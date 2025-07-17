@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planificador de Carrera - Diseño Industrial (Univalle)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" xintegrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -218,7 +218,34 @@
             font-weight: 600;
             margin-right: 4px;
         }
-
+        .api-key-input {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .error-message {
+            background-color: #7f1d1d;
+            color: #fecaca;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+        .api-key-container {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: var(--bg-tertiary);
+            border-radius: 6px;
+        }
+        .api-key-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
     </style>
 </head>
 <body class="p-4 lg:p-8">
@@ -349,8 +376,14 @@
         <div class="modal-content">
             <button id="close-organize-modal-btn" class="modal-close">&times;</button>
             <h2 class="text-2xl font-bold mb-4">✨ Organizar desde Tabulado con IA</h2>
+            <div class="api-key-container">
+                <label class="api-key-label">API Key de Gemini:</label>
+                <input type="text" id="gemini-api-key" class="api-key-input" placeholder="Ingresa tu API Key de Google Gemini">
+                <p class="text-xs text-secondary mt-1">Necesitas una API Key válida para usar esta función</p>
+            </div>
             <p class="text-secondary mb-4">Pega aquí tu historial de materias (tabulado de SIRA). Para mejores resultados, organiza la información por semestre. Ej: "Semestre 1: [Materia 1], [Materia 2]... Semestre 2: [Materia 3]..."</p>
             <textarea id="tabulado-input" class="w-full h-48 p-2 bg-tertiary border border-color rounded-md" placeholder="Pega el texto de tu tabulado aquí..."></textarea>
+            <div id="organize-error" class="error-message"></div>
             <button id="process-tabulado-btn" class="btn-ai w-full py-2 rounded-md font-semibold mt-4">Analizar y Organizar</button>
         </div>
     </div>
@@ -395,6 +428,9 @@
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
+        // Esta variable global almacenará la instancia de Gemini
+        let genAI = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             const initialSubjects = [
                 { id: 'fgc1', name: 'Fundamentos Sociales y Culturales del Diseño', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
@@ -432,7 +468,7 @@
                 { id: 'hds6', name: 'Herramientas Digitales. Simulación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
                 { id: 'hdc7', name: 'Herramientas Digitales. Comprobación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
             ];
-
+    
             const predefinedProfElectives = [
                 { id: "507092C", name: "BIOMIMESIS", credits: 2 },
                 { id: "507082C", name: "COLOR", credits: 3 },
@@ -459,7 +495,7 @@
                 { id: "507120C", name: "MODELOS EN REPETICIÓN", credits: 3 },
                 { id: "507119C", name: "DISEÑO + ARTE CONTEMPORÁNEO", credits: 3 },
             ];
-
+    
             const predefinedFGElectives = [
                 // Científico Tecnológico
                 { id: "417016C", name: "ESTRATEGIAS PARA EL APRENDIZAJE AUTÓNOMO", credits: 3 },
@@ -585,16 +621,16 @@
                 { id: "507100C", name: "DESARROLLO DE LA CREATIVIDAD", credits: 3 },
                 { id: "507101C", name: "DESARROLLO DE CLIENTES", credits: 3 },
             ];
-
+    
             let state = {
                 subjects: [],
                 semesters: [],
                 nextSemesterId: 1,
                 nextElectiveId: 1,
             };
-
+    
             const defaultSemesterColor = () => document.documentElement.getAttribute('data-theme') === 'light' ? '#ffffff' : '#212121';
-
+    
             const loadState = () => {
                 const savedState = localStorage.getItem('univalleDisenoPlannerV10');
                 if (savedState) {
@@ -609,11 +645,11 @@
                     state.subjects = initialSubjects.map(s => ({ ...s, location: 'bank', completed: false, isElective: false }));
                 }
             };
-
+    
             const saveState = () => {
                 localStorage.setItem('univalleDisenoPlannerV10', JSON.stringify(state));
             };
-
+    
             const createSubjectCard = (subject) => {
                 const card = document.createElement('div');
                 card.id = `subject-${subject.id}`;
@@ -625,7 +661,7 @@
                 if (subject.isElective) {
                     deleteButton = `<button class="delete-elective-btn" data-id="${subject.id}" title="Eliminar electiva">&times;</button>`;
                 }
-
+    
                 let typeTag = '';
                 let typeColor = 'bg-gray-500';
                 if (subject.isElective) {
@@ -646,8 +682,8 @@
                     }
                 }
                 const areaTag = subject.area ? `<span class="subject-tag bg-gray-600 text-white">${subject.area}</span>` : '';
-
-
+    
+    
                 card.innerHTML = `
                     <div class="w-full flex justify-between items-start">
                         <p class="text-sm font-medium pr-2 flex-grow">${subject.name}</p>
@@ -689,7 +725,7 @@
                 updateStats();
                 saveState();
             };
-
+    
             const renderStatsBoard = () => {
                 const container = document.querySelector('.stats-board');
                 container.innerHTML = '';
@@ -707,7 +743,7 @@
                     container.appendChild(card);
                 });
             };
-
+    
             const renderSubjectBank = () => {
                 const bankContent = document.getElementById('bank-content');
                 bankContent.innerHTML = '';
@@ -749,11 +785,11 @@
                     electiveList.addEventListener('dragover', handleDragOver);
                     electiveList.addEventListener('drop', handleDrop);
                     createdElectives.forEach(s => electiveList.appendChild(createSubjectCard(s)));
-                    electivesEl.appendChild(electivesEl);
+                    electivesEl.appendChild(electiveList);
                     bankContent.appendChild(electivesEl);
                 }
             };
-
+    
             const generatePeriodOptions = (selectedPeriod) => {
                 let optionsHtml = '<option value="">Seleccionar periodo</option>';
                 const currentYear = new Date().getFullYear();
@@ -765,7 +801,7 @@
                 }
                 return optionsHtml;
             };
-
+    
             const renderSemesters = () => {
                 const grid = document.getElementById('semesters-grid');
                 grid.innerHTML = '';
@@ -798,7 +834,7 @@
                     grid.appendChild(semesterCol);
                 });
             };
-
+    
             const updateStats = () => {
                 const completedSubjects = state.subjects.filter(s => s.completed);
                 const basicCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Básico').reduce((sum, s) => sum + s.credits, 0);
@@ -808,7 +844,7 @@
                 const profElectivesCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'prof').reduce((sum, s) => sum + s.credits, 0);
                 
                 const totalCredits = basicCredits + profCredits + fgCredits + profElectivesCredits;
-
+    
                 const updateStat = (id, current, total) => {
                     const numEl = document.getElementById(id);
                     const barEl = document.getElementById(`${id}-bar`);
@@ -834,7 +870,7 @@
                     saveState();
                 }
             };
-
+    
             const handlePeriodChange = (e) => {
                 const semesterId = parseInt(e.target.dataset.id);
                 const newPeriod = e.target.value;
@@ -844,16 +880,16 @@
                     saveState();
                 }
             };
-
+    
             const toggleSubjectComplete = (subjectId) => {
                 const subject = state.subjects.find(s => s.id === subjectId);
                 if (!subject) return;
-
+    
                 if (subject.location === 'bank') {
                     alert('Debes arrastrar la materia a un semestre para poder marcarla como cursada.');
                     return;
                 }
-
+    
                 if (subject.completed) {
                     const dependents = state.subjects.filter(s => s.prerequisites.includes(subjectId) && s.completed);
                     if (dependents.length > 0) {
@@ -871,7 +907,7 @@
                 }
                 render();
             };
-
+    
             document.getElementById('add-semester-btn').addEventListener('click', () => {
                 state.semesters.push({ id: state.nextSemesterId++, subjects: [], color: defaultSemesterColor(), period: '' });
                 render();
@@ -917,7 +953,7 @@
                 state.subjects.push(newElective);
                 render();
             };
-
+    
             const deleteElective = (subjectId) => {
                 const subjectIndex = state.subjects.findIndex(s => s.id === subjectId);
                 if (subjectIndex > -1) {
@@ -925,7 +961,7 @@
                     render();
                 }
             };
-
+    
             document.getElementById('reset-button').addEventListener('click', () => {
                 if (confirm('¿Estás seguro de que quieres reiniciar todo tu progreso? Esta acción no se puede deshacer.')) {
                     localStorage.removeItem('univalleDisenoPlannerV10');
@@ -937,8 +973,8 @@
                     state.nextElectiveId = 1;
                     location.reload();
                 }
-            });
-
+            };
+    
             const themeToggle = document.getElementById('theme-toggle');
             const setAppTheme = (theme) => {
                 document.documentElement.setAttribute('data-theme', theme);
@@ -953,7 +989,7 @@
                 });
                 render();
             });
-
+    
             const bankHeader = document.getElementById('bank-header');
             const bankContent = document.getElementById('bank-content');
             bankHeader.addEventListener('click', () => {
@@ -963,11 +999,11 @@
                  if (window.innerWidth < 1024) { bankContent.classList.add('collapsed'); } 
                  else { bankContent.classList.remove('collapsed'); }
             };
-
+    
             // Modal Logic
             const openModal = (modal) => modal.classList.add('visible');
             const closeModal = (modal) => modal.classList.remove('visible');
-
+    
             const welcomeModal = document.getElementById('welcome-modal');
             const closeWelcomeBtn = document.getElementById('close-welcome-modal-btn');
             if (!localStorage.getItem('hasVisitedPlanner')) {
@@ -975,14 +1011,14 @@
                 localStorage.setItem('hasVisitedPlanner', 'true');
             }
             closeWelcomeBtn.addEventListener('click', () => closeModal(welcomeModal));
-
+    
             const pdfModal = document.getElementById('pdf-modal');
             const openPdfModalBtn = document.getElementById('open-pdf-modal-btn');
             const closePdfModalBtn = document.getElementById('close-pdf-modal-btn');
             const pdfInfoForm = document.getElementById('pdf-info-form');
             const loadingOverlay = document.getElementById('loading-overlay');
             const loadingText = document.getElementById('loading-text');
-
+    
             openPdfModalBtn.addEventListener('click', () => openModal(pdfModal));
             closePdfModalBtn.addEventListener('click', () => closeModal(pdfModal));
             
@@ -1003,7 +1039,7 @@
             const searchInput = document.getElementById('elective-search');
             const customForm = document.getElementById('add-custom-elective-form');
             let currentElectiveType = 'fg';
-
+    
             const populateCatalog = (type) => {
                 const list = type === 'fg' ? predefinedFGElectives : predefinedProfElectives;
                 catalogList.innerHTML = '';
@@ -1027,24 +1063,24 @@
                     catalogList.appendChild(item);
                 });
             };
-
+    
             openFgElectiveBtn.addEventListener('click', () => {
                 currentElectiveType = 'fg';
                 document.getElementById('elective-modal-title').textContent = 'Seleccionar Electiva de Formación General';
                 populateCatalog('fg');
                 openModal(electiveModal);
             });
-
+    
             openProfElectiveBtn.addEventListener('click', () => {
                 currentElectiveType = 'prof';
                  document.getElementById('elective-modal-title').textContent = 'Seleccionar Electiva Profesional';
                 populateCatalog('prof');
                 openModal(electiveModal);
             });
-
+    
             closeElectiveBtn.addEventListener('click', () => closeModal(electiveModal));
             searchInput.addEventListener('input', () => populateCatalog(currentElectiveType));
-
+    
             customForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const name = document.getElementById('custom-elective-name').value;
@@ -1053,7 +1089,7 @@
                 closeModal(electiveModal);
                 e.target.reset();
             });
-
+    
             // Tabs in Modal
             const tabs = document.querySelectorAll('.modal-tab');
             const tabContents = document.querySelectorAll('.modal-tab-content');
@@ -1070,18 +1106,18 @@
                     });
                 });
             });
-
-
+    
+    
             // Personalization Logic
             const profilePicContainer = document.getElementById('profile-pic-container');
             const profilePicUpload = document.getElementById('profile-pic-upload');
             const profilePic = document.getElementById('profile-pic');
             const customizeBtn = document.getElementById('customize-btn');
             const bgUpload = document.getElementById('bg-upload');
-
+    
             profilePicContainer.addEventListener('click', () => profilePicUpload.click());
             customizeBtn.addEventListener('click', () => bgUpload.click());
-
+    
             const handleFileUpload = (file, storageKey, callback) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -1091,7 +1127,7 @@
                 };
                 reader.readAsDataURL(file);
             };
-
+    
             profilePicUpload.addEventListener('change', (e) => {
                 if (e.target.files && e.target.files[0]) {
                     handleFileUpload(e.target.files[0], 'userProfilePic', (url) => {
@@ -1099,7 +1135,7 @@
                     });
                 }
             });
-
+    
             bgUpload.addEventListener('change', (e) => {
                  if (e.target.files && e.target.files[0]) {
                     handleFileUpload(e.target.files[0], 'userBgImage', (url) => {
@@ -1107,7 +1143,7 @@
                     });
                 }
             });
-
+    
             const loadPersonalization = () => {
                 const savedPic = localStorage.getItem('userProfilePic');
                 const savedBg = localStorage.getItem('userBgImage');
@@ -1118,19 +1154,19 @@
                     document.body.style.backgroundImage = `url(${savedBg})`;
                 }
             };
-
-
+    
+    
             function generatePDF(studentName, studentId) {
                 loadingText.textContent = 'Generando PDF...';
                 openModal(loadingOverlay);
-
+    
                 const reportElement = document.createElement('div');
                 reportElement.style.padding = '20px';
                 reportElement.style.fontFamily = 'Arial, sans-serif';
                 reportElement.style.color = '#333';
                 
                 const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-
+    
                 let html = `
                     <div style="text-align: center; margin-bottom: 20px;">
                         <h1 style="font-size: 24px; margin: 0;">Reporte de Progreso Académico</h1>
@@ -1143,14 +1179,14 @@
                     </div>
                     <h2 style="font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Resumen de Créditos</h2>
                 `;
-
+    
                 const completedSubjects = state.subjects.filter(s => s.completed);
                 const basicCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Básico').reduce((sum, s) => sum + s.credits, 0);
                 const profCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Profesional').reduce((sum, s) => sum + s.credits, 0);
                 const fgCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'fg').reduce((sum, s) => sum + s.credits, 0);
                 const profElectivesCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'prof').reduce((sum, s) => sum + s.credits, 0);
                 const totalCredits = basicCredits + profCredits + fgCredits + profElectivesCredits;
-
+    
                 html += `
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
                         <tr style="background-color: #eee;">
@@ -1164,7 +1200,7 @@
                         <tr style="background-color: #eee; font-weight: bold;"><td style="padding: 8px; border: 1px solid #ddd;">TOTAL</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${totalCredits} / 140</td></tr>
                     </table>
                 `;
-
+    
                 html += `<h2 style="font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Plan de Carrera</h2>`;
                 state.semesters.forEach(semester => {
                     const periodText = semester.period ? `(${semester.period})` : '';
@@ -1180,9 +1216,9 @@
                         html += `<p>No hay materias planeadas para este semestre.</p>`;
                     }
                 });
-
+    
                 reportElement.innerHTML = html;
-
+    
                 const opt = {
                     margin: 10,
                     filename: `Reporte_Progreso_${studentName.replace(/\s/g, '_')}.pdf`,
@@ -1190,7 +1226,7 @@
                     html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
-
+    
                 html2pdf().from(reportElement).set(opt).save().then(() => {
                     closeModal(loadingOverlay);
                 });
@@ -1204,12 +1240,24 @@
             const organizeModal = document.getElementById('organize-modal');
             const closeOrganizeModalBtn = document.getElementById('close-organize-modal-btn');
             const processTabuladoBtn = document.getElementById('process-tabulado-btn');
+            const organizeError = document.getElementById('organize-error');
+            const apiKeyInput = document.getElementById('gemini-api-key');
             
             aiOrganizeBtn.addEventListener('click', () => openModal(organizeModal));
             closeOrganizeModalBtn.addEventListener('click', () => closeModal(organizeModal));
             processTabuladoBtn.addEventListener('click', () => processTabulado());
-
-
+    
+            // Inicializar la API de Gemini con la clave proporcionada
+            const initializeGemini = (apiKey) => {
+                try {
+                    genAI = new GoogleGenerativeAI(apiKey);
+                    return true;
+                } catch (error) {
+                    console.error("Error al inicializar la API de Gemini:", error);
+                    return false;
+                }
+            };
+    
             const professionalElectiveDescriptions = `
                 - Diseño y prototipado de sistemas robóticos: Se enfoca en el diseño, desarrollo de piezas, programación e integración de sistemas robóticos, con un enfoque multidisciplinar y colaborativo. Ideal para interesados en industria 4.0, informática, electrónica y mecánica.
                 - Procesos de fabricación aditiva - impresión 3D: Explora la impresión 3D como herramienta para el diseño eficiente y rápido de prototipos y productos. Se centra en la optimización de diseños para diferentes técnicas y materiales de impresión, fomentando la innovación y personalización.
@@ -1218,86 +1266,87 @@
                 - MODELOS EN REPETICIÓN: Curso teórico-práctico sobre la creación de prototipos funcionales a través de moldes y vaciados. Se enfoca en la interpretación de planos, escala, selección de materiales y procesos para la comprobación funcional y estética de modelos.
                 - DISEÑO + ARTE CONTEMPORÁNEO: Explora las profundas conexiones entre el arte contemporáneo y el diseño, analizando cómo las vanguardias artísticas han influido en la cultura material, los estilos de vida y el consumo. Ideal para quienes buscan una perspectiva estética y cultural en el diseño.
             `;
-
+    
             async function getAISuggestions() {
                 const userInterests = aiPromptInput.value;
                 if (!userInterests) {
                     alert('Por favor, escribe tus intereses.');
                     return;
                 }
-
+    
                 loadingText.textContent = 'La IA está buscando electivas...';
                 openModal(loadingOverlay);
-
+    
                 const allElectivesList = predefinedFGElectives.map(e => `(Formación General) ${e.name}`).join('\n');
                 const profElectivesList = predefinedProfElectives.map(e => `(Profesional) ${e.name}`).join('\n');
                 
                 const prompt = `
                     Eres un consejero académico experto en la Universidad del Valle para el programa de Diseño Industrial. Un estudiante te ha indicado sus intereses. Basándote en sus intereses y en las siguientes listas de electivas, recomienda un máximo de 3 materias que mejor se alineen. Para las electivas de Formación General, infiere su contenido a partir del título. Para las electivas profesionales, usa las descripciones provistas.
-
+    
                     Intereses del estudiante: "${userInterests}"
-
+    
                     Lista de Electivas de Formación General (solo títulos):
                     ${allElectivesList}
-
+    
                     Lista y descripciones de Electivas Profesionales:
                     ${professionalElectiveDescriptions}
-
-                    Para cada recomendación, proporciona el nombre exacto de la materia, el tipo ("Formación General" o "Profesional") y una justificación corta (1-2 frases) de por qué es una buena opción.
+    
+                    Para cada recomendación, proporciona un objeto JSON con las siguientes propiedades:
+                    - nombre: Nombre exacto de la materia
+                    - tipo: "Formación General" o "Profesional"
+                    - razon: Justificación corta (1-2 frases) de por qué es una buena opción
+    
+                    Devuelve únicamente un array JSON válido con las sugerencias, sin ningún otro texto.
                 `;
-
+    
                 try {
+                    if (!genAI) {
+                        throw new Error("La API de Gemini no está inicializada. Por favor, configura tu API Key.");
+                    }
+                    
                     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
                     const result = await model.generateContent(prompt);
                     const response = await result.response;
                     const text = response.text();
-                    // This part needs a robust parser since the output is not guaranteed JSON
-                    // For now, let's assume a simple format and parse manually.
-                    // A more robust solution would be to ask the model to format as JSON.
-                    displayAISuggestions(parseAIResponse(text));
-
+                    
+                    // Intentar extraer el JSON de la respuesta
+                    let jsonStr = text;
+                    // Eliminar cualquier texto fuera del JSON
+                    const jsonMatch = text.match(/\[[\s\S]*\]/);
+                    if (jsonMatch) {
+                        jsonStr = jsonMatch[0];
+                    }
+                    
+                    const suggestions = JSON.parse(jsonStr);
+                    displayAISuggestions(suggestions);
+    
                 } catch (error) {
                     console.error("Error al llamar a la API de Gemini:", error);
-                    aiSuggestionsContainer.innerHTML = `<p class="text-red-500">Ocurrió un error al contactar a la IA. Revisa la consola para más detalles.</p>`;
+                    aiSuggestionsContainer.innerHTML = `
+                        <div class="p-3 bg-red-900/50 rounded-lg border border-red-700">
+                            <p class="text-red-300 font-semibold">Error al contactar con la IA</p>
+                            <p class="text-sm text-red-200">${error.message || 'Por favor verifica tu conexión y API key'}</p>
+                        </div>
+                    `;
                 } finally {
                     closeModal(loadingOverlay);
                 }
             }
             
-            function parseAIResponse(text) {
-                // A simple parser for the expected format. This is brittle and should be improved.
-                const suggestions = [];
-                const lines = text.split('\n');
-                let currentSuggestion = {};
-                lines.forEach(line => {
-                    if (line.startsWith("Nombre:")) {
-                        if (Object.keys(currentSuggestion).length > 0) suggestions.push(currentSuggestion);
-                        currentSuggestion = { nombre: line.replace("Nombre:", "").trim() };
-                    } else if (line.startsWith("Tipo:")) {
-                        currentSuggestion.tipo = line.replace("Tipo:", "").trim();
-                    } else if (line.startsWith("Razón:")) {
-                        currentSuggestion.razon = line.replace("Razón:", "").trim();
-                    }
-                });
-                if (Object.keys(currentSuggestion).length > 0) suggestions.push(currentSuggestion);
-                return suggestions;
-            }
-
-
             function displayAISuggestions(suggestions) {
                 aiSuggestionsContainer.innerHTML = '';
                 if (!suggestions || suggestions.length === 0) {
                     aiSuggestionsContainer.innerHTML = '<p class="text-secondary">No se encontraron sugerencias para esos intereses. Intenta con otras palabras.</p>';
                     return;
                 }
-
+    
                 suggestions.forEach(suggestion => {
                     const suggestionEl = document.createElement('div');
                     suggestionEl.className = 'p-3 bg-tertiary rounded-lg border border-color';
                     const isProf = suggestion.tipo === 'Profesional';
                     const catalog = isProf ? predefinedProfElectives : predefinedFGElectives;
                     const electiveData = catalog.find(e => e.name.toLowerCase() === suggestion.nombre.toLowerCase());
-
+    
                     if (electiveData) {
                         suggestionEl.innerHTML = `
                             <div class="flex justify-between items-start">
@@ -1316,52 +1365,98 @@
                     }
                 });
             }
-
+    
             aiSuggestBtn.addEventListener('click', getAISuggestions);
             
             // --- AI Organizer ---
             async function processTabulado() {
                 const tabuladoText = document.getElementById('tabulado-input').value;
-                if (!tabuladoText) {
-                    alert('Por favor, pega el texto de tu tabulado de SIRA.');
+                const apiKey = apiKeyInput.value;
+                
+                if (!apiKey) {
+                    organizeError.textContent = 'Por favor, ingresa tu API Key de Gemini';
+                    organizeError.style.display = 'block';
                     return;
                 }
+                
+                if (!tabuladoText) {
+                    organizeError.textContent = 'Por favor, pega el texto de tu tabulado de SIRA';
+                    organizeError.style.display = 'block';
+                    return;
+                }
+                
+                // Ocultar cualquier error previo
+                organizeError.style.display = 'none';
+                
+                // Inicializar la API con la clave proporcionada
+                if (!initializeGemini(apiKey)) {
+                    organizeError.textContent = 'API Key inválida. Por favor verifica tu clave.';
+                    organizeError.style.display = 'block';
+                    return;
+                }
+                
                 closeModal(organizeModal);
                 loadingText.textContent = 'La IA está analizando tu historial...';
                 openModal(loadingOverlay);
-
+    
                 const masterSubjectList = [...initialSubjects, ...predefinedFGElectives, ...predefinedProfElectives];
                 const subjectNames = masterSubjectList.map(s => `"${s.name}" (ID: ${s.id})`).join(', ');
-
+    
                 const prompt = `
-                    Analiza el siguiente historial académico (tabulado). Identifica todas las materias que han sido APROBADAS (usualmente marcadas con 'AP'). Compara los nombres de las materias aprobadas con la siguiente lista maestra de materias y sus IDs. Es MUY IMPORTANTE que priorices la lista de materias del pénsum oficial. Materias como 'Diseño para la Paz Sostenible' o 'Escritura, Expresión y Comunicación' son del pénsum básico, no electivas, aunque aparezcan en otros catálogos. Devuelve únicamente los IDs de las materias que coincidan y estén aprobadas.
-
+                    Analiza el siguiente historial académico (tabulado). Identifica todas las materias que han sido APROBADAS (usualmente marcadas con 'AP'). Compara los nombres de las materias aprobadas con la siguiente lista maestra de materias y sus IDs. Es MUY IMPORTANTE que priorices la lista de materias del pénsum oficial. Materias como 'Diseño para la Paz Sostenible' o 'Escritura, Expresión y Comunicación' son del pénsum básico, no electivas, aunque aparezcan en otros catálogos. 
+    
                     Historial del estudiante:
                     ---
                     ${tabuladoText}
                     ---
-
+    
                     Lista Maestra de Materias (Pénsum y Electivas):
                     [${subjectNames}]
+    
+                    Devuelve únicamente un objeto JSON con la siguiente estructura:
+                    {
+                        "approved_ids": ["id1", "id2", ...]
+                    }
                 `;
-
+    
                 try {
                     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
                     const result = await model.generateContent(prompt);
                     const response = await result.response;
                     const text = response.text();
-                    // This part needs a robust parser since the output is not guaranteed JSON
-                    const ids = text.match(/[A-Z0-9-]{6,}/g) || [];
+                    
+                    // Intentar extraer el JSON de la respuesta
+                    let jsonStr = text;
+                    const jsonMatch = text.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        jsonStr = jsonMatch[0];
+                    }
+                    
+                    const resultData = JSON.parse(jsonStr);
+                    const ids = resultData.approved_ids || [];
                     organizeSubjects(ids);
-
+    
                 } catch (error) {
                     console.error("Error al procesar tabulado con Gemini:", error);
-                    alert('Ocurrió un error al procesar tu historial. Revisa la consola para más detalles.');
+                    
+                    // Mostrar mensaje de error específico
+                    let errorMessage = "Ocurrió un error al procesar tu historial.";
+                    if (error.message.includes("API_KEY")) {
+                        errorMessage = "API Key inválida. Por favor verifica tu clave.";
+                    } else if (error.message.includes("quota")) {
+                        errorMessage = "Se ha excedido la cuota de la API. Intenta más tarde o verifica tu plan.";
+                    } else if (error.message.includes("network")) {
+                        errorMessage = "Error de red. Verifica tu conexión a internet.";
+                    }
+                    
+                    organizeError.textContent = errorMessage;
+                    organizeError.style.display = 'block';
+                    openModal(organizeModal);
                 } finally {
                     closeModal(loadingOverlay);
                 }
             }
-
+    
             function organizeSubjects(approvedIds) {
                 // Reset current progress
                 state.subjects.forEach(s => {
@@ -1370,14 +1465,14 @@
                 });
                 state.semesters = [];
                 state.nextSemesterId = 1;
-
+    
                 const allSubjectsMap = new Map();
                 [...initialSubjects, ...predefinedFGElectives, ...predefinedProfElectives].forEach(s => {
                     if (!allSubjectsMap.has(s.id)) {
                         allSubjectsMap.set(s.id, s);
                     }
                 });
-
+    
                 approvedIds.forEach(id => {
                     const subject = state.subjects.find(s => s.id === id);
                     if (subject) {
@@ -1392,13 +1487,13 @@
                         }
                     }
                 });
-
+    
                 // Distribute completed subjects into semesters
                 const completed = state.subjects.filter(s => s.completed);
                 let currentSemesterCredits = 0;
                 let currentSemesterId = 1;
                 state.semesters.push({ id: currentSemesterId, subjects: [], color: defaultSemesterColor(), period: '' });
-
+    
                 completed.forEach(subject => {
                     if (currentSemesterCredits + subject.credits > 18 && currentSemesterCredits > 0) {
                         currentSemesterId++;
@@ -1413,8 +1508,8 @@
                 alert(`${completed.length} materias aprobadas han sido organizadas en tu plan.`);
                 render();
             }
-
-
+    
+    
             // --- INITIALIZATION ---
             const savedTheme = localStorage.getItem('univalleTheme') || 'dark';
             setAppTheme(savedTheme);
