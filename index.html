@@ -226,6 +226,14 @@
     <div class="max-w-screen-2xl mx-auto">
         <!-- App Header -->
         <div class="flex justify-between items-center mb-6 px-2">
+            <div class="flex items-center gap-4">
+                <a href="https://www.instagram.com/univallelegionestudiantil" target="_blank" rel="noopener noreferrer">
+                    <img src="https://media.canva.com/v2/image-resize/format:PNG/height:550/quality:100/uri:ifs%3A%2F%2FM%2Ffa5e9b55-900d-403c-8dc2-262f7040000a/watermark:F/width:550?csig=AAAAAAAAAAAAAAAAAAAAAKJhFDB7zj1aaCEy7bzK2MzeLjXkCfMk2lx8L3ck2CLI&exp=1752780991&osig=AAAAAAAAAAAAAAAAAAAAAATu3T34_3d1vkkBu6T1N4eEa-1dIuZcthyyj5YQeM2W&signer=media-rpc&x-canva-quality=thumbnail_large" alt="Logo Legión Estudiantil" class="h-16 md:h-20 object-contain">
+                </a>
+                <a href="https://www.instagram.com/chrisdindustrial" target="_blank" rel="noopener noreferrer">
+                    <img src="https://media.canva.com/v2/image-resize/format:PNG/height:309/quality:100/uri:ifs%3A%2F%2FM%2F2cd4ddda-308b-4db8-ad01-96545286fb3b/watermark:F/width:550?csig=AAAAAAAAAAAAAAAAAAAAAP2s2CZEJvcQ8PNkXpVmrBw7p-p4K6eRhXuVviaAQhBV&exp=1752782101&osig=AAAAAAAAAAAAAAAAAAAAAKmUurH7MGQSZIlLYs90B8yeiFQ6KBtXfW5Ioq9nig4K&signer=media-rpc&x-canva-quality=thumbnail_large" alt="Logo Univalle FAI" class="h-16 md:h-20 object-contain">
+                </a>
+            </div>
              <div class="flex items-center gap-4">
                 <button id="customize-btn" class="btn-secondary px-3 py-1.5 rounded-md text-sm">Personalizar</button>
                 <input type="file" id="bg-upload" class="hidden" accept="image/*">
@@ -236,14 +244,6 @@
                     </label>
                 </div>
              </div>
-             <div class="flex items-center gap-4">
-                <a href="https://www.instagram.com/univallelegionestudiantil" target="_blank" rel="noopener noreferrer">
-                    <img src="https://media.canva.com/v2/image-resize/format:PNG/height:550/quality:100/uri:ifs%3A%2F%2FM%2Ffa5e9b55-900d-403c-8dc2-262f7040000a/watermark:F/width:550?csig=AAAAAAAAAAAAAAAAAAAAAKJhFDB7zj1aaCEy7bzK2MzeLjXkCfMk2lx8L3ck2CLI&exp=1752780991&osig=AAAAAAAAAAAAAAAAAAAAAATu3T34_3d1vkkBu6T1N4eEa-1dIuZcthyyj5YQeM2W&signer=media-rpc&x-canva-quality=thumbnail_large" alt="Logo Legión Estudiantil" class="h-16 md:h-20 object-contain">
-                </a>
-                <a href="https://www.instagram.com/chrisdindustrial" target="_blank" rel="noopener noreferrer">
-                    <img src="https://media.canva.com/v2/image-resize/format:PNG/height:309/quality:100/uri:ifs%3A%2F%2FM%2F2cd4ddda-308b-4db8-ad01-96545286fb3b/watermark:F/width:550?csig=AAAAAAAAAAAAAAAAAAAAAP2s2CZEJvcQ8PNkXpVmrBw7p-p4K6eRhXuVviaAQhBV&exp=1752782101&osig=AAAAAAAAAAAAAAAAAAAAAKmUurH7MGQSZIlLYs90B8yeiFQ6KBtXfW5Ioq9nig4K&signer=media-rpc&x-canva-quality=thumbnail_large" alt="Logo Univalle FAI" class="h-16 md:h-20 object-contain">
-                </a>
-            </div>
         </div>
 
         <!-- Header -->
@@ -392,1096 +392,1038 @@
         <p id="loading-text" class="mt-4 text-lg">Procesando...</p>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const initialSubjects = [
-            { id: 'fgc1', name: 'Fundamentos Sociales y Culturales del Diseño', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'ee1', name: 'Escritura, Expresión y Comunicación', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'pie2', name: 'Producción Intersubjetiva del Espacio Físico', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'dm3', name: 'Diseño Mundo', credits: 3, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'dps3', name: 'Diseño para la Paz Sostenible', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'si4', name: 'Seminario de Investigación', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'pv1', name: 'Percepción Visual', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-            { id: 'cf1', name: 'Creación de la Forma', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-            { id: 'ev2', name: 'Estudios Visuales', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-            { id: 'md2', name: 'Métodos de Diseño', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-            { id: 'pea2', name: 'Proyectos. Estructuras y Autonomías', credits: 4, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-            { id: 'prv3', name: 'Proyectos. Relaciones y Vínculos', credits: 4, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-            { id: 'psh4', name: 'Proyecto. Ser Humano', credits: 7, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-            { id: 'md1', name: 'Matemáticas para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-            { id: 'im1', name: 'Introducción a los Materiales y Procesos', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-            { id: 'hd1', name: 'Herramientas Digitales - Representación', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-            { id: 'gd2', name: 'Geometría para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-            { id: 'fd3', name: 'Física para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-            { id: 'mpm4', name: 'Materiales y Procesos. Metales', credits: 3, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-            { id: 'ecd5', name: 'Estudios Críticos del Diseño', credits: 3, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'dcm6', name: 'Diseño Colonial y Modernidad', credits: 2, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'dr7', name: 'Disidencias y Resistencias', credits: 3, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
-            { id: 'pe5', name: 'Proyecto. Entorno', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
-            { id: 'pb6', name: 'Proyecto. Biosfera', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
-            { id: 'pp7', name: 'Proyecto. Producto', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
-            { id: 'pg8', name: 'Proyecto. Gestión', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
-            { id: 'pff9', name: 'Proyecto Final. Formulación', credits: 3, cycle: 'Profesional', area: 'Diseño', prerequisites: ['im1'] },
-            { id: 'pfd10', name: 'Proyecto Final. Desarrollo', credits: 4, cycle: 'Profesional', area: 'Diseño', prerequisites: ['pff9'] },
-            { id: 'hdv4', name: 'Herramientas Digitales. Visualización', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-            { id: 'mpp5', name: 'Materiales y Procesos. Polímeros', credits: 3, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-            { id: 'hdp5', name: 'Herramientas Digitales. Programación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-            { id: 'mpnm6', name: 'Materiales y Procesos. Nuevos Materiales', credits: 3, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-            { id: 'hds6', name: 'Herramientas Digitales. Simulación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-            { id: 'hdc7', name: 'Herramientas Digitales. Comprobación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-        ];
+    <script type="module">
+        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        const predefinedProfElectives = [
-            { id: "507092C", name: "BIOMIMESIS", credits: 2 },
-            { id: "507082C", name: "COLOR", credits: 3 },
-            { id: "507057C", name: "CREACIÓN CON MADERA", credits: 2 },
-            { id: "507083C", name: "CRÍTICA DE LAS MERCANCÍAS Y EL CONSUMO", credits: 3 },
-            { id: "507062C", name: "DIBUJO TÉCNICO PARA DISEÑO INDUSTRIAL", credits: 2 },
-            { id: "507090C", name: "DISEÑO DE APLICACIONES MÓVILES", credits: 3 },
-            { id: "507093C", name: "DISEÑO Y PROTOTIPADO DE SISTEMAS ROBÓTICOS", credits: 3 },
-            { id: "507061C", name: "ESTRATEGIAS DE ECODISEÑO", credits: 2 },
-            { id: "507084C", name: "ESTUDIOS CRÍTICOS SOBRE LOS RESIDUOS", credits: 3 },
-            { id: "507094C", name: "PRÁCTICAS ESCRITURALES", credits: 2 },
-            { id: "507109C", name: "SOSTENIBILIDAD EN LA INDUSTRIA TEXTIL", credits: 3 },
-            { id: "507105C", name: "MORFOLOGÍA EXPERIMENTAL EN EL DISEÑO INDUSTRIAL", credits: 3 },
-            { id: "507106C", name: "PROCESOS DE FABRICACIÓN ADITIVA - IMPRESIÓN TRIDIMENSIONAL (3D)", credits: 3 },
-            { id: "507110C", name: "TÉCNICAS DE PROTOTIPADO RÁPIDO", credits: 3 },
-            { id: "507108C", name: "EL GÉNERO EN LOS OBJETOS", credits: 3 },
-            { id: "507113C", name: "MARKETING DE PRODUCTO", credits: 3 },
-            { id: "507112C", name: "ELEMENTOS PARA DISEÑO DE INTERIORES", credits: 3 },
-            { id: "507114C", name: "PRÁCTICAS ESCRITURALES", credits: 3 },
-            { id: "507051C", name: "PRÁCTICA EN INVESTIGACIÓN-CREACIÓN", credits: 3 },
-            { id: "507118C", name: "PRODUCCIÓN DE PLATAFORMAS CULTURALES PARA ARTE Y DISEÑO", credits: 3 },
-            { id: "507122C", name: "DISEÑO INDUSTRIAL CONTEMPORÁNEO", credits: 3 },
-            { id: "507121C", name: "REUSO Y RECICLAJE CREATIVO", credits: 3 },
-            { id: "507120C", name: "MODELOS EN REPETICIÓN", credits: 3 },
-            { id: "507119C", name: "DISEÑO + ARTE CONTEMPORÁNEO", credits: 3 },
-        ];
-
-        const predefinedFGElectives = [
-            // Científico Tecnológico
-            { id: "417016C", name: "ESTRATEGIAS PARA EL APRENDIZAJE AUTÓNOMO", credits: 3 },
-            { id: "417017C", name: "APROPIACIÓN DIGITAL Y APRENDIZAJE SIGNIFICATIVO", credits: 3 },
-            { id: "106030C", name: "HUMANITAS, CIENCIA, AGRICULTURA Y CAMBIO CLIMÁTICO", credits: 3 },
-            { id: "801127C", name: "CONFLUENCIA DE REALIDADES: NATURALEZA Y SOCIEDAD", credits: 3 },
-            { id: "801044C", name: "TALLER DE HABILIDADES INFORMÁTICAS PARA LA GESTIÓN", credits: 3 },
-            { id: "602001C", name: "EN SUS MARCAS, UN, DOS, TIC, APRENDO", credits: 3 },
-            { id: "201012C", name: "EDUCACIÓN Y TIC", credits: 3 },
-            { id: "106002C", name: "INTRODUCCIÓN A LA EXPERIMENTACIÓN CIENTÍFICA", credits: 3 },
-            { id: "102052C", name: "BIOLOGÍA GENERAL - CIENCIAS", credits: 4 },
-            { id: "116019C", name: "INTRODUCCIÓN A LAS TECNOLOGÍAS", credits: 2 },
-            { id: "204054C", name: "ACTIVIDADES DE APRENDIZAJE MEDIADAS POR LAS TIC", credits: 3 },
-            { id: "111023C", name: "MATEMÁTICAS BÁSICAS", credits: 3 },
-            { id: "111002C", name: "INTRODUCCIÓN AL MODELAMIENTO MATEMÁTICO", credits: 3 },
-            { id: "116009C", name: "INTRODUCCIÓN A LAS CIENCIAS NATURALES", credits: 4 },
-            { id: "116020C", name: "TALLER TECNOLÓGICO I", credits: 3 },
-            { id: "201022C", name: "INSTRUMENTOS E MODELOS DE ANÁLISIS ECONÓMICO PARA LA HISTORIA", credits: 3 },
-            { id: "620013C", name: "CUIDADOS PALIATIVOS CON ENFOQUE TRANSDISCIPLINAR", credits: 2 },
-            { id: "203019C", name: "HISTORIA DEL DESARROLLO DE LA INTELIGENCIA ARTIFICIAL Y SUS APLICACIONES", credits: 3 },
-            { id: "620011C", name: "ABORDAJE INTEGRAL A LAS PERSONAS CON SITUACIONES ONCOLÓGICAS", credits: 2 },
-            { id: "801157C", name: "INTELIGENCIA DE NEGOCIOS Y ANALÍTICA DE DATOS PARA LA GESTIÓN", credits: 3 },
-            { id: "802064C", name: "SEGURIDAD DE LA INFORMACIÓN FINANCIERA Y CONTABLE", credits: 3 },
-            { id: "415006C", name: "NUEVAS TECNOLOGÍAS Y EDUCACIÓN", credits: 3 },
-            { id: "406015C", name: "APORTE DE LAS TIC EN LA ENSEÑANZA DE LAS CIENCIAS", credits: 3 },
-            { id: "505134C", name: "EDICIÓN DE PARTITURAS", credits: 2 },
-            { id: "750002C", name: "INFORMÁTICA I", credits: 3 },
-            { id: "750011C", name: "FUNDAMENTOS DE PROGRAMACIÓN", credits: 3 },
-            { id: "750012C", name: "FUNDAMENTOS DE PROGRAMACIÓN IMPERATIVA", credits: 3 },
-            { id: "750007C", name: "FUNDAMENTOS Y APLICACIONES DE LA PROGRAMACIÓN COMPUTACIONAL", credits: 4 },
-            { id: "770001C", name: "CIENCIAS DE LOS MATERIALES", credits: 3 },
-            { id: "710004C", name: "TALLER DE INGENIERÍA II", credits: 2 },
-            { id: "102081C", name: "INSECTOS Y SOCIEDAD", credits: 3 },
-            { id: "1303004C", name: "FUNDAMENTOS DE PROGRAMACIÓN PARA ECONOMÍA", credits: 4 },
-            { id: "303025C", name: "CIENCIAS AMBIENTALES", credits: 3 },
-            { id: "406001C", name: "FUNDAMENTACIÓN EN CIENCIAS, TECNOLOGÍA, SOCIEDAD Y AMBIENTE", credits: 3 },
-            { id: "416047C", name: "NUMEROS Y ESTADISTICAS PARA PENSAR LA EDUCACIÓN POPULAR", credits: 3 },
-            { id: "607008C", name: "RAZA, ETNIA, RACISMO Y SALUD PÚBLICA", credits: 3 },
-            { id: "111061C", name: "FUNDAMENTOS INICIALES DE MATEMÁTICA UNIVERSITARIA", credits: 3 },
-            { id: "730111C", name: "TALLER TECNOLÓGICO I: GESTIÓN DE LA CONSERVACIÓN", credits: 3 },
-            // Formación Social y Ciudadana
-            { id: "415007C", name: "FORMACIÓN CIUDADANA Y CONSTITUCIÓN POLÍTICA DE COLOMBIA", credits: 3 },
-            { id: "304035C", name: "GÉNERO, PLURALIDAD Y DIVERSIDAD", credits: 3 },
-            { id: "506015C", name: "COMUNICACIÓN, GÉNERO Y DIVERSIDAD", credits: 3 },
-            { id: "415011C", name: "EDUCACIÓN COMUNIDADES NEGRAS, AFROCOLOMBIANAS, RAIZALES, PALENQUERAS", credits: 3 },
-            { id: "801042C", name: "INTRODUCCIÓN AL DERECHO Y CONSTITUCIÓN POLÍTICA", credits: 3 },
-            { id: "507044C", name: "DISEÑO PARA LA PAZ SOSTENIBLE", credits: 2 },
-            { id: "730025C", name: "SEMINARIO EN CONSTITUCIÓN, LEGISLACIÓN Y ÉTICA DE LA PROFESIÓN", credits: 2 },
-            { id: "730011C", name: "FUNDAMENTOS SISTEMAS SOCIOECOLÓGICOS", credits: 3 },
-            { id: "204058C", name: "RESOLUCIÓN DE CONFLICTOS EN LA ESCUELA GÉNERO Y DIVERSIDAD", credits: 3 },
-            { id: "102061C", name: "ÉTICA Y RESPONSABILIDAD SOCIAL", credits: 3 },
-            { id: "760018C", name: "INGENIERÍA Y SOCIEDAD", credits: 3 },
-            { id: "801078C", name: "CIENCIAS HUMANAS", credits: 2 },
-            { id: "203001C", name: "CULTURA DE PAZ/CONSTRUCCIÓN DE CULTURA DE PAZ", credits: 3 },
-            { id: "801112C", name: "RESPONSABILIDAD SOCIAL Y GESTIÓN HUMANA EN EL SECTOR PÚBLICO", credits: 3 },
-            { id: "102062C", name: "FUNDAMENTOS DE SUSTENTABILIDAD Y AMBIENTE", credits: 3 },
-            { id: "201002C", name: "CIENCIAS SOCIALES Y CIUDADANÍA", credits: 3 },
-            { id: "802027C", name: "MECANISMOS DE CONTROL ORGANIZACIONES CIVILES Y PARTICIPACIÓN CIUDADANA", credits: 3 },
-            { id: "730012C", name: "FUNDAMENTOS DE PROCESOS SOCIALES", credits: 3 },
-            { id: "202023C", name: "LEGISLACIÓN EDUCATIVA EN COLOMBIA", credits: 3 },
-            { id: "201001C", name: "ANTROPOLOGÍA Y DEMOCRACIA", credits: 3 },
-            { id: "507003C", name: "DISEÑO PARA LA PAZ DG", credits: 3 },
-            { id: "203013C", name: "ÉTICA Y POLÍTICA", credits: 3 },
-            { id: "406008C", name: "PENSAMIENTO HISTÓRICO - FILOSÓFICO EN LA ENSEÑANZA DE LAS CIENCIAS", credits: 2 },
-            { id: "406025C", name: "POLÍTICAS PÚBLICAS EDUCATIVAS DEL ESTADO", credits: 3 },
-            { id: "507089C", name: "PROYECTO BIOSFERA - DISEÑO ONTOLÓGICO", credits: 3 },
-            { id: "607007C", name: "COMER: SABORES, LUCHAS Y SALUD PÚBLICA", credits: 3 },
-            { id: "607010C", name: "SEGURIDAD FINANCIERA Y DECISIONES RESPONSABLES", credits: 3 },
-            { id: "620021C", name: "DISCAPACIDAD, SOCIEDAD Y CULTURA", credits: 3 },
-            { id: "106036C", name: "NORMATIVIDAD Y ÉTICA PROFESIONAL", credits: 2 },
-            { id: "406018C", name: "EL PENSAMIENTO DOCENTE", credits: 3 },
-            { id: "406006C", name: "COSMOVISIONES Y TEORÍAS DEL CONOCIMIENTO", credits: 2 },
-            { id: "404047C", name: "EDUCACIÓN PARA LA PAZ", credits: 2 },
-            { id: "201069C", name: "DISCRIMINACIÓN, EMPODERAMIENTO Y CIUDADANÍA", credits: 3 },
-            { id: "415037C", name: "EDUCACIÓN SUPERIOR Y CONTEXTOS SOCIOPOLÍTICOS Y PROFESIONALES CONTEMPORÁNEOS", credits: 3 },
-            { id: "415041C", name: "PEDAGOGÍA, ÉTICA E INFANCIA", credits: 3 },
-            { id: "D02006C", name: "CÁTEDRA DE LA JEP", credits: 3 },
-            { id: "303002C", name: "FILOSOFÍA POLÍTICA", credits: 3 },
-            { id: "303003C", name: "TEORÍA SOCIAL", credits: 3 },
-            // Lenguaje y Comunicación
-            { id: "204133C", name: "COMPRENSIÓN Y PRODUCCIÓN DE TEXTOS ACADÉMICOS GENERALES", credits: 2 },
-            { id: "506026C", name: "ESCRITURA, EXPRESIÓN Y COMUNICACIÓN", credits: 3 },
-            { id: "203012C", name: "ESPAÑOL Y COMUNICACIÓN I", credits: 2 },
-            { id: "415008C", name: "TALLER DE LECTURA Y ESCRITURA I", credits: 2 },
-            { id: "416009C", name: "HERRAMIENTAS PARA PENSAR Y RECREAR - ARGUMENTOS Y TEXTOS ACADÉMICOS", credits: 2 },
-            { id: "416035C", name: "ARTESANIAS DE LA PRODUCCION INTELECTUAL I", credits: 3 },
-            { id: "416045C", name: "ARTESANIAS DE LA PRODUCCION INTELECTUAL II", credits: 3 },
-            // Estilos de Vida Saludable
-            { id: "603032C", name: "HABILIDADES PARA LA VIDA", credits: 3 },
-            { id: "404032C", name: "DEPORTE FORMATIVO", credits: 3 },
-            { id: "410029C", name: "HATHA YOGA", credits: 3 },
-            { id: "607003C", name: "INTRODUCCIÓN A LAS INTERVENCIONES ASISTIDAS CON ANIMALES", credits: 3 },
-            { id: "607004C", name: "APNEA: MENTE, CUERPO Y VIDA SALUDABLE", credits: 3 },
-            { id: "404002C", name: "DEPORTE Y SALUD", credits: 2 },
-            { id: "402002C", name: "CORPORALIDAD EN MOVIMIENTO (PSICOMOTRICIDAD)", credits: 2 },
-            { id: "415026C", name: "JUEGO Y MOVIMIENTO PARA LA VIDA", credits: 3 },
-            { id: "415024C", name: "AUTOCUIDADO Y PROYECTO DE VIDA SALUDABLE", credits: 3 },
-            { id: "605010C", name: "PRINCIPIO DE NUTRICIÓN, ALIMENTACIÓN Y SALUD", credits: 3 },
-            { id: "404028C", name: "DANZA Y EXPRESIÓN CORPORAL", credits: 3 },
-            { id: "504070C", name: "PRÁCTICAS ARTÍSTICAS, CUERPO Y SALUD MENTAL", credits: 3 },
-            { id: "411003C", name: "PROYECTO DE VIDA I", credits: 3 },
-            { id: "411004C", name: "PROYECTO DE VIDA II", credits: 3 },
-            // Artístico Humanístico
-            { id: "402051C", name: "VIDA UNIVERSITARIA I: ENCUENTROS CON LA UNIVERSIDAD", credits: 3 },
-            { id: "204124C", name: "NARRATIVAS DE VIDA", credits: 3 },
-            { id: "417008C", name: "CIENCIA, CULTURA Y CREATIVIDAD", credits: 3 },
-            { id: "402014C", name: "LÚDICA Y ESTESIS EN LA CONSTITUCIÓN DEL SER HUMANO", credits: 2 },
-            { id: "504001C", name: "EL ARTE DE EXPRESARSE EN PÚBLICO", credits: 4 },
-            { id: "504002C", name: "TALLER DE CREATIVIDAD AUDIOVISUAL", credits: 4 },
-            { id: "504003C", name: "TALLER DE GUION AUDIOVISUAL PARA PRINCIPIANTES", credits: 4 },
-            { id: "504019C", name: "ESTÉTICAS DE LA RESISTENCIA", credits: 4 },
-            { id: "504037C", name: "TALLER DE APRECIACIÓN DEL TEATRO", credits: 3 },
-            { id: "504038C", name: "ACTUACIÓN ANTE CÁMARAS", credits: 3 },
-            { id: "504048C", name: "CONCEPTUALIZACIÓN Y DISEÑO DE PROYECTOS CULTURALES", credits: 3 },
-            { id: "504049C", name: "ANÁLISIS ACTIVO A PERSONAJES FEMENINOS DE LA DRAMATURGIA", credits: 3 },
-            { id: "504050C", name: "HERRAMIENTAS DIDÁCTICAS PARA LA ESCUELA - TÉCNICAS BÁSICAS DE CONSTRUCCIÓN Y MANEJO DE TÍTERES", credits: 3 },
-            { id: "504051C", name: "JUEGOS ACROBÁTICOS EXPRESIÓN CORPORAL PARA NO ACTORES", credits: 3 },
-            { id: "504052C", name: "TEATRO, SUEÑO Y CREACIÓN", credits: 3 },
-            { id: "504053C", name: "TEATROS Y TEATRALIDADES DEL MUNDO", credits: 3 },
-            // Emprendimiento
-            { id: "507098C", name: "EMPRENDIMIENTO, CULTURA Y CIUDAD", credits: 3 },
-            { id: "507099C", name: "DESARROLLO DE PROYECTO EMPRENDEDOR", credits: 3 },
-            { id: "507100C", name: "DESARROLLO DE LA CREATIVIDAD", credits: 3 },
-            { id: "507101C", name: "DESARROLLO DE CLIENTES", credits: 3 },
-        ];
-
-        let state = {
-            subjects: [],
-            semesters: [],
-            nextSemesterId: 1,
-            nextElectiveId: 1,
-        };
-
-        const defaultSemesterColor = () => document.documentElement.getAttribute('data-theme') === 'light' ? '#ffffff' : '#212121';
-
-        const loadState = () => {
-            const savedState = localStorage.getItem('univalleDisenoPlannerV10');
-            if (savedState) {
-                const parsed = JSON.parse(savedState);
-                state = { ...state, ...parsed };
-                state.semesters.forEach(s => {
-                    if (!s.color) s.color = defaultSemesterColor();
-                    if (!s.period) s.period = '';
-                });
-                if (!state.nextElectiveId) state.nextElectiveId = 1;
-            } else {
-                state.subjects = initialSubjects.map(s => ({ ...s, location: 'bank', completed: false, isElective: false }));
-            }
-        };
-
-        const saveState = () => {
-            localStorage.setItem('univalleDisenoPlannerV10', JSON.stringify(state));
-        };
-
-        const createSubjectCard = (subject) => {
-            const card = document.createElement('div');
-            card.id = `subject-${subject.id}`;
-            card.dataset.id = subject.id;
-            card.className = 'subject-card p-3 rounded-lg flex flex-col items-start';
-            card.draggable = true;
-            
-            let deleteButton = '';
-            if (subject.isElective) {
-                deleteButton = `<button class="delete-elective-btn" data-id="${subject.id}" title="Eliminar electiva">&times;</button>`;
-            }
-
-            let typeTag = '';
-            let typeColor = 'bg-gray-500';
-            if (subject.isElective) {
-                if(subject.electiveType === 'fg') {
-                    typeTag = 'FG';
-                    typeColor = 'bg-blue-500';
-                } else {
-                    typeTag = 'EP';
-                    typeColor = 'bg-purple-500';
-                }
-            } else {
-                if (subject.cycle === 'Básico') {
-                    typeTag = 'AB';
-                    typeColor = 'bg-green-500';
-                } else if (subject.cycle === 'Profesional') {
-                    typeTag = 'AP';
-                    typeColor = 'bg-orange-500';
-                }
-            }
-            const areaTag = subject.area ? `<span class="subject-tag bg-gray-600 text-white">${subject.area}</span>` : '';
-
-
-            card.innerHTML = `
-                <div class="w-full flex justify-between items-start">
-                    <p class="text-sm font-medium pr-2 flex-grow">${subject.name}</p>
-                    <span class="credits-badge text-xs font-bold px-2 py-1 rounded-full flex-shrink-0">${subject.credits} C</span>
-                </div>
-                <div class="mt-2 flex gap-1">
-                    <span class="subject-tag ${typeColor} text-white">${typeTag}</span>
-                    ${areaTag}
-                </div>
-                ${deleteButton}
-            `;
-            
-            if (subject.completed) card.classList.add('completed');
-            
-            const prereqsMet = subject.prerequisites.every(pId => state.subjects.find(s => s.id === pId)?.completed);
-            if (!prereqsMet && !subject.completed) card.classList.add('locked');
-            
-            card.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('delete-elective-btn')) {
-                    toggleSubjectComplete(subject.id);
-                }
-            });
-            card.addEventListener('dragstart', handleDragStart);
-            card.addEventListener('dragend', handleDragEnd);
-            
-            if (subject.isElective) {
-                card.querySelector('.delete-elective-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    deleteElective(subject.id);
-                });
-            }
-            return card;
-        };
-        
-        const render = () => {
-            renderStatsBoard();
-            renderSubjectBank();
-            renderSemesters();
-            updateStats();
-            saveState();
-        };
-
-        const renderStatsBoard = () => {
-            const container = document.querySelector('.stats-board');
-            container.innerHTML = '';
-            const stats = [
-                { id: 'total-credits', label: 'CRÉDITOS TOTALES', total: 140 },
-                { id: 'basic-cycle-credits', label: 'CICLO BÁSICO', total: 49 },
-                { id: 'professional-cycle-credits', label: 'CICLO PROFESIONAL', total: 57 },
-                { id: 'fg-credits', label: 'FORMACIÓN GENERAL', total: 17 },
-                { id: 'prof-electives-credits', label: 'ELECTIVAS PROFESIONALES', total: 17 }
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialSubjects = [
+                { id: 'fgc1', name: 'Fundamentos Sociales y Culturales del Diseño', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'ee1', name: 'Escritura, Expresión y Comunicación', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'pie2', name: 'Producción Intersubjetiva del Espacio Físico', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'dm3', name: 'Diseño Mundo', credits: 3, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'dps3', name: 'Diseño para la Paz Sostenible', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'si4', name: 'Seminario de Investigación', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'pv1', name: 'Percepción Visual', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+                { id: 'cf1', name: 'Creación de la Forma', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+                { id: 'ev2', name: 'Estudios Visuales', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+                { id: 'md2', name: 'Métodos de Diseño', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+                { id: 'pea2', name: 'Proyectos. Estructuras y Autonomías', credits: 4, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+                { id: 'prv3', name: 'Proyectos. Relaciones y Vínculos', credits: 4, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+                { id: 'psh4', name: 'Proyecto. Ser Humano', credits: 7, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+                { id: 'md1', name: 'Matemáticas para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+                { id: 'im1', name: 'Introducción a los Materiales y Procesos', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+                { id: 'hd1', name: 'Herramientas Digitales - Representación', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+                { id: 'gd2', name: 'Geometría para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+                { id: 'fd3', name: 'Física para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+                { id: 'mpm4', name: 'Materiales y Procesos. Metales', credits: 3, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+                { id: 'ecd5', name: 'Estudios Críticos del Diseño', credits: 3, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'dcm6', name: 'Diseño Colonial y Modernidad', credits: 2, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'dr7', name: 'Disidencias y Resistencias', credits: 3, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
+                { id: 'pe5', name: 'Proyecto. Entorno', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
+                { id: 'pb6', name: 'Proyecto. Biosfera', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
+                { id: 'pp7', name: 'Proyecto. Producto', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
+                { id: 'pg8', name: 'Proyecto. Gestión', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
+                { id: 'pff9', name: 'Proyecto Final. Formulación', credits: 3, cycle: 'Profesional', area: 'Diseño', prerequisites: ['im1'] },
+                { id: 'pfd10', name: 'Proyecto Final. Desarrollo', credits: 4, cycle: 'Profesional', area: 'Diseño', prerequisites: ['pff9'] },
+                { id: 'hdv4', name: 'Herramientas Digitales. Visualización', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+                { id: 'mpp5', name: 'Materiales y Procesos. Polímeros', credits: 3, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+                { id: 'hdp5', name: 'Herramientas Digitales. Programación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+                { id: 'mpnm6', name: 'Materiales y Procesos. Nuevos Materiales', credits: 3, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+                { id: 'hds6', name: 'Herramientas Digitales. Simulación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+                { id: 'hdc7', name: 'Herramientas Digitales. Comprobación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
             ];
-            stats.forEach(stat => {
-                const card = document.createElement('div');
-                card.className = 'text-center bg-secondary p-4 rounded-lg';
-                card.innerHTML = `<h3 class="text-xs font-semibold text-secondary uppercase">${stat.label}</h3><p id="${stat.id}" class="text-xl font-bold">0 / ${stat.total}</p><div class="progress-bar-container mt-2"><div id="${stat.id}-bar" class="progress-bar-fill"></div></div>`;
-                container.appendChild(card);
-            });
-        };
 
-        const renderSubjectBank = () => {
-            const bankContent = document.getElementById('bank-content');
-            bankContent.innerHTML = '';
-            const cycles = ['Básico', 'Profesional'];
-            const areas = ['Sociedad y cultura', 'Diseño', 'Tecnología'];
-            cycles.forEach(cycle => {
-                const cycleEl = document.createElement('div');
-                cycleEl.className = 'mb-6';
-                cycleEl.innerHTML = `<h3 class="text-lg font-semibold mb-2">${cycle}</h3>`;
-                const areaContainer = document.createElement('div');
-                areaContainer.id = `bank-${cycle.toLowerCase()}`;
-                areaContainer.className = 'space-y-4 p-2 rounded-lg';
-                areaContainer.addEventListener('dragover', handleDragOver);
-                areaContainer.addEventListener('drop', handleDrop);
-                areas.forEach(area => {
-                    const areaSubjects = state.subjects.filter(s => !s.isElective && s.cycle === cycle && s.area === area && s.location === 'bank');
-                    if (areaSubjects.length > 0) {
-                        const areaEl = document.createElement('div');
-                        areaEl.innerHTML = `<h4 class="area-title text-sm font-bold uppercase pb-1 mb-2">${area}</h4>`;
-                        const subjectList = document.createElement('div');
-                        subjectList.className = 'space-y-2';
-                        areaSubjects.forEach(s => subjectList.appendChild(createSubjectCard(s)));
-                        areaEl.appendChild(subjectList);
-                        areaContainer.appendChild(areaEl);
-                    }
-                });
-                cycleEl.appendChild(areaContainer);
-                bankContent.appendChild(cycleEl);
-            });
-            
-            const createdElectives = state.subjects.filter(s => s.isElective && s.location === 'bank');
-            if (createdElectives.length > 0) {
-                const electivesEl = document.createElement('div');
-                electivesEl.className = 'mb-6';
-                electivesEl.innerHTML = `<h3 class="text-lg font-semibold mb-2">Mis Electivas</h3>`;
-                const electiveList = document.createElement('div');
-                electiveList.className = 'space-y-2 p-2 rounded-lg';
-                electiveList.id = 'bank-electives';
-                electiveList.addEventListener('dragover', handleDragOver);
-                electiveList.addEventListener('drop', handleDrop);
-                createdElectives.forEach(s => electiveList.appendChild(createSubjectCard(s)));
-                electivesEl.appendChild(electiveList);
-                bankContent.appendChild(electivesEl);
-            }
-        };
+            const predefinedProfElectives = [
+                { id: "507092C", name: "BIOMIMESIS", credits: 2 },
+                { id: "507082C", name: "COLOR", credits: 3 },
+                { id: "507057C", name: "CREACIÓN CON MADERA", credits: 2 },
+                { id: "507083C", name: "CRÍTICA DE LAS MERCANCÍAS Y EL CONSUMO", credits: 3 },
+                { id: "507062C", name: "DIBUJO TÉCNICO PARA DISEÑO INDUSTRIAL", credits: 2 },
+                { id: "507090C", name: "DISEÑO DE APLICACIONES MÓVILES", credits: 3 },
+                { id: "507093C", name: "DISEÑO Y PROTOTIPADO DE SISTEMAS ROBÓTICOS", credits: 3 },
+                { id: "507061C", name: "ESTRATEGIAS DE ECODISEÑO", credits: 2 },
+                { id: "507084C", name: "ESTUDIOS CRÍTICOS SOBRE LOS RESIDUOS", credits: 3 },
+                { id: "507094C", name: "PRÁCTICAS ESCRITURALES", credits: 2 },
+                { id: "507109C", name: "SOSTENIBILIDAD EN LA INDUSTRIA TEXTIL", credits: 3 },
+                { id: "507105C", name: "MORFOLOGÍA EXPERIMENTAL EN EL DISEÑO INDUSTRIAL", credits: 3 },
+                { id: "507106C", name: "PROCESOS DE FABRICACIÓN ADITIVA - IMPRESIÓN TRIDIMENSIONAL (3D)", credits: 3 },
+                { id: "507110C", name: "TÉCNICAS DE PROTOTIPADO RÁPIDO", credits: 3 },
+                { id: "507108C", name: "EL GÉNERO EN LOS OBJETOS", credits: 3 },
+                { id: "507113C", name: "MARKETING DE PRODUCTO", credits: 3 },
+                { id: "507112C", name: "ELEMENTOS PARA DISEÑO DE INTERIORES", credits: 3 },
+                { id: "507114C", name: "PRÁCTICAS ESCRITURALES", credits: 3 },
+                { id: "507051C", name: "PRÁCTICA EN INVESTIGACIÓN-CREACIÓN", credits: 3 },
+                { id: "507118C", name: "PRODUCCIÓN DE PLATAFORMAS CULTURALES PARA ARTE Y DISEÑO", credits: 3 },
+                { id: "507122C", name: "DISEÑO INDUSTRIAL CONTEMPORÁNEO", credits: 3 },
+                { id: "507121C", name: "REUSO Y RECICLAJE CREATIVO", credits: 3 },
+                { id: "507120C", name: "MODELOS EN REPETICIÓN", credits: 3 },
+                { id: "507119C", name: "DISEÑO + ARTE CONTEMPORÁNEO", credits: 3 },
+            ];
 
-        const generatePeriodOptions = (selectedPeriod) => {
-            let optionsHtml = '<option value="">Seleccionar periodo</option>';
-            const currentYear = new Date().getFullYear();
-            for (let year = 2018; year <= currentYear + 5; year++) {
-                const period1 = `${year}-1`;
-                const period2 = `${year}-2`;
-                optionsHtml += `<option value="${period1}" ${selectedPeriod === period1 ? 'selected' : ''}>${period1}</option>`;
-                optionsHtml += `<option value="${period2}" ${selectedPeriod === period2 ? 'selected' : ''}>${period2}</option>`;
-            }
-            return optionsHtml;
-        };
+            const predefinedFGElectives = [
+                // Científico Tecnológico
+                { id: "417016C", name: "ESTRATEGIAS PARA EL APRENDIZAJE AUTÓNOMO", credits: 3 },
+                { id: "417017C", name: "APROPIACIÓN DIGITAL Y APRENDIZAJE SIGNIFICATIVO", credits: 3 },
+                { id: "106030C", name: "HUMANITAS, CIENCIA, AGRICULTURA Y CAMBIO CLIMÁTICO", credits: 3 },
+                { id: "801127C", name: "CONFLUENCIA DE REALIDADES: NATURALEZA Y SOCIEDAD", credits: 3 },
+                { id: "801044C", name: "TALLER DE HABILIDADES INFORMÁTICAS PARA LA GESTIÓN", credits: 3 },
+                { id: "602001C", name: "EN SUS MARCAS, UN, DOS, TIC, APRENDO", credits: 3 },
+                { id: "201012C", name: "EDUCACIÓN Y TIC", credits: 3 },
+                { id: "106002C", name: "INTRODUCCIÓN A LA EXPERIMENTACIÓN CIENTÍFICA", credits: 3 },
+                { id: "102052C", name: "BIOLOGÍA GENERAL - CIENCIAS", credits: 4 },
+                { id: "116019C", name: "INTRODUCCIÓN A LAS TECNOLOGÍAS", credits: 2 },
+                { id: "204054C", name: "ACTIVIDADES DE APRENDIZAJE MEDIADAS POR LAS TIC", credits: 3 },
+                { id: "111023C", name: "MATEMÁTICAS BÁSICAS", credits: 3 },
+                { id: "111002C", name: "INTRODUCCIÓN AL MODELAMIENTO MATEMÁTICO", credits: 3 },
+                { id: "116009C", name: "INTRODUCCIÓN A LAS CIENCIAS NATURALES", credits: 4 },
+                { id: "116020C", name: "TALLER TECNOLÓGICO I", credits: 3 },
+                { id: "201022C", name: "INSTRUMENTOS E MODELOS DE ANÁLISIS ECONÓMICO PARA LA HISTORIA", credits: 3 },
+                { id: "620013C", name: "CUIDADOS PALIATIVOS CON ENFOQUE TRANSDISCIPLINAR", credits: 2 },
+                { id: "203019C", name: "HISTORIA DEL DESARROLLO DE LA INTELIGENCIA ARTIFICIAL Y SUS APLICACIONES", credits: 3 },
+                { id: "620011C", name: "ABORDAJE INTEGRAL A LAS PERSONAS CON SITUACIONES ONCOLÓGICAS", credits: 2 },
+                { id: "801157C", name: "INTELIGENCIA DE NEGOCIOS Y ANALÍTICA DE DATOS PARA LA GESTIÓN", credits: 3 },
+                { id: "802064C", name: "SEGURIDAD DE LA INFORMACIÓN FINANCIERA Y CONTABLE", credits: 3 },
+                { id: "415006C", name: "NUEVAS TECNOLOGÍAS Y EDUCACIÓN", credits: 3 },
+                { id: "406015C", name: "APORTE DE LAS TIC EN LA ENSEÑANZA DE LAS CIENCIAS", credits: 3 },
+                { id: "505134C", name: "EDICIÓN DE PARTITURAS", credits: 2 },
+                { id: "750002C", name: "INFORMÁTICA I", credits: 3 },
+                { id: "750011C", name: "FUNDAMENTOS DE PROGRAMACIÓN", credits: 3 },
+                { id: "750012C", name: "FUNDAMENTOS DE PROGRAMACIÓN IMPERATIVA", credits: 3 },
+                { id: "750007C", name: "FUNDAMENTOS Y APLICACIONES DE LA PROGRAMACIÓN COMPUTACIONAL", credits: 4 },
+                { id: "770001C", name: "CIENCIAS DE LOS MATERIALES", credits: 3 },
+                { id: "710004C", name: "TALLER DE INGENIERÍA II", credits: 2 },
+                { id: "102081C", name: "INSECTOS Y SOCIEDAD", credits: 3 },
+                { id: "1303004C", name: "FUNDAMENTOS DE PROGRAMACIÓN PARA ECONOMÍA", credits: 4 },
+                { id: "303025C", name: "CIENCIAS AMBIENTALES", credits: 3 },
+                { id: "406001C", name: "FUNDAMENTACIÓN EN CIENCIAS, TECNOLOGÍA, SOCIEDAD Y AMBIENTE", credits: 3 },
+                { id: "416047C", name: "NUMEROS Y ESTADISTICAS PARA PENSAR LA EDUCACIÓN POPULAR", credits: 3 },
+                { id: "607008C", name: "RAZA, ETNIA, RACISMO Y SALUD PÚBLICA", credits: 3 },
+                { id: "111061C", name: "FUNDAMENTOS INICIALES DE MATEMÁTICA UNIVERSITARIA", credits: 3 },
+                { id: "730111C", name: "TALLER TECNOLÓGICO I: GESTIÓN DE LA CONSERVACIÓN", credits: 3 },
+                // Formación Social y Ciudadana
+                { id: "415007C", name: "FORMACIÓN CIUDADANA Y CONSTITUCIÓN POLÍTICA DE COLOMBIA", credits: 3 },
+                { id: "304035C", name: "GÉNERO, PLURALIDAD Y DIVERSIDAD", credits: 3 },
+                { id: "506015C", name: "COMUNICACIÓN, GÉNERO Y DIVERSIDAD", credits: 3 },
+                { id: "415011C", name: "EDUCACIÓN COMUNIDADES NEGRAS, AFROCOLOMBIANAS, RAIZALES, PALENQUERAS", credits: 3 },
+                { id: "801042C", name: "INTRODUCCIÓN AL DERECHO Y CONSTITUCIÓN POLÍTICA", credits: 3 },
+                { id: "507044C", name: "DISEÑO PARA LA PAZ SOSTENIBLE", credits: 2 },
+                { id: "730025C", name: "SEMINARIO EN CONSTITUCIÓN, LEGISLACIÓN Y ÉTICA DE LA PROFESIÓN", credits: 2 },
+                { id: "730011C", name: "FUNDAMENTOS SISTEMAS SOCIOECOLÓGICOS", credits: 3 },
+                { id: "204058C", name: "RESOLUCIÓN DE CONFLICTOS EN LA ESCUELA GÉNERO Y DIVERSIDAD", credits: 3 },
+                { id: "102061C", name: "ÉTICA Y RESPONSABILIDAD SOCIAL", credits: 3 },
+                { id: "760018C", name: "INGENIERÍA Y SOCIEDAD", credits: 3 },
+                { id: "801078C", name: "CIENCIAS HUMANAS", credits: 2 },
+                { id: "203001C", name: "CULTURA DE PAZ/CONSTRUCCIÓN DE CULTURA DE PAZ", credits: 3 },
+                { id: "801112C", name: "RESPONSABILIDAD SOCIAL Y GESTIÓN HUMANA EN EL SECTOR PÚBLICO", credits: 3 },
+                { id: "102062C", name: "FUNDAMENTOS DE SUSTENTABILIDAD Y AMBIENTE", credits: 3 },
+                { id: "201002C", name: "CIENCIAS SOCIALES Y CIUDADANÍA", credits: 3 },
+                { id: "802027C", name: "MECANISMOS DE CONTROL ORGANIZACIONES CIVILES Y PARTICIPACIÓN CIUDADANA", credits: 3 },
+                { id: "730012C", name: "FUNDAMENTOS DE PROCESOS SOCIALES", credits: 3 },
+                { id: "202023C", name: "LEGISLACIÓN EDUCATIVA EN COLOMBIA", credits: 3 },
+                { id: "201001C", name: "ANTROPOLOGÍA Y DEMOCRACIA", credits: 3 },
+                { id: "507003C", name: "DISEÑO PARA LA PAZ DG", credits: 3 },
+                { id: "203013C", name: "ÉTICA Y POLÍTICA", credits: 3 },
+                { id: "406008C", name: "PENSAMIENTO HISTÓRICO - FILOSÓFICO EN LA ENSEÑANZA DE LAS CIENCIAS", credits: 2 },
+                { id: "406025C", name: "POLÍTICAS PÚBLICAS EDUCATIVAS DEL ESTADO", credits: 3 },
+                { id: "507089C", name: "PROYECTO BIOSFERA - DISEÑO ONTOLÓGICO", credits: 3 },
+                { id: "607007C", name: "COMER: SABORES, LUCHAS Y SALUD PÚBLICA", credits: 3 },
+                { id: "607010C", name: "SEGURIDAD FINANCIERA Y DECISIONES RESPONSABLES", credits: 3 },
+                { id: "620021C", name: "DISCAPACIDAD, SOCIEDAD Y CULTURA", credits: 3 },
+                { id: "106036C", name: "NORMATIVIDAD Y ÉTICA PROFESIONAL", credits: 2 },
+                { id: "406018C", name: "EL PENSAMIENTO DOCENTE", credits: 3 },
+                { id: "406006C", name: "COSMOVISIONES Y TEORÍAS DEL CONOCIMIENTO", credits: 2 },
+                { id: "404047C", name: "EDUCACIÓN PARA LA PAZ", credits: 2 },
+                { id: "201069C", name: "DISCRIMINACIÓN, EMPODERAMIENTO Y CIUDADANÍA", credits: 3 },
+                { id: "415037C", name: "EDUCACIÓN SUPERIOR Y CONTEXTOS SOCIOPOLÍTICOS Y PROFESIONALES CONTEMPORÁNEOS", credits: 3 },
+                { id: "415041C", name: "PEDAGOGÍA, ÉTICA E INFANCIA", credits: 3 },
+                { id: "D02006C", name: "CÁTEDRA DE LA JEP", credits: 3 },
+                { id: "303002C", name: "FILOSOFÍA POLÍTICA", credits: 3 },
+                { id: "303003C", name: "TEORÍA SOCIAL", credits: 3 },
+                // Lenguaje y Comunicación
+                { id: "204133C", name: "COMPRENSIÓN Y PRODUCCIÓN DE TEXTOS ACADÉMICOS GENERALES", credits: 2 },
+                { id: "506026C", name: "ESCRITURA, EXPRESIÓN Y COMUNICACIÓN", credits: 3 },
+                { id: "203012C", name: "ESPAÑOL Y COMUNICACIÓN I", credits: 2 },
+                { id: "415008C", name: "TALLER DE LECTURA Y ESCRITURA I", credits: 2 },
+                { id: "416009C", name: "HERRAMIENTAS PARA PENSAR Y RECREAR - ARGUMENTOS Y TEXTOS ACADÉMICOS", credits: 2 },
+                { id: "416035C", name: "ARTESANIAS DE LA PRODUCCION INTELECTUAL I", credits: 3 },
+                { id: "416045C", name: "ARTESANIAS DE LA PRODUCCION INTELECTUAL II", credits: 3 },
+                // Estilos de Vida Saludable
+                { id: "603032C", name: "HABILIDADES PARA LA VIDA", credits: 3 },
+                { id: "404032C", name: "DEPORTE FORMATIVO", credits: 3 },
+                { id: "410029C", name: "HATHA YOGA", credits: 3 },
+                { id: "607003C", name: "INTRODUCCIÓN A LAS INTERVENCIONES ASISTIDAS CON ANIMALES", credits: 3 },
+                { id: "607004C", name: "APNEA: MENTE, CUERPO Y VIDA SALUDABLE", credits: 3 },
+                { id: "404002C", name: "DEPORTE Y SALUD", credits: 2 },
+                { id: "402002C", name: "CORPORALIDAD EN MOVIMIENTO (PSICOMOTRICIDAD)", credits: 2 },
+                { id: "415026C", name: "JUEGO Y MOVIMIENTO PARA LA VIDA", credits: 3 },
+                { id: "415024C", name: "AUTOCUIDADO Y PROYECTO DE VIDA SALUDABLE", credits: 3 },
+                { id: "605010C", name: "PRINCIPIO DE NUTRICIÓN, ALIMENTACIÓN Y SALUD", credits: 3 },
+                { id: "404028C", name: "DANZA Y EXPRESIÓN CORPORAL", credits: 3 },
+                { id: "504070C", name: "PRÁCTICAS ARTÍSTICAS, CUERPO Y SALUD MENTAL", credits: 3 },
+                { id: "411003C", name: "PROYECTO DE VIDA I", credits: 3 },
+                { id: "411004C", name: "PROYECTO DE VIDA II", credits: 3 },
+                // Artístico Humanístico
+                { id: "402051C", name: "VIDA UNIVERSITARIA I: ENCUENTROS CON LA UNIVERSIDAD", credits: 3 },
+                { id: "204124C", name: "NARRATIVAS DE VIDA", credits: 3 },
+                { id: "417008C", name: "CIENCIA, CULTURA Y CREATIVIDAD", credits: 3 },
+                { id: "402014C", name: "LÚDICA Y ESTESIS EN LA CONSTITUCIÓN DEL SER HUMANO", credits: 2 },
+                { id: "504001C", name: "EL ARTE DE EXPRESARSE EN PÚBLICO", credits: 4 },
+                { id: "504002C", name: "TALLER DE CREATIVIDAD AUDIOVISUAL", credits: 4 },
+                { id: "504003C", name: "TALLER DE GUION AUDIOVISUAL PARA PRINCIPIANTES", credits: 4 },
+                { id: "504019C", name: "ESTÉTICAS DE LA RESISTENCIA", credits: 4 },
+                { id: "504037C", name: "TALLER DE APRECIACIÓN DEL TEATRO", credits: 3 },
+                { id: "504038C", name: "ACTUACIÓN ANTE CÁMARAS", credits: 3 },
+                { id: "504048C", name: "CONCEPTUALIZACIÓN Y DISEÑO DE PROYECTOS CULTURALES", credits: 3 },
+                { id: "504049C", name: "ANÁLISIS ACTIVO A PERSONAJES FEMENINOS DE LA DRAMATURGIA", credits: 3 },
+                { id: "504050C", name: "HERRAMIENTAS DIDÁCTICAS PARA LA ESCUELA - TÉCNICAS BÁSICAS DE CONSTRUCCIÓN Y MANEJO DE TÍTERES", credits: 3 },
+                { id: "504051C", name: "JUEGOS ACROBÁTICOS EXPRESIÓN CORPORAL PARA NO ACTORES", credits: 3 },
+                { id: "504052C", name: "TEATRO, SUEÑO Y CREACIÓN", credits: 3 },
+                { id: "504053C", name: "TEATROS Y TEATRALIDADES DEL MUNDO", credits: 3 },
+                // Emprendimiento
+                { id: "507098C", name: "EMPRENDIMIENTO, CULTURA Y CIUDAD", credits: 3 },
+                { id: "507099C", name: "DESARROLLO DE PROYECTO EMPRENDEDOR", credits: 3 },
+                { id: "507100C", name: "DESARROLLO DE LA CREATIVIDAD", credits: 3 },
+                { id: "507101C", name: "DESARROLLO DE CLIENTES", credits: 3 },
+            ];
 
-        const renderSemesters = () => {
-            const grid = document.getElementById('semesters-grid');
-            grid.innerHTML = '';
-            state.semesters.forEach(semester => {
-                const semesterCol = document.createElement('div');
-                semesterCol.id = `semester-${semester.id}`;
-                semesterCol.className = 'semester-column p-4 rounded-lg space-y-2';
-                semesterCol.dataset.id = semester.id;
-                semesterCol.style.backgroundColor = semester.color;
-                
-                const header = document.createElement('div');
-                header.className = 'semester-header';
-                header.innerHTML = `
-                    <h3 class="text-lg font-bold text-accent">Semestre ${semester.id}</h3>
-                    <div class="flex items-center gap-2">
-                        <select class="semester-period-selector bg-tertiary border border-color text-xs rounded p-1" data-id="${semester.id}">
-                            ${generatePeriodOptions(semester.period)}
-                        </select>
-                        <input type="color" class="semester-color-picker" data-id="${semester.id}" value="${semester.color}" title="Cambiar color del semestre">
-                    </div>
-                `;
-                semesterCol.appendChild(header);
-                
-                state.subjects.filter(s => s.location === semester.id).forEach(s => semesterCol.appendChild(createSubjectCard(s)));
-                
-                semesterCol.addEventListener('dragover', handleDragOver);
-                semesterCol.addEventListener('drop', handleDrop);
-                semesterCol.querySelector('.semester-color-picker').addEventListener('input', handleColorChange);
-                semesterCol.querySelector('.semester-period-selector').addEventListener('change', handlePeriodChange);
-                grid.appendChild(semesterCol);
-            });
-        };
-
-        const updateStats = () => {
-            const completedSubjects = state.subjects.filter(s => s.completed);
-            const basicCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Básico').reduce((sum, s) => sum + s.credits, 0);
-            const profCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Profesional').reduce((sum, s) => sum + s.credits, 0);
-            
-            const fgCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'fg').reduce((sum, s) => sum + s.credits, 0);
-            const profElectivesCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'prof').reduce((sum, s) => sum + s.credits, 0);
-            
-            const totalCredits = basicCredits + profCredits + fgCredits + profElectivesCredits;
-
-            const updateStat = (id, current, total) => {
-                const numEl = document.getElementById(id);
-                const barEl = document.getElementById(`${id}-bar`);
-                if(numEl && barEl) {
-                    numEl.textContent = `${current} / ${total}`;
-                    barEl.style.width = total > 0 ? `${(current / total) * 100}%` : '0%';
-                }
+            let state = {
+                subjects: [],
+                semesters: [],
+                nextSemesterId: 1,
+                nextElectiveId: 1,
             };
-            updateStat('total-credits', totalCredits, 140);
-            updateStat('basic-cycle-credits', basicCredits, 49);
-            updateStat('professional-cycle-credits', profCredits, 57);
-            updateStat('fg-credits', fgCredits, 17);
-            updateStat('prof-electives-credits', profElectivesCredits, 17);
-        };
-        
-        const handleColorChange = (e) => {
-            const semesterId = parseInt(e.target.dataset.id);
-            const newColor = e.target.value;
-            const semester = state.semesters.find(s => s.id === semesterId);
-            if(semester) {
-                semester.color = newColor;
-                document.getElementById(`semester-${semesterId}`).style.backgroundColor = newColor;
-                saveState();
-            }
-        };
 
-        const handlePeriodChange = (e) => {
-            const semesterId = parseInt(e.target.dataset.id);
-            const newPeriod = e.target.value;
-            const semester = state.semesters.find(s => s.id === semesterId);
-            if (semester) {
-                semester.period = newPeriod;
-                saveState();
-            }
-        };
+            const defaultSemesterColor = () => document.documentElement.getAttribute('data-theme') === 'light' ? '#ffffff' : '#212121';
 
-        const toggleSubjectComplete = (subjectId) => {
-            const subject = state.subjects.find(s => s.id === subjectId);
-            if (!subject) return;
-
-            if (subject.location === 'bank') {
-                alert('Debes arrastrar la materia a un semestre para poder marcarla como cursada.');
-                return;
-            }
-
-            if (subject.completed) {
-                const dependents = state.subjects.filter(s => s.prerequisites.includes(subjectId) && s.completed);
-                if (dependents.length > 0) {
-                    alert(`No puedes desmarcar esta materia. Las siguientes materias dependen de ella: ${dependents.map(d => d.name).join(', ')}`);
-                    return;
-                }
-                subject.completed = false;
-            } else {
-                const prereqsMet = subject.prerequisites.every(pId => state.subjects.find(s => s.id === pId)?.completed);
-                if (!prereqsMet) {
-                    alert('Debes completar los prerrequisitos primero.');
-                    return;
-                }
-                subject.completed = true;
-            }
-            render();
-        };
-
-        document.getElementById('add-semester-btn').addEventListener('click', () => {
-            state.semesters.push({ id: state.nextSemesterId++, subjects: [], color: defaultSemesterColor(), period: '' });
-            render();
-        });
-        
-        let draggedElementId = null;
-        function handleDragStart(e) { draggedElementId = e.target.dataset.id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
-        function handleDragEnd(e) { e.target.classList.remove('dragging'); draggedElementId = null; }
-        function handleDragOver(e) {
-            e.preventDefault(); e.dataTransfer.dropEffect = 'move';
-            const dropTarget = e.target.closest('.semester-column, [id^="bank-"]');
-            if (dropTarget) {
-                document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-                dropTarget.classList.add('drag-over');
-            }
-        }
-        function handleDrop(e) {
-            e.preventDefault();
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            const dropTarget = e.target.closest('.semester-column, [id^="bank-"]');
-            if (!dropTarget || !draggedElementId) return;
-            const subject = state.subjects.find(s => s.id === draggedElementId);
-            if (!subject) return;
-            const targetId = dropTarget.id;
-            if (targetId.startsWith('semester-')) subject.location = parseInt(dropTarget.dataset.id);
-            else if (targetId.startsWith('bank-')) subject.location = 'bank';
-            render();
-        }
-        
-        const addElective = (electiveData, type) => {
-             const newElective = {
-                id: `elective-${state.nextElectiveId++}`,
-                name: electiveData.name,
-                credits: electiveData.credits,
-                cycle: 'Electiva',
-                area: 'Electivas',
-                prerequisites: [],
-                location: 'bank',
-                completed: false,
-                isElective: true,
-                electiveType: type
-            };
-            state.subjects.push(newElective);
-            render();
-        };
-
-        const deleteElective = (subjectId) => {
-            const subjectIndex = state.subjects.findIndex(s => s.id === subjectId);
-            if (subjectIndex > -1) {
-                state.subjects.splice(subjectIndex, 1);
-                render();
-            }
-        };
-
-        document.getElementById('reset-button').addEventListener('click', () => {
-            if (confirm('¿Estás seguro de que quieres reiniciar todo tu progreso? Esta acción no se puede deshacer.')) {
-                localStorage.removeItem('univalleDisenoPlannerV10');
-                localStorage.removeItem('userProfilePic');
-                localStorage.removeItem('userBgImage');
-                state.subjects = initialSubjects.map(s => ({ ...s, location: 'bank', completed: false, isElective: false }));
-                state.semesters = [];
-                state.nextSemesterId = 1;
-                state.nextElectiveId = 1;
-                location.reload();
-            }
-        });
-
-        const themeToggle = document.getElementById('theme-toggle');
-        const setAppTheme = (theme) => {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('univalleTheme', theme);
-            themeToggle.checked = theme === 'light';
-        };
-        themeToggle.addEventListener('change', () => {
-            const newTheme = themeToggle.checked ? 'light' : 'dark';
-            setAppTheme(newTheme);
-            state.semesters.forEach(s => {
-                if (s.color === '#212121' || s.color === '#ffffff') s.color = defaultSemesterColor();
-            });
-            render();
-        });
-
-        const bankHeader = document.getElementById('bank-header');
-        const bankContent = document.getElementById('bank-content');
-        bankHeader.addEventListener('click', () => {
-            if (window.innerWidth < 1024) { bankContent.classList.toggle('collapsed'); }
-        });
-        const checkMobileAccordion = () => {
-             if (window.innerWidth < 1024) { bankContent.classList.add('collapsed'); } 
-             else { bankContent.classList.remove('collapsed'); }
-        };
-
-        // Modal Logic
-        const openModal = (modal) => modal.classList.add('visible');
-        const closeModal = (modal) => modal.classList.remove('visible');
-
-        const welcomeModal = document.getElementById('welcome-modal');
-        const closeWelcomeBtn = document.getElementById('close-welcome-modal-btn');
-        if (!localStorage.getItem('hasVisitedPlanner')) {
-            openModal(welcomeModal);
-            localStorage.setItem('hasVisitedPlanner', 'true');
-        }
-        closeWelcomeBtn.addEventListener('click', () => closeModal(welcomeModal));
-
-        const pdfModal = document.getElementById('pdf-modal');
-        const openPdfModalBtn = document.getElementById('open-pdf-modal-btn');
-        const closePdfModalBtn = document.getElementById('close-pdf-modal-btn');
-        const pdfInfoForm = document.getElementById('pdf-info-form');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const loadingText = document.getElementById('loading-text');
-
-        openPdfModalBtn.addEventListener('click', () => openModal(pdfModal));
-        closePdfModalBtn.addEventListener('click', () => closeModal(pdfModal));
-        
-        pdfInfoForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const studentName = document.getElementById('student-name').value;
-            const studentId = document.getElementById('student-id').value;
-            closeModal(pdfModal);
-            generatePDF(studentName, studentId);
-        });
-        
-        // Credits Popover
-        const creditsBtn = document.getElementById('credits-btn');
-        if (creditsBtn) {
-            const creditsPopover = document.getElementById('credits-popover');
-            creditsBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                creditsPopover.classList.toggle('visible');
-            });
-            document.addEventListener('click', (e) => {
-                if (creditsPopover && !creditsPopover.contains(e.target) && !creditsBtn.contains(e.target)) {
-                    creditsPopover.classList.remove('visible');
-                }
-            });
-        }
-
-        // Elective Modal Logic
-        const electiveModal = document.getElementById('elective-modal');
-        const openFgElectiveBtn = document.getElementById('open-fg-elective-modal-btn');
-        const openProfElectiveBtn = document.getElementById('open-prof-elective-modal-btn');
-        const closeElectiveBtn = document.getElementById('close-elective-modal-btn');
-        const catalogList = document.getElementById('elective-catalog-list');
-        const searchInput = document.getElementById('elective-search');
-        const customForm = document.getElementById('add-custom-elective-form');
-        let currentElectiveType = 'fg';
-
-        const populateCatalog = (type) => {
-            const list = type === 'fg' ? predefinedFGElectives : predefinedProfElectives;
-            catalogList.innerHTML = '';
-            const searchTerm = searchInput.value.toLowerCase();
-            list
-                .filter(elective => elective.name.toLowerCase().includes(searchTerm) || elective.id.toLowerCase().includes(searchTerm))
-                .forEach(elective => {
-                const item = document.createElement('div');
-                item.className = 'flex justify-between items-center p-2 bg-tertiary rounded-md';
-                item.innerHTML = `
-                    <div>
-                        <p class="font-semibold">${elective.name}</p>
-                        <p class="text-xs text-secondary">${elective.id} - ${elective.credits} créditos</p>
-                    </div>
-                    <button class="btn-primary text-sm px-3 py-1 rounded-md">Añadir</button>
-                `;
-                item.querySelector('button').addEventListener('click', () => {
-                    addElective({ name: elective.name, credits: elective.credits }, currentElectiveType);
-                    closeModal(electiveModal);
-                });
-                catalogList.appendChild(item);
-            });
-        };
-
-        openFgElectiveBtn.addEventListener('click', () => {
-            currentElectiveType = 'fg';
-            document.getElementById('elective-modal-title').textContent = 'Seleccionar Electiva de Formación General';
-            populateCatalog('fg');
-            openModal(electiveModal);
-        });
-
-        openProfElectiveBtn.addEventListener('click', () => {
-            currentElectiveType = 'prof';
-             document.getElementById('elective-modal-title').textContent = 'Seleccionar Electiva Profesional';
-            populateCatalog('prof');
-            openModal(electiveModal);
-        });
-
-        closeElectiveBtn.addEventListener('click', () => closeModal(electiveModal));
-        searchInput.addEventListener('input', () => populateCatalog(currentElectiveType));
-
-        customForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('custom-elective-name').value;
-            const credits = parseInt(document.getElementById('custom-elective-credits').value);
-            addElective({ name, credits }, currentElectiveType);
-            closeModal(electiveModal);
-            e.target.reset();
-        });
-
-        // Tabs in Modal
-        const tabs = document.querySelectorAll('.modal-tab');
-        const tabContents = document.querySelectorAll('.modal-tab-content');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                const target = tab.id.replace('tab-', 'content-');
-                tabContents.forEach(c => {
-                    c.classList.remove('active');
-                    if (c.id === target) {
-                        c.classList.add('active');
-                    }
-                });
-            });
-        });
-
-
-        // Personalization Logic
-        const profilePicContainer = document.getElementById('profile-pic-container');
-        const profilePicUpload = document.getElementById('profile-pic-upload');
-        const profilePic = document.getElementById('profile-pic');
-        const customizeBtn = document.getElementById('customize-btn');
-        const bgUpload = document.getElementById('bg-upload');
-
-        profilePicContainer.addEventListener('click', () => profilePicUpload.click());
-        customizeBtn.addEventListener('click', () => bgUpload.click());
-
-        const handleFileUpload = (file, storageKey, callback) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const dataUrl = e.target.result;
-                localStorage.setItem(storageKey, dataUrl);
-                callback(dataUrl);
-            };
-            reader.readAsDataURL(file);
-        };
-
-        profilePicUpload.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                handleFileUpload(e.target.files[0], 'userProfilePic', (url) => {
-                    profilePic.src = url;
-                });
-            }
-        });
-
-        bgUpload.addEventListener('change', (e) => {
-             if (e.target.files && e.target.files[0]) {
-                handleFileUpload(e.target.files[0], 'userBgImage', (url) => {
-                    document.body.style.backgroundImage = `url(${url})`;
-                });
-            }
-        });
-
-        const loadPersonalization = () => {
-            const savedPic = localStorage.getItem('userProfilePic');
-            const savedBg = localStorage.getItem('userBgImage');
-            if (savedPic) {
-                profilePic.src = savedPic;
-            }
-            if (savedBg) {
-                document.body.style.backgroundImage = `url(${savedBg})`;
-            }
-        };
-
-
-        function generatePDF(studentName, studentId) {
-            loadingText.textContent = 'Generando PDF...';
-            openModal(loadingOverlay);
-
-            const reportElement = document.createElement('div');
-            reportElement.style.padding = '20px';
-            reportElement.style.fontFamily = 'Arial, sans-serif';
-            reportElement.style.color = '#333';
-            
-            const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-
-            let html = `
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h1 style="font-size: 24px; margin: 0;">Reporte de Progreso Académico</h1>
-                    <p style="font-size: 16px; margin: 5px 0;">Diseño Industrial - Universidad del Valle</p>
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <p><strong>Estudiante:</strong> ${studentName}</p>
-                    <p><strong>Código:</strong> ${studentId}</p>
-                    <p><strong>Fecha de generación:</strong> ${date}</p>
-                </div>
-                <h2 style="font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Resumen de Créditos</h2>
-            `;
-
-            const completedSubjects = state.subjects.filter(s => s.completed);
-            const basicCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Básico').reduce((sum, s) => sum + s.credits, 0);
-            const profCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Profesional').reduce((sum, s) => sum + s.credits, 0);
-            const fgCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'fg').reduce((sum, s) => sum + s.credits, 0);
-            const profElectivesCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'prof').reduce((sum, s) => sum + s.credits, 0);
-            const totalCredits = basicCredits + profCredits + fgCredits + profElectivesCredits;
-
-            html += `
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                    <tr style="background-color: #eee;">
-                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Componente</th>
-                        <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Créditos</th>
-                    </tr>
-                    <tr><td style="padding: 8px; border: 1px solid #ddd;">Ciclo Básico</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${basicCredits} / 49</td></tr>
-                    <tr><td style="padding: 8px; border: 1px solid #ddd;">Ciclo Profesional</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${profCredits} / 57</td></tr>
-                    <tr><td style="padding: 8px; border: 1px solid #ddd;">Formación General</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${fgCredits} / 17</td></tr>
-                    <tr><td style="padding: 8px; border: 1px solid #ddd;">Electivas Profesionales</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${profElectivesCredits} / 17</td></tr>
-                    <tr style="background-color: #eee; font-weight: bold;"><td style="padding: 8px; border: 1px solid #ddd;">TOTAL</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${totalCredits} / 140</td></tr>
-                </table>
-            `;
-
-            html += `<h2 style="font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Plan de Carrera</h2>`;
-            state.semesters.forEach(semester => {
-                const periodText = semester.period ? `(${semester.period})` : '';
-                html += `<h3 style="font-size: 18px; margin-top: 20px; margin-bottom: 10px;">Semestre ${semester.id} ${periodText}</h3>`;
-                const subjectsInSemester = state.subjects.filter(s => s.location === semester.id);
-                if (subjectsInSemester.length > 0) {
-                    html += `<ul style="list-style-type: none; padding: 0;">`;
-                    subjectsInSemester.forEach(subject => {
-                        html += `<li style="padding: 5px; border-bottom: 1px solid #eee;">${subject.name} (${subject.credits} C) ${subject.completed ? '<strong>- Cursada</strong>' : ''}</li>`;
+            const loadState = () => {
+                const savedState = localStorage.getItem('univalleDisenoPlannerV10');
+                if (savedState) {
+                    const parsed = JSON.parse(savedState);
+                    state = { ...state, ...parsed };
+                    state.semesters.forEach(s => {
+                        if (!s.color) s.color = defaultSemesterColor();
+                        if (!s.period) s.period = '';
                     });
-                    html += `</ul>`;
+                    if (!state.nextElectiveId) state.nextElectiveId = 1;
                 } else {
-                    html += `<p>No hay materias planeadas para este semestre.</p>`;
+                    state.subjects = initialSubjects.map(s => ({ ...s, location: 'bank', completed: false, isElective: false }));
                 }
-            });
-
-            reportElement.innerHTML = html;
-
-            const opt = {
-                margin: 10,
-                filename: `Reporte_Progreso_${studentName.replace(/\s/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().from(reportElement).set(opt).save().then(() => {
-                closeModal(loadingOverlay);
-            });
-        }
-        
-        // --- AI Features ---
-        const aiSuggestBtn = document.getElementById('ai-suggest-electives-btn');
-        const aiPromptInput = document.getElementById('ai-elective-prompt');
-        const aiSuggestionsContainer = document.getElementById('ai-suggestions-container');
-        const aiOrganizeBtn = document.getElementById('ai-organize-btn');
-        const organizeModal = document.getElementById('organize-modal');
-        const closeOrganizeModalBtn = document.getElementById('close-organize-modal-btn');
-        const processTabuladoBtn = document.getElementById('process-tabulado-btn');
-        
-        aiOrganizeBtn.addEventListener('click', () => openModal(organizeModal));
-        closeOrganizeModalBtn.addEventListener('click', () => closeModal(organizeModal));
-        processTabuladoBtn.addEventListener('click', () => processTabulado());
+            const saveState = () => {
+                localStorage.setItem('univalleDisenoPlannerV10', JSON.stringify(state));
+            };
 
-
-        const professionalElectiveDescriptions = `
-            - Diseño y prototipado de sistemas robóticos: Se enfoca en el diseño, desarrollo de piezas, programación e integración de sistemas robóticos, con un enfoque multidisciplinar y colaborativo. Ideal para interesados en industria 4.0, informática, electrónica y mecánica.
-            - Procesos de fabricación aditiva - impresión 3D: Explora la impresión 3D como herramienta para el diseño eficiente y rápido de prototipos y productos. Se centra en la optimización de diseños para diferentes técnicas y materiales de impresión, fomentando la innovación y personalización.
-            - SEMINARIO DE DISEÑO INDUSTRIAL CONTEMPORÁNEO: Analiza las relaciones y divergencias entre la academia y el mundo profesional a través de discusiones con invitados expertos. Ideal para estudiantes que buscan una perspectiva crítica y global de las tendencias actuales del diseño industrial.
-            - REUSO Y RECICLAJE CREATIVO: Utiliza la creatividad para dar una segunda vida a objetos y materiales. Fomenta el diseño sostenible mediante la mejora de procesos y la facilitación de la reutilización y el reciclaje, ideal para interesados en economía circular y diseño con conciencia ambiental.
-            - MODELOS EN REPETICIÓN: Curso teórico-práctico sobre la creación de prototipos funcionales a través de moldes y vaciados. Se enfoca en la interpretación de planos, escala, selección de materiales y procesos para la comprobación funcional y estética de modelos.
-            - DISEÑO + ARTE CONTEMPORÁNEO: Explora las profundas conexiones entre el arte contemporáneo y el diseño, analizando cómo las vanguardias artísticas han influido en la cultura material, los estilos de vida y el consumo. Ideal para quienes buscan una perspectiva estética y cultural en el diseño.
-        `;
-
-        async function getAISuggestions() {
-            const userInterests = aiPromptInput.value;
-            if (!userInterests) {
-                alert('Por favor, escribe tus intereses.');
-                return;
-            }
-
-            loadingText.textContent = 'La IA está buscando electivas...';
-            openModal(loadingOverlay);
-
-            const allElectivesList = predefinedFGElectives.map(e => `(Formación General) ${e.name}`).join('\n');
-            const profElectivesList = predefinedProfElectives.map(e => `(Profesional) ${e.name}`).join('\n');
-            
-            const prompt = `
-                Eres un consejero académico experto en la Universidad del Valle para el programa de Diseño Industrial. Un estudiante te ha indicado sus intereses. Basándote en sus intereses y en las siguientes listas de electivas, recomienda un máximo de 3 materias que mejor se alineen. Para las electivas de Formación General, infiere su contenido a partir del título. Para las electivas profesionales, usa las descripciones provistas.
-
-                Intereses del estudiante: "${userInterests}"
-
-                Lista de Electivas de Formación General (solo títulos):
-                ${allElectivesList}
-
-                Lista y descripciones de Electivas Profesionales:
-                ${professionalElectiveDescriptions}
-
-                Para cada recomendación, proporciona el nombre exacto de la materia, el tipo ("Formación General" o "Profesional") y una justificación corta (1-2 frases) de por qué es una buena opción.
-            `;
-
-            try {
-                let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                const payload = {
-                    contents: chatHistory,
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: "OBJECT",
-                            properties: {
-                                "sugerencias": {
-                                    "type": "ARRAY",
-                                    "items": {
-                                        "type": "OBJECT",
-                                        "properties": {
-                                            "nombre": { "type": "STRING" },
-                                            "tipo": { "type": "STRING", "enum": ["Formación General", "Profesional"] },
-                                            "razon": { "type": "STRING" }
-                                        },
-                                        "required": ["nombre", "tipo", "razon"]
-                                    }
-                                }
-                            }
-                        }
-                    }
-                };
-                const apiKey = ""; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const createSubjectCard = (subject) => {
+                const card = document.createElement('div');
+                card.id = `subject-${subject.id}`;
+                card.dataset.id = subject.id;
+                card.className = 'subject-card p-3 rounded-lg flex flex-col items-start';
+                card.draggable = true;
                 
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error(`Error de la API: ${response.statusText}`);
-
-                const result = await response.json();
-                
-                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    const parsedJson = JSON.parse(text);
-                    displayAISuggestions(parsedJson.sugerencias);
-                } else {
-                    aiSuggestionsContainer.innerHTML = '<p class="text-secondary">La IA no pudo generar sugerencias esta vez. Inténtalo de nuevo.</p>';
+                let deleteButton = '';
+                if (subject.isElective) {
+                    deleteButton = `<button class="delete-elective-btn" data-id="${subject.id}" title="Eliminar electiva">&times;</button>`;
                 }
 
-            } catch (error) {
-                console.error("Error al llamar a la API de Gemini:", error);
-                aiSuggestionsContainer.innerHTML = `<p class="text-red-500">Ocurrió un error al contactar a la IA. Revisa la consola para más detalles.</p>`;
-            } finally {
-                closeModal(loadingOverlay);
-            }
-        }
+                let typeTag = '';
+                let typeColor = 'bg-gray-500';
+                if (subject.isElective) {
+                    if(subject.electiveType === 'fg') {
+                        typeTag = 'FG';
+                        typeColor = 'bg-blue-500';
+                    } else {
+                        typeTag = 'EP';
+                        typeColor = 'bg-purple-500';
+                    }
+                } else {
+                    if (subject.cycle === 'Básico') {
+                        typeTag = 'AB';
+                        typeColor = 'bg-green-500';
+                    } else if (subject.cycle === 'Profesional') {
+                        typeTag = 'AP';
+                        typeColor = 'bg-orange-500';
+                    }
+                }
+                const areaTag = subject.area ? `<span class="subject-tag bg-gray-600 text-white">${subject.area}</span>` : '';
 
-        function displayAISuggestions(suggestions) {
-            aiSuggestionsContainer.innerHTML = '';
-            if (!suggestions || suggestions.length === 0) {
-                aiSuggestionsContainer.innerHTML = '<p class="text-secondary">No se encontraron sugerencias para esos intereses. Intenta con otras palabras.</p>';
-                return;
-            }
 
-            suggestions.forEach(suggestion => {
-                const suggestionEl = document.createElement('div');
-                suggestionEl.className = 'p-3 bg-tertiary rounded-lg border border-color';
-                const isProf = suggestion.tipo === 'Profesional';
-                const catalog = isProf ? predefinedProfElectives : predefinedFGElectives;
-                const electiveData = catalog.find(e => e.name.toLowerCase() === suggestion.nombre.toLowerCase());
+                card.innerHTML = `
+                    <div class="w-full flex justify-between items-start">
+                        <p class="text-sm font-medium pr-2 flex-grow">${subject.name}</p>
+                        <span class="credits-badge text-xs font-bold px-2 py-1 rounded-full flex-shrink-0">${subject.credits} C</span>
+                    </div>
+                    <div class="mt-2 flex gap-1">
+                        <span class="subject-tag ${typeColor} text-white">${typeTag}</span>
+                        ${areaTag}
+                    </div>
+                    ${deleteButton}
+                `;
+                
+                if (subject.completed) card.classList.add('completed');
+                
+                const prereqsMet = subject.prerequisites.every(pId => state.subjects.find(s => s.id === pId)?.completed);
+                if (!prereqsMet && !subject.completed) card.classList.add('locked');
+                
+                card.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('delete-elective-btn')) {
+                        toggleSubjectComplete(subject.id);
+                    }
+                });
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+                
+                if (subject.isElective) {
+                    card.querySelector('.delete-elective-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteElective(subject.id);
+                    });
+                }
+                return card;
+            };
+            
+            const render = () => {
+                renderStatsBoard();
+                renderSubjectBank();
+                renderSemesters();
+                updateStats();
+                saveState();
+            };
 
-                if (electiveData) {
-                    suggestionEl.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-bold text-primary">${suggestion.nombre} <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${isProf ? 'bg-purple-500 text-white' : 'bg-blue-500 text-white'}">${suggestion.tipo}</span></h4>
-                                <p class="text-sm text-secondary mt-1">${suggestion.razon}</p>
-                            </div>
-                            <button class="btn-primary text-sm px-3 py-1 rounded-md ml-4 flex-shrink-0">Añadir al Banco</button>
+            const renderStatsBoard = () => {
+                const container = document.querySelector('.stats-board');
+                container.innerHTML = '';
+                const stats = [
+                    { id: 'total-credits', label: 'CRÉDITOS TOTALES', total: 140 },
+                    { id: 'basic-cycle-credits', label: 'CICLO BÁSICO', total: 49 },
+                    { id: 'professional-cycle-credits', label: 'CICLO PROFESIONAL', total: 57 },
+                    { id: 'fg-credits', label: 'FORMACIÓN GENERAL', total: 17 },
+                    { id: 'prof-electives-credits', label: 'ELECTIVAS PROFESIONALES', total: 17 }
+                ];
+                stats.forEach(stat => {
+                    const card = document.createElement('div');
+                    card.className = 'text-center bg-secondary p-4 rounded-lg';
+                    card.innerHTML = `<h3 class="text-xs font-semibold text-secondary uppercase">${stat.label}</h3><p id="${stat.id}" class="text-xl font-bold">0 / ${stat.total}</p><div class="progress-bar-container mt-2"><div id="${stat.id}-bar" class="progress-bar-fill"></div></div>`;
+                    container.appendChild(card);
+                });
+            };
+
+            const renderSubjectBank = () => {
+                const bankContent = document.getElementById('bank-content');
+                bankContent.innerHTML = '';
+                const cycles = ['Básico', 'Profesional'];
+                const areas = ['Sociedad y cultura', 'Diseño', 'Tecnología'];
+                cycles.forEach(cycle => {
+                    const cycleEl = document.createElement('div');
+                    cycleEl.className = 'mb-6';
+                    cycleEl.innerHTML = `<h3 class="text-lg font-semibold mb-2">${cycle}</h3>`;
+                    const areaContainer = document.createElement('div');
+                    areaContainer.id = `bank-${cycle.toLowerCase()}`;
+                    areaContainer.className = 'space-y-4 p-2 rounded-lg';
+                    areaContainer.addEventListener('dragover', handleDragOver);
+                    areaContainer.addEventListener('drop', handleDrop);
+                    areas.forEach(area => {
+                        const areaSubjects = state.subjects.filter(s => !s.isElective && s.cycle === cycle && s.area === area && s.location === 'bank');
+                        if (areaSubjects.length > 0) {
+                            const areaEl = document.createElement('div');
+                            areaEl.innerHTML = `<h4 class="area-title text-sm font-bold uppercase pb-1 mb-2">${area}</h4>`;
+                            const subjectList = document.createElement('div');
+                            subjectList.className = 'space-y-2';
+                            areaSubjects.forEach(s => subjectList.appendChild(createSubjectCard(s)));
+                            areaEl.appendChild(subjectList);
+                            areaContainer.appendChild(areaEl);
+                        }
+                    });
+                    cycleEl.appendChild(areaContainer);
+                    bankContent.appendChild(cycleEl);
+                });
+                
+                const createdElectives = state.subjects.filter(s => s.isElective && s.location === 'bank');
+                if (createdElectives.length > 0) {
+                    const electivesEl = document.createElement('div');
+                    electivesEl.className = 'mb-6';
+                    electivesEl.innerHTML = `<h3 class="text-lg font-semibold mb-2">Mis Electivas</h3>`;
+                    const electiveList = document.createElement('div');
+                    electiveList.className = 'space-y-2 p-2 rounded-lg';
+                    electiveList.id = 'bank-electives';
+                    electiveList.addEventListener('dragover', handleDragOver);
+                    electiveList.addEventListener('drop', handleDrop);
+                    createdElectives.forEach(s => electiveList.appendChild(createSubjectCard(s)));
+                    electivesEl.appendChild(electivesEl);
+                    bankContent.appendChild(electivesEl);
+                }
+            };
+
+            const generatePeriodOptions = (selectedPeriod) => {
+                let optionsHtml = '<option value="">Seleccionar periodo</option>';
+                const currentYear = new Date().getFullYear();
+                for (let year = 2018; year <= currentYear + 5; year++) {
+                    const period1 = `${year}-1`;
+                    const period2 = `${year}-2`;
+                    optionsHtml += `<option value="${period1}" ${selectedPeriod === period1 ? 'selected' : ''}>${period1}</option>`;
+                    optionsHtml += `<option value="${period2}" ${selectedPeriod === period2 ? 'selected' : ''}>${period2}</option>`;
+                }
+                return optionsHtml;
+            };
+
+            const renderSemesters = () => {
+                const grid = document.getElementById('semesters-grid');
+                grid.innerHTML = '';
+                state.semesters.forEach(semester => {
+                    const semesterCol = document.createElement('div');
+                    semesterCol.id = `semester-${semester.id}`;
+                    semesterCol.className = 'semester-column p-4 rounded-lg space-y-2';
+                    semesterCol.dataset.id = semester.id;
+                    semesterCol.style.backgroundColor = semester.color;
+                    
+                    const header = document.createElement('div');
+                    header.className = 'semester-header';
+                    header.innerHTML = `
+                        <h3 class="text-lg font-bold text-accent">Semestre ${semester.id}</h3>
+                        <div class="flex items-center gap-2">
+                            <select class="semester-period-selector bg-tertiary border border-color text-xs rounded p-1" data-id="${semester.id}">
+                                ${generatePeriodOptions(semester.period)}
+                            </select>
+                            <input type="color" class="semester-color-picker" data-id="${semester.id}" value="${semester.color}" title="Cambiar color del semestre">
                         </div>
                     `;
-                    suggestionEl.querySelector('button').addEventListener('click', () => {
-                        addElective(electiveData, isProf ? 'prof' : 'fg');
-                        alert(`'${electiveData.name}' ha sido añadida a 'Mis Electivas' en el Banco de Materias.`);
-                    });
-                    aiSuggestionsContainer.appendChild(suggestionEl);
-                }
-            });
-        }
+                    semesterCol.appendChild(header);
+                    
+                    state.subjects.filter(s => s.location === semester.id).forEach(s => semesterCol.appendChild(createSubjectCard(s)));
+                    
+                    semesterCol.addEventListener('dragover', handleDragOver);
+                    semesterCol.addEventListener('drop', handleDrop);
+                    semesterCol.querySelector('.semester-color-picker').addEventListener('input', handleColorChange);
+                    semesterCol.querySelector('.semester-period-selector').addEventListener('change', handlePeriodChange);
+                    grid.appendChild(semesterCol);
+                });
+            };
 
-        aiSuggestBtn.addEventListener('click', getAISuggestions);
-        
-        // --- AI Organizer ---
-        async function processTabulado() {
-            const tabuladoText = document.getElementById('tabulado-input').value;
-            if (!tabuladoText) {
-                alert('Por favor, pega el texto de tu tabulado de SIRA.');
-                return;
-            }
-            closeModal(organizeModal);
-            loadingText.textContent = 'La IA está analizando tu historial...';
-            openModal(loadingOverlay);
+            const updateStats = () => {
+                const completedSubjects = state.subjects.filter(s => s.completed);
+                const basicCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Básico').reduce((sum, s) => sum + s.credits, 0);
+                const profCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Profesional').reduce((sum, s) => sum + s.credits, 0);
+                
+                const fgCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'fg').reduce((sum, s) => sum + s.credits, 0);
+                const profElectivesCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'prof').reduce((sum, s) => sum + s.credits, 0);
+                
+                const totalCredits = basicCredits + profCredits + fgCredits + profElectivesCredits;
 
-            const masterSubjectList = [...initialSubjects, ...predefinedFGElectives, ...predefinedProfElectives];
-            const subjectNames = masterSubjectList.map(s => `"${s.name}" (ID: ${s.id})`).join(', ');
-
-            const prompt = `
-                Analiza el siguiente historial académico (tabulado). Identifica todas las materias que han sido APROBADAS (usualmente marcadas con 'AP'). Compara los nombres de las materias aprobadas con la siguiente lista maestra de materias y sus IDs. Es MUY IMPORTANTE que priorices la lista de materias del pénsum oficial. Materias como 'Diseño para la Paz Sostenible' o 'Escritura, Expresión y Comunicación' son del pénsum básico, no electivas, aunque aparezcan en otros catálogos. Devuelve únicamente los IDs de las materias que coincidan y estén aprobadas.
-
-                Historial del estudiante:
-                ---
-                ${tabuladoText}
-                ---
-
-                Lista Maestra de Materias (Pénsum y Electivas):
-                [${subjectNames}]
-            `;
-
-            try {
-                let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                const payload = {
-                    contents: chatHistory,
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: "OBJECT",
-                            properties: {
-                                "materiasAprobadasIds": {
-                                    "type": "ARRAY",
-                                    "items": { "type": "STRING" }
-                                }
-                            }
-                        }
+                const updateStat = (id, current, total) => {
+                    const numEl = document.getElementById(id);
+                    const barEl = document.getElementById(`${id}-bar`);
+                    if(numEl && barEl) {
+                        numEl.textContent = `${current} / ${total}`;
+                        barEl.style.width = total > 0 ? `${(current / total) * 100}%` : '0%';
                     }
                 };
-                const apiKey = ""; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                updateStat('total-credits', totalCredits, 140);
+                updateStat('basic-cycle-credits', basicCredits, 49);
+                updateStat('professional-cycle-credits', profCredits, 57);
+                updateStat('fg-credits', fgCredits, 17);
+                updateStat('prof-electives-credits', profElectivesCredits, 17);
+            };
+            
+            const handleColorChange = (e) => {
+                const semesterId = parseInt(e.target.dataset.id);
+                const newColor = e.target.value;
+                const semester = state.semesters.find(s => s.id === semesterId);
+                if(semester) {
+                    semester.color = newColor;
+                    document.getElementById(`semester-${semesterId}`).style.backgroundColor = newColor;
+                    saveState();
+                }
+            };
+
+            const handlePeriodChange = (e) => {
+                const semesterId = parseInt(e.target.dataset.id);
+                const newPeriod = e.target.value;
+                const semester = state.semesters.find(s => s.id === semesterId);
+                if (semester) {
+                    semester.period = newPeriod;
+                    saveState();
+                }
+            };
+
+            const toggleSubjectComplete = (subjectId) => {
+                const subject = state.subjects.find(s => s.id === subjectId);
+                if (!subject) return;
+
+                if (subject.location === 'bank') {
+                    alert('Debes arrastrar la materia a un semestre para poder marcarla como cursada.');
+                    return;
+                }
+
+                if (subject.completed) {
+                    const dependents = state.subjects.filter(s => s.prerequisites.includes(subjectId) && s.completed);
+                    if (dependents.length > 0) {
+                        alert(`No puedes desmarcar esta materia. Las siguientes materias dependen de ella: ${dependents.map(d => d.name).join(', ')}`);
+                        return;
+                    }
+                    subject.completed = false;
+                } else {
+                    const prereqsMet = subject.prerequisites.every(pId => state.subjects.find(s => s.id === pId)?.completed);
+                    if (!prereqsMet) {
+                        alert('Debes completar los prerrequisitos primero.');
+                        return;
+                    }
+                    subject.completed = true;
+                }
+                render();
+            };
+
+            document.getElementById('add-semester-btn').addEventListener('click', () => {
+                state.semesters.push({ id: state.nextSemesterId++, subjects: [], color: defaultSemesterColor(), period: '' });
+                render();
+            });
+            
+            let draggedElementId = null;
+            function handleDragStart(e) { draggedElementId = e.target.dataset.id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+            function handleDragEnd(e) { e.target.classList.remove('dragging'); draggedElementId = null; }
+            function handleDragOver(e) {
+                e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+                const dropTarget = e.target.closest('.semester-column, [id^="bank-"]');
+                if (dropTarget) {
+                    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                    dropTarget.classList.add('drag-over');
+                }
+            }
+            function handleDrop(e) {
+                e.preventDefault();
+                document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                const dropTarget = e.target.closest('.semester-column, [id^="bank-"]');
+                if (!dropTarget || !draggedElementId) return;
+                const subject = state.subjects.find(s => s.id === draggedElementId);
+                if (!subject) return;
+                const targetId = dropTarget.id;
+                if (targetId.startsWith('semester-')) subject.location = parseInt(dropTarget.dataset.id);
+                else if (targetId.startsWith('bank-')) subject.location = 'bank';
+                render();
+            }
+            
+            const addElective = (electiveData, type) => {
+                 const newElective = {
+                    id: `elective-${state.nextElectiveId++}`,
+                    name: electiveData.name,
+                    credits: electiveData.credits,
+                    cycle: 'Electiva',
+                    area: 'Electivas',
+                    prerequisites: [],
+                    location: 'bank',
+                    completed: false,
+                    isElective: true,
+                    electiveType: type
+                };
+                state.subjects.push(newElective);
+                render();
+            };
+
+            const deleteElective = (subjectId) => {
+                const subjectIndex = state.subjects.findIndex(s => s.id === subjectId);
+                if (subjectIndex > -1) {
+                    state.subjects.splice(subjectIndex, 1);
+                    render();
+                }
+            };
+
+            document.getElementById('reset-button').addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que quieres reiniciar todo tu progreso? Esta acción no se puede deshacer.')) {
+                    localStorage.removeItem('univalleDisenoPlannerV10');
+                    localStorage.removeItem('userProfilePic');
+                    localStorage.removeItem('userBgImage');
+                    state.subjects = initialSubjects.map(s => ({ ...s, location: 'bank', completed: false, isElective: false }));
+                    state.semesters = [];
+                    state.nextSemesterId = 1;
+                    state.nextElectiveId = 1;
+                    location.reload();
+                }
+            });
+
+            const themeToggle = document.getElementById('theme-toggle');
+            const setAppTheme = (theme) => {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('univalleTheme', theme);
+                themeToggle.checked = theme === 'light';
+            };
+            themeToggle.addEventListener('change', () => {
+                const newTheme = themeToggle.checked ? 'light' : 'dark';
+                setAppTheme(newTheme);
+                state.semesters.forEach(s => {
+                    if (s.color === '#212121' || s.color === '#ffffff') s.color = defaultSemesterColor();
+                });
+                render();
+            });
+
+            const bankHeader = document.getElementById('bank-header');
+            const bankContent = document.getElementById('bank-content');
+            bankHeader.addEventListener('click', () => {
+                if (window.innerWidth < 1024) { bankContent.classList.toggle('collapsed'); }
+            });
+            const checkMobileAccordion = () => {
+                 if (window.innerWidth < 1024) { bankContent.classList.add('collapsed'); } 
+                 else { bankContent.classList.remove('collapsed'); }
+            };
+
+            // Modal Logic
+            const openModal = (modal) => modal.classList.add('visible');
+            const closeModal = (modal) => modal.classList.remove('visible');
+
+            const welcomeModal = document.getElementById('welcome-modal');
+            const closeWelcomeBtn = document.getElementById('close-welcome-modal-btn');
+            if (!localStorage.getItem('hasVisitedPlanner')) {
+                openModal(welcomeModal);
+                localStorage.setItem('hasVisitedPlanner', 'true');
+            }
+            closeWelcomeBtn.addEventListener('click', () => closeModal(welcomeModal));
+
+            const pdfModal = document.getElementById('pdf-modal');
+            const openPdfModalBtn = document.getElementById('open-pdf-modal-btn');
+            const closePdfModalBtn = document.getElementById('close-pdf-modal-btn');
+            const pdfInfoForm = document.getElementById('pdf-info-form');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const loadingText = document.getElementById('loading-text');
+
+            openPdfModalBtn.addEventListener('click', () => openModal(pdfModal));
+            closePdfModalBtn.addEventListener('click', () => closeModal(pdfModal));
+            
+            pdfInfoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const studentName = document.getElementById('student-name').value;
+                const studentId = document.getElementById('student-id').value;
+                closeModal(pdfModal);
+                generatePDF(studentName, studentId);
+            });
+            
+            // Elective Modal Logic
+            const electiveModal = document.getElementById('elective-modal');
+            const openFgElectiveBtn = document.getElementById('open-fg-elective-modal-btn');
+            const openProfElectiveBtn = document.getElementById('open-prof-elective-modal-btn');
+            const closeElectiveBtn = document.getElementById('close-elective-modal-btn');
+            const catalogList = document.getElementById('elective-catalog-list');
+            const searchInput = document.getElementById('elective-search');
+            const customForm = document.getElementById('add-custom-elective-form');
+            let currentElectiveType = 'fg';
+
+            const populateCatalog = (type) => {
+                const list = type === 'fg' ? predefinedFGElectives : predefinedProfElectives;
+                catalogList.innerHTML = '';
+                const searchTerm = searchInput.value.toLowerCase();
+                list
+                    .filter(elective => elective.name.toLowerCase().includes(searchTerm) || elective.id.toLowerCase().includes(searchTerm))
+                    .forEach(elective => {
+                    const item = document.createElement('div');
+                    item.className = 'flex justify-between items-center p-2 bg-tertiary rounded-md';
+                    item.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${elective.name}</p>
+                            <p class="text-xs text-secondary">${elective.id} - ${elective.credits} créditos</p>
+                        </div>
+                        <button class="btn-primary text-sm px-3 py-1 rounded-md">Añadir</button>
+                    `;
+                    item.querySelector('button').addEventListener('click', () => {
+                        addElective({ name: elective.name, credits: elective.credits }, currentElectiveType);
+                        closeModal(electiveModal);
+                    });
+                    catalogList.appendChild(item);
+                });
+            };
+
+            openFgElectiveBtn.addEventListener('click', () => {
+                currentElectiveType = 'fg';
+                document.getElementById('elective-modal-title').textContent = 'Seleccionar Electiva de Formación General';
+                populateCatalog('fg');
+                openModal(electiveModal);
+            });
+
+            openProfElectiveBtn.addEventListener('click', () => {
+                currentElectiveType = 'prof';
+                 document.getElementById('elective-modal-title').textContent = 'Seleccionar Electiva Profesional';
+                populateCatalog('prof');
+                openModal(electiveModal);
+            });
+
+            closeElectiveBtn.addEventListener('click', () => closeModal(electiveModal));
+            searchInput.addEventListener('input', () => populateCatalog(currentElectiveType));
+
+            customForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('custom-elective-name').value;
+                const credits = parseInt(document.getElementById('custom-elective-credits').value);
+                addElective({ name, credits }, currentElectiveType);
+                closeModal(electiveModal);
+                e.target.reset();
+            });
+
+            // Tabs in Modal
+            const tabs = document.querySelectorAll('.modal-tab');
+            const tabContents = document.querySelectorAll('.modal-tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const target = tab.id.replace('tab-', 'content-');
+                    tabContents.forEach(c => {
+                        c.classList.remove('active');
+                        if (c.id === target) {
+                            c.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+
+            // Personalization Logic
+            const profilePicContainer = document.getElementById('profile-pic-container');
+            const profilePicUpload = document.getElementById('profile-pic-upload');
+            const profilePic = document.getElementById('profile-pic');
+            const customizeBtn = document.getElementById('customize-btn');
+            const bgUpload = document.getElementById('bg-upload');
+
+            profilePicContainer.addEventListener('click', () => profilePicUpload.click());
+            customizeBtn.addEventListener('click', () => bgUpload.click());
+
+            const handleFileUpload = (file, storageKey, callback) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+                    localStorage.setItem(storageKey, dataUrl);
+                    callback(dataUrl);
+                };
+                reader.readAsDataURL(file);
+            };
+
+            profilePicUpload.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    handleFileUpload(e.target.files[0], 'userProfilePic', (url) => {
+                        profilePic.src = url;
+                    });
+                }
+            });
+
+            bgUpload.addEventListener('change', (e) => {
+                 if (e.target.files && e.target.files[0]) {
+                    handleFileUpload(e.target.files[0], 'userBgImage', (url) => {
+                        document.body.style.backgroundImage = `url(${url})`;
+                    });
+                }
+            });
+
+            const loadPersonalization = () => {
+                const savedPic = localStorage.getItem('userProfilePic');
+                const savedBg = localStorage.getItem('userBgImage');
+                if (savedPic) {
+                    profilePic.src = savedPic;
+                }
+                if (savedBg) {
+                    document.body.style.backgroundImage = `url(${savedBg})`;
+                }
+            };
+
+
+            function generatePDF(studentName, studentId) {
+                loadingText.textContent = 'Generando PDF...';
+                openModal(loadingOverlay);
+
+                const reportElement = document.createElement('div');
+                reportElement.style.padding = '20px';
+                reportElement.style.fontFamily = 'Arial, sans-serif';
+                reportElement.style.color = '#333';
                 
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                let html = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="font-size: 24px; margin: 0;">Reporte de Progreso Académico</h1>
+                        <p style="font-size: 16px; margin: 5px 0;">Diseño Industrial - Universidad del Valle</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Estudiante:</strong> ${studentName}</p>
+                        <p><strong>Código:</strong> ${studentId}</p>
+                        <p><strong>Fecha de generación:</strong> ${date}</p>
+                    </div>
+                    <h2 style="font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Resumen de Créditos</h2>
+                `;
+
+                const completedSubjects = state.subjects.filter(s => s.completed);
+                const basicCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Básico').reduce((sum, s) => sum + s.credits, 0);
+                const profCredits = completedSubjects.filter(s => !s.isElective && s.cycle === 'Profesional').reduce((sum, s) => sum + s.credits, 0);
+                const fgCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'fg').reduce((sum, s) => sum + s.credits, 0);
+                const profElectivesCredits = completedSubjects.filter(s => s.isElective && s.electiveType === 'prof').reduce((sum, s) => sum + s.credits, 0);
+                const totalCredits = basicCredits + profCredits + fgCredits + profElectivesCredits;
+
+                html += `
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <tr style="background-color: #eee;">
+                            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Componente</th>
+                            <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Créditos</th>
+                        </tr>
+                        <tr><td style="padding: 8px; border: 1px solid #ddd;">Ciclo Básico</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${basicCredits} / 49</td></tr>
+                        <tr><td style="padding: 8px; border: 1px solid #ddd;">Ciclo Profesional</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${profCredits} / 57</td></tr>
+                        <tr><td style="padding: 8px; border: 1px solid #ddd;">Formación General</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${fgCredits} / 17</td></tr>
+                        <tr><td style="padding: 8px; border: 1px solid #ddd;">Electivas Profesionales</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${profElectivesCredits} / 17</td></tr>
+                        <tr style="background-color: #eee; font-weight: bold;"><td style="padding: 8px; border: 1px solid #ddd;">TOTAL</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${totalCredits} / 140</td></tr>
+                    </table>
+                `;
+
+                html += `<h2 style="font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Plan de Carrera</h2>`;
+                state.semesters.forEach(semester => {
+                    const periodText = semester.period ? `(${semester.period})` : '';
+                    html += `<h3 style="font-size: 18px; margin-top: 20px; margin-bottom: 10px;">Semestre ${semester.id} ${periodText}</h3>`;
+                    const subjectsInSemester = state.subjects.filter(s => s.location === semester.id);
+                    if (subjectsInSemester.length > 0) {
+                        html += `<ul style="list-style-type: none; padding: 0;">`;
+                        subjectsInSemester.forEach(subject => {
+                            html += `<li style="padding: 5px; border-bottom: 1px solid #eee;">${subject.name} (${subject.credits} C) ${subject.completed ? '<strong>- Cursada</strong>' : ''}</li>`;
+                        });
+                        html += `</ul>`;
+                    } else {
+                        html += `<p>No hay materias planeadas para este semestre.</p>`;
+                    }
                 });
 
-                if (!response.ok) throw new Error(`Error de la API: ${response.statusText}`);
+                reportElement.innerHTML = html;
 
-                const result = await response.json();
-                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    const parsedJson = JSON.parse(text);
-                    organizeSubjects(parsedJson.materiasAprobadasIds);
-                } else {
-                    alert('La IA no pudo procesar el tabulado. Inténtalo de nuevo.');
-                }
-            } catch (error) {
-                console.error("Error al procesar tabulado con Gemini:", error);
-                alert('Ocurrió un error al procesar tu historial. Revisa la consola para más detalles.');
-            } finally {
-                closeModal(loadingOverlay);
+                const opt = {
+                    margin: 10,
+                    filename: `Reporte_Progreso_${studentName.replace(/\s/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().from(reportElement).set(opt).save().then(() => {
+                    closeModal(loadingOverlay);
+                });
             }
-        }
-
-        function organizeSubjects(approvedIds) {
-            // Reset current progress
-            state.subjects.forEach(s => {
-                s.completed = false;
-                s.location = 'bank';
-            });
-            state.semesters = [];
-            state.nextSemesterId = 1;
-
-            const allSubjectsMap = new Map();
-            [...initialSubjects, ...predefinedFGElectives, ...predefinedProfElectives].forEach(s => {
-                if (!allSubjectsMap.has(s.id)) {
-                    allSubjectsMap.set(s.id, s);
-                }
-            });
-
-            approvedIds.forEach(id => {
-                const subject = state.subjects.find(s => s.id === id);
-                if (subject) {
-                    subject.completed = true;
-                } else { // Handle electives not yet in state
-                    const electiveData = allSubjectsMap.get(id);
-                    if (electiveData) {
-                       const type = predefinedProfElectives.some(p => p.id === id) ? 'prof' : 'fg';
-                       addElective({ name: electiveData.name, credits: electiveData.credits, id: id }, type);
-                       const newElectiveInState = state.subjects.find(s => s.id === `elective-${state.nextElectiveId - 1}`); // A bit of a hack to find the last added
-                       if (newElectiveInState) newElectiveInState.completed = true;
-                    }
-                }
-            });
-
-            // Distribute completed subjects into semesters
-            const completed = state.subjects.filter(s => s.completed);
-            let currentSemesterCredits = 0;
-            let currentSemesterId = 1;
-            state.semesters.push({ id: currentSemesterId, subjects: [], color: defaultSemesterColor(), period: '' });
-
-            completed.forEach(subject => {
-                if (currentSemesterCredits + subject.credits > 18 && currentSemesterCredits > 0) {
-                    currentSemesterId++;
-                    state.semesters.push({ id: currentSemesterId, subjects: [], color: defaultSemesterColor(), period: '' });
-                    currentSemesterCredits = 0;
-                }
-                subject.location = currentSemesterId;
-                currentSemesterCredits += subject.credits;
-            });
-            state.nextSemesterId = currentSemesterId + 1;
             
-            alert(`${completed.length} materias aprobadas han sido organizadas en tu plan.`);
+            // --- AI Features ---
+            const aiSuggestBtn = document.getElementById('ai-suggest-electives-btn');
+            const aiPromptInput = document.getElementById('ai-elective-prompt');
+            const aiSuggestionsContainer = document.getElementById('ai-suggestions-container');
+            const aiOrganizeBtn = document.getElementById('ai-organize-btn');
+            const organizeModal = document.getElementById('organize-modal');
+            const closeOrganizeModalBtn = document.getElementById('close-organize-modal-btn');
+            const processTabuladoBtn = document.getElementById('process-tabulado-btn');
+            
+            aiOrganizeBtn.addEventListener('click', () => openModal(organizeModal));
+            closeOrganizeModalBtn.addEventListener('click', () => closeModal(organizeModal));
+            processTabuladoBtn.addEventListener('click', () => processTabulado());
+
+
+            const professionalElectiveDescriptions = `
+                - Diseño y prototipado de sistemas robóticos: Se enfoca en el diseño, desarrollo de piezas, programación e integración de sistemas robóticos, con un enfoque multidisciplinar y colaborativo. Ideal para interesados en industria 4.0, informática, electrónica y mecánica.
+                - Procesos de fabricación aditiva - impresión 3D: Explora la impresión 3D como herramienta para el diseño eficiente y rápido de prototipos y productos. Se centra en la optimización de diseños para diferentes técnicas y materiales de impresión, fomentando la innovación y personalización.
+                - SEMINARIO DE DISEÑO INDUSTRIAL CONTEMPORÁNEO: Analiza las relaciones y divergencias entre la academia y el mundo profesional a través de discusiones con invitados expertos. Ideal para estudiantes que buscan una perspectiva crítica y global de las tendencias actuales del diseño industrial.
+                - REUSO Y RECICLAJE CREATIVO: Utiliza la creatividad para dar una segunda vida a objetos y materiales. Fomenta el diseño sostenible mediante la mejora de procesos y la facilitación de la reutilización y el reciclaje, ideal para interesados en economía circular y diseño con conciencia ambiental.
+                - MODELOS EN REPETICIÓN: Curso teórico-práctico sobre la creación de prototipos funcionales a través de moldes y vaciados. Se enfoca en la interpretación de planos, escala, selección de materiales y procesos para la comprobación funcional y estética de modelos.
+                - DISEÑO + ARTE CONTEMPORÁNEO: Explora las profundas conexiones entre el arte contemporáneo y el diseño, analizando cómo las vanguardias artísticas han influido en la cultura material, los estilos de vida y el consumo. Ideal para quienes buscan una perspectiva estética y cultural en el diseño.
+            `;
+
+            async function getAISuggestions() {
+                const userInterests = aiPromptInput.value;
+                if (!userInterests) {
+                    alert('Por favor, escribe tus intereses.');
+                    return;
+                }
+
+                loadingText.textContent = 'La IA está buscando electivas...';
+                openModal(loadingOverlay);
+
+                const allElectivesList = predefinedFGElectives.map(e => `(Formación General) ${e.name}`).join('\n');
+                const profElectivesList = predefinedProfElectives.map(e => `(Profesional) ${e.name}`).join('\n');
+                
+                const prompt = `
+                    Eres un consejero académico experto en la Universidad del Valle para el programa de Diseño Industrial. Un estudiante te ha indicado sus intereses. Basándote en sus intereses y en las siguientes listas de electivas, recomienda un máximo de 3 materias que mejor se alineen. Para las electivas de Formación General, infiere su contenido a partir del título. Para las electivas profesionales, usa las descripciones provistas.
+
+                    Intereses del estudiante: "${userInterests}"
+
+                    Lista de Electivas de Formación General (solo títulos):
+                    ${allElectivesList}
+
+                    Lista y descripciones de Electivas Profesionales:
+                    ${professionalElectiveDescriptions}
+
+                    Para cada recomendación, proporciona el nombre exacto de la materia, el tipo ("Formación General" o "Profesional") y una justificación corta (1-2 frases) de por qué es una buena opción.
+                `;
+
+                try {
+                    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                    const result = await model.generateContent(prompt);
+                    const response = await result.response;
+                    const text = response.text();
+                    // This part needs a robust parser since the output is not guaranteed JSON
+                    // For now, let's assume a simple format and parse manually.
+                    // A more robust solution would be to ask the model to format as JSON.
+                    displayAISuggestions(parseAIResponse(text));
+
+                } catch (error) {
+                    console.error("Error al llamar a la API de Gemini:", error);
+                    aiSuggestionsContainer.innerHTML = `<p class="text-red-500">Ocurrió un error al contactar a la IA. Revisa la consola para más detalles.</p>`;
+                } finally {
+                    closeModal(loadingOverlay);
+                }
+            }
+            
+            function parseAIResponse(text) {
+                // A simple parser for the expected format. This is brittle and should be improved.
+                const suggestions = [];
+                const lines = text.split('\n');
+                let currentSuggestion = {};
+                lines.forEach(line => {
+                    if (line.startsWith("Nombre:")) {
+                        if (Object.keys(currentSuggestion).length > 0) suggestions.push(currentSuggestion);
+                        currentSuggestion = { nombre: line.replace("Nombre:", "").trim() };
+                    } else if (line.startsWith("Tipo:")) {
+                        currentSuggestion.tipo = line.replace("Tipo:", "").trim();
+                    } else if (line.startsWith("Razón:")) {
+                        currentSuggestion.razon = line.replace("Razón:", "").trim();
+                    }
+                });
+                if (Object.keys(currentSuggestion).length > 0) suggestions.push(currentSuggestion);
+                return suggestions;
+            }
+
+
+            function displayAISuggestions(suggestions) {
+                aiSuggestionsContainer.innerHTML = '';
+                if (!suggestions || suggestions.length === 0) {
+                    aiSuggestionsContainer.innerHTML = '<p class="text-secondary">No se encontraron sugerencias para esos intereses. Intenta con otras palabras.</p>';
+                    return;
+                }
+
+                suggestions.forEach(suggestion => {
+                    const suggestionEl = document.createElement('div');
+                    suggestionEl.className = 'p-3 bg-tertiary rounded-lg border border-color';
+                    const isProf = suggestion.tipo === 'Profesional';
+                    const catalog = isProf ? predefinedProfElectives : predefinedFGElectives;
+                    const electiveData = catalog.find(e => e.name.toLowerCase() === suggestion.nombre.toLowerCase());
+
+                    if (electiveData) {
+                        suggestionEl.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-primary">${suggestion.nombre} <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${isProf ? 'bg-purple-500 text-white' : 'bg-blue-500 text-white'}">${suggestion.tipo}</span></h4>
+                                    <p class="text-sm text-secondary mt-1">${suggestion.razon}</p>
+                                </div>
+                                <button class="btn-primary text-sm px-3 py-1 rounded-md ml-4 flex-shrink-0">Añadir al Banco</button>
+                            </div>
+                        `;
+                        suggestionEl.querySelector('button').addEventListener('click', () => {
+                            addElective(electiveData, isProf ? 'prof' : 'fg');
+                            alert(`'${electiveData.name}' ha sido añadida a 'Mis Electivas' en el Banco de Materias.`);
+                        });
+                        aiSuggestionsContainer.appendChild(suggestionEl);
+                    }
+                });
+            }
+
+            aiSuggestBtn.addEventListener('click', getAISuggestions);
+            
+            // --- AI Organizer ---
+            async function processTabulado() {
+                const tabuladoText = document.getElementById('tabulado-input').value;
+                if (!tabuladoText) {
+                    alert('Por favor, pega el texto de tu tabulado de SIRA.');
+                    return;
+                }
+                closeModal(organizeModal);
+                loadingText.textContent = 'La IA está analizando tu historial...';
+                openModal(loadingOverlay);
+
+                const masterSubjectList = [...initialSubjects, ...predefinedFGElectives, ...predefinedProfElectives];
+                const subjectNames = masterSubjectList.map(s => `"${s.name}" (ID: ${s.id})`).join(', ');
+
+                const prompt = `
+                    Analiza el siguiente historial académico (tabulado). Identifica todas las materias que han sido APROBADAS (usualmente marcadas con 'AP'). Compara los nombres de las materias aprobadas con la siguiente lista maestra de materias y sus IDs. Es MUY IMPORTANTE que priorices la lista de materias del pénsum oficial. Materias como 'Diseño para la Paz Sostenible' o 'Escritura, Expresión y Comunicación' son del pénsum básico, no electivas, aunque aparezcan en otros catálogos. Devuelve únicamente los IDs de las materias que coincidan y estén aprobadas.
+
+                    Historial del estudiante:
+                    ---
+                    ${tabuladoText}
+                    ---
+
+                    Lista Maestra de Materias (Pénsum y Electivas):
+                    [${subjectNames}]
+                `;
+
+                try {
+                    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                    const result = await model.generateContent(prompt);
+                    const response = await result.response;
+                    const text = response.text();
+                    // This part needs a robust parser since the output is not guaranteed JSON
+                    const ids = text.match(/[A-Z0-9-]{6,}/g) || [];
+                    organizeSubjects(ids);
+
+                } catch (error) {
+                    console.error("Error al procesar tabulado con Gemini:", error);
+                    alert('Ocurrió un error al procesar tu historial. Revisa la consola para más detalles.');
+                } finally {
+                    closeModal(loadingOverlay);
+                }
+            }
+
+            function organizeSubjects(approvedIds) {
+                // Reset current progress
+                state.subjects.forEach(s => {
+                    s.completed = false;
+                    s.location = 'bank';
+                });
+                state.semesters = [];
+                state.nextSemesterId = 1;
+
+                const allSubjectsMap = new Map();
+                [...initialSubjects, ...predefinedFGElectives, ...predefinedProfElectives].forEach(s => {
+                    if (!allSubjectsMap.has(s.id)) {
+                        allSubjectsMap.set(s.id, s);
+                    }
+                });
+
+                approvedIds.forEach(id => {
+                    const subject = state.subjects.find(s => s.id === id);
+                    if (subject) {
+                        subject.completed = true;
+                    } else { // Handle electives not yet in state
+                        const electiveData = allSubjectsMap.get(id);
+                        if (electiveData) {
+                           const type = predefinedProfElectives.some(p => p.id === id) ? 'prof' : 'fg';
+                           addElective({ name: electiveData.name, credits: electiveData.credits, id: id }, type);
+                           const newElectiveInState = state.subjects.find(s => s.id === `elective-${state.nextElectiveId - 1}`); // A bit of a hack to find the last added
+                           if (newElectiveInState) newElectiveInState.completed = true;
+                        }
+                    }
+                });
+
+                // Distribute completed subjects into semesters
+                const completed = state.subjects.filter(s => s.completed);
+                let currentSemesterCredits = 0;
+                let currentSemesterId = 1;
+                state.semesters.push({ id: currentSemesterId, subjects: [], color: defaultSemesterColor(), period: '' });
+
+                completed.forEach(subject => {
+                    if (currentSemesterCredits + subject.credits > 18 && currentSemesterCredits > 0) {
+                        currentSemesterId++;
+                        state.semesters.push({ id: currentSemesterId, subjects: [], color: defaultSemesterColor(), period: '' });
+                        currentSemesterCredits = 0;
+                    }
+                    subject.location = currentSemesterId;
+                    currentSemesterCredits += subject.credits;
+                });
+                state.nextSemesterId = currentSemesterId + 1;
+                
+                alert(`${completed.length} materias aprobadas han sido organizadas en tu plan.`);
+                render();
+            }
+
+
+            // --- INITIALIZATION ---
+            const savedTheme = localStorage.getItem('univalleTheme') || 'dark';
+            setAppTheme(savedTheme);
+            loadState();
+            loadPersonalization();
             render();
-        }
-
-
-        // --- INITIALIZATION ---
-        const savedTheme = localStorage.getItem('univalleTheme') || 'dark';
-        setAppTheme(savedTheme);
-        loadState();
-        loadPersonalization();
-        render();
-        checkMobileAccordion(); 
-        window.addEventListener('resize', checkMobileAccordion);
-    });
+            checkMobileAccordion(); 
+            window.addEventListener('resize', checkMobileAccordion);
+        });
     </script>
 </body>
 </html>
