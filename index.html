@@ -39,13 +39,13 @@
         [data-theme="light"] input, 
         [data-theme="light"] select, 
         [data-theme="light"] textarea {
-            color: #1a1a1a !important; 
+            color: var(--input-text-color) !important; 
         }
         
         [data-theme="dark"] input, 
         [data-theme="dark"] select, 
         [data-theme="dark"] textarea {
-            color: #e5e5e5 !important;
+            color: var(--input-text-color) !important;
         }
 
         body {
@@ -243,13 +243,11 @@
     <div class="max-w-screen-2xl mx-auto">
         <!-- App Header -->
         <div class="flex items-center gap-4">
-    <a href="https://www.instagram.com/univallelegionestudiantil" target="_blank" rel="noopener noreferrer">
-        <img src="https://media.canva.com/v2/image-resize/format:PNG/height:550/quality:100/uri:ifs%3A%2F%2FM%2Ffa5e9b55-900d-403c-8dc2-262f7040000a/watermark:F/width:550?csig=AAAAAAAAAAAAAAAAAAAAAKJhFDB7zj1aaCEy7bzK2MzeLjXkCfMk2lx8L3ck2CLI&exp=1752780991&osig=AAAAAAAAAAAAAAAAAAAAAATu3T34_3d1vkkBu6T1N4eEa-1dIuZcthyyj5YQeM2W&signer=media-rpc&x-canva-quality=thumbnail_large" 
-             alt="Logo Legión Estudiantil" 
-             class="h-24 md:h-30 object-contain">
-                    </label>
-                </div>
-             </div>
+            <a href="https://www.instagram.com/univallelegionestudiantil" target="_blank" rel="noopener noreferrer">
+                <img src="https://media.canva.com/v2/image-resize/format:PNG/height:550/quality:100/uri:ifs%3A%2F%2FM%2Ffa5e9b55-900d-403c-8dc2-262f7040000a/watermark:F/width:550?csig=AAAAAAAAAAAAAAAAAAAAACIdq9X75-PDq1UZ_vsHSbJBGAKmirySDTFdGxAm7DLK&exp=1752802591&osig=AAAAAAAAAAAAAAAAAAAAAEFnMBX7tY4Kb5AhX6pm6dGIFSsEftwYgl7TS_dXC3cQ&signer=media-rpc&x-canva-quality=thumbnail_large" 
+                     alt="Logo Legión Estudiantil" 
+                     class="h-24 md:h-32 object-contain">
+            </a>
         </div>
 
         <!-- Header -->
@@ -941,7 +939,7 @@
                     state.nextElectiveId = 1;
                     location.reload();
                 }
-            });
+            };
     
             const themeToggle = document.getElementById('theme-toggle');
             const setAppTheme = (theme) => {
