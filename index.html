@@ -1232,7 +1232,7 @@
                 });
             }
             
-            // --- AI Features ---
+           // --- AI Features ---
             const aiSuggestBtn = document.getElementById('ai-suggest-electives-btn');
             const aiPromptInput = document.getElementById('ai-elective-prompt');
             const aiSuggestionsContainer = document.getElementById('ai-suggestions-container');
@@ -1241,22 +1241,10 @@
             const closeOrganizeModalBtn = document.getElementById('close-organize-modal-btn');
             const processTabuladoBtn = document.getElementById('process-tabulado-btn');
             const organizeError = document.getElementById('organize-error');
-            const apiKeyInput = document.getElementById('gemini-api-key');
             
             aiOrganizeBtn.addEventListener('click', () => openModal(organizeModal));
             closeOrganizeModalBtn.addEventListener('click', () => closeModal(organizeModal));
             processTabuladoBtn.addEventListener('click', () => processTabulado());
-    
-            // Inicializar la API de Gemini con la clave proporcionada
-            const initializeGemini = (apiKey) => {
-                try {
-                    genAI = new GoogleGenerativeAI(apiKey);
-                    return true;
-                } catch (error) {
-                    console.error("Error al inicializar la API de Gemini:", error);
-                    return false;
-                }
-            };
     
             const professionalElectiveDescriptions = `
                 - Diseño y prototipado de sistemas robóticos: Se enfoca en el diseño, desarrollo de piezas, programación e integración de sistemas robóticos, con un enfoque multidisciplinar y colaborativo. Ideal para interesados en industria 4.0, informática, electrónica y mecánica.
@@ -1300,18 +1288,18 @@
                 `;
     
                 try {
-                    if (!genAI) {
-                        throw new Error("La API de Gemini no está inicializada. Por favor, configura tu API Key.");
-                    }
-                    
-                    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                    const model = genAI.getGenerativeModel({ 
+                        model: "gemini-2.5-flash",
+                        generationConfig: {
+                            temperature: 0.3
+                        }
+                    });
                     const result = await model.generateContent(prompt);
                     const response = await result.response;
                     const text = response.text();
                     
                     // Intentar extraer el JSON de la respuesta
                     let jsonStr = text;
-                    // Eliminar cualquier texto fuera del JSON
                     const jsonMatch = text.match(/\[[\s\S]*\]/);
                     if (jsonMatch) {
                         jsonStr = jsonMatch[0];
@@ -1325,7 +1313,7 @@
                     aiSuggestionsContainer.innerHTML = `
                         <div class="p-3 bg-red-900/50 rounded-lg border border-red-700">
                             <p class="text-red-300 font-semibold">Error al contactar con la IA</p>
-                            <p class="text-sm text-red-200">${error.message || 'Por favor verifica tu conexión y API key'}</p>
+                            <p class="text-sm text-red-200">${error.message || 'Por favor verifica tu conexión'}</p>
                         </div>
                     `;
                 } finally {
@@ -1371,13 +1359,6 @@
             // --- AI Organizer ---
             async function processTabulado() {
                 const tabuladoText = document.getElementById('tabulado-input').value;
-                const apiKey = apiKeyInput.value;
-                
-                if (!apiKey) {
-                    organizeError.textContent = 'Por favor, ingresa tu API Key de Gemini';
-                    organizeError.style.display = 'block';
-                    return;
-                }
                 
                 if (!tabuladoText) {
                     organizeError.textContent = 'Por favor, pega el texto de tu tabulado de SIRA';
@@ -1388,39 +1369,38 @@
                 // Ocultar cualquier error previo
                 organizeError.style.display = 'none';
                 
-                // Inicializar la API con la clave proporcionada
-                if (!initializeGemini(apiKey)) {
-                    organizeError.textContent = 'API Key inválida. Por favor verifica tu clave.';
-                    organizeError.style.display = 'block';
-                    return;
-                }
-                
                 closeModal(organizeModal);
                 loadingText.textContent = 'La IA está analizando tu historial...';
                 openModal(loadingOverlay);
-    
+
                 const masterSubjectList = [...initialSubjects, ...predefinedFGElectives, ...predefinedProfElectives];
                 const subjectNames = masterSubjectList.map(s => `"${s.name}" (ID: ${s.id})`).join(', ');
-    
+
                 const prompt = `
-                    Analiza el siguiente historial académico (tabulado). Identifica todas las materias que han sido APROBADAS (usualmente marcadas con 'AP'). Compara los nombres de las materias aprobadas con la siguiente lista maestra de materias y sus IDs. Es MUY IMPORTANTE que priorices la lista de materias del pénsum oficial. Materias como 'Diseño para la Paz Sostenible' o 'Escritura, Expresión y Comunicación' son del pénsum básico, no electivas, aunque aparezcan en otros catálogos. 
-    
+                    Analiza el siguiente historial académico (tabulado). Identifica todas las materias que han sido APROBADAS (calificación >= 3.0). Compara los nombres de las materias aprobadas con la siguiente lista maestra de materias y sus IDs. Es MUY IMPORTANTE que priorices la lista de materias del pénsum oficial. Materias como 'Diseño para la Paz Sostenible' o 'Escritura, Expresión y Comunicación' son del pénsum básico, no electivas, aunque aparezcan en otros catálogos. 
+
                     Historial del estudiante:
                     ---
                     ${tabuladoText}
                     ---
-    
+
                     Lista Maestra de Materias (Pénsum y Electivas):
                     [${subjectNames}]
-    
+
                     Devuelve únicamente un objeto JSON con la siguiente estructura:
                     {
                         "approved_ids": ["id1", "id2", ...]
                     }
                 `;
-    
+
                 try {
-                    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                    const model = genAI.getGenerativeModel({ 
+                        model: "gemini-2.5-flash",
+                        generationConfig: {
+                            temperature: 0.3
+                        }
+                    });
+                    
                     const result = await model.generateContent(prompt);
                     const response = await result.response;
                     const text = response.text();
@@ -1435,16 +1415,16 @@
                     const resultData = JSON.parse(jsonStr);
                     const ids = resultData.approved_ids || [];
                     organizeSubjects(ids);
-    
+
                 } catch (error) {
                     console.error("Error al procesar tabulado con Gemini:", error);
                     
                     // Mostrar mensaje de error específico
                     let errorMessage = "Ocurrió un error al procesar tu historial.";
                     if (error.message.includes("API_KEY")) {
-                        errorMessage = "API Key inválida. Por favor verifica tu clave.";
+                        errorMessage = "API Key inválida.";
                     } else if (error.message.includes("quota")) {
-                        errorMessage = "Se ha excedido la cuota de la API. Intenta más tarde o verifica tu plan.";
+                        errorMessage = "Se ha excedido la cuota de la API. Intenta más tarde.";
                     } else if (error.message.includes("network")) {
                         errorMessage = "Error de red. Verifica tu conexión a internet.";
                     }
@@ -1456,7 +1436,7 @@
                     closeModal(loadingOverlay);
                 }
             }
-    
+
             function organizeSubjects(approvedIds) {
                 // Reset current progress
                 state.subjects.forEach(s => {
@@ -1465,14 +1445,14 @@
                 });
                 state.semesters = [];
                 state.nextSemesterId = 1;
-    
+
                 const allSubjectsMap = new Map();
                 [...initialSubjects, ...predefinedFGElectives, ...predefinedProfElectives].forEach(s => {
                     if (!allSubjectsMap.has(s.id)) {
                         allSubjectsMap.set(s.id, s);
                     }
                 });
-    
+
                 approvedIds.forEach(id => {
                     const subject = state.subjects.find(s => s.id === id);
                     if (subject) {
@@ -1487,13 +1467,13 @@
                         }
                     }
                 });
-    
+
                 // Distribute completed subjects into semesters
                 const completed = state.subjects.filter(s => s.completed);
                 let currentSemesterCredits = 0;
                 let currentSemesterId = 1;
                 state.semesters.push({ id: currentSemesterId, subjects: [], color: defaultSemesterColor(), period: '' });
-    
+
                 completed.forEach(subject => {
                     if (currentSemesterCredits + subject.credits > 18 && currentSemesterCredits > 0) {
                         currentSemesterId++;
