@@ -1,40 +1,43 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DATOS INICIALES ---
+    // --- DATOS INICIALES (ACTUALIZADOS SEGÚN PDF OFICIAL) ---
     const initialSubjects = [
-        { id: 'fgc1', name: 'Fundamentos Sociales y Culturales del Diseño', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'ee1', name: 'Escritura, Expresión y Comunicación', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'pie2', name: 'Producción Intersubjetiva del Espacio Físico', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'dm3', name: 'Diseño Mundo', credits: 3, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'dps3', name: 'Diseño para la Paz Sostenible', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'si4', name: 'Seminario de Investigación', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'pv1', name: 'Percepción Visual', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-        { id: 'cf1', name: 'Creación de la Forma', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-        { id: 'ev2', name: 'Estudios Visuales', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-        { id: 'md2', name: 'Métodos de Diseño', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-        { id: 'pea2', name: 'Proyectos. Estructuras y Autonomías', credits: 4, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-        { id: 'prv3', name: 'Proyectos. Relaciones y Vínculos', credits: 4, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-        { id: 'psh4', name: 'Proyecto. Ser Humano', credits: 7, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
-        { id: 'md1', name: 'Matemáticas para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-        { id: 'im1', name: 'Introducción a los Materiales y Procesos', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-        { id: 'hd1', name: 'Herramientas Digitales - Representación', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-        { id: 'gd2', name: 'Geometría para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-        { id: 'fd3', name: 'Física para Diseño', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-        { id: 'mpm4', name: 'Materiales y Procesos. Metales', credits: 3, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
-        { id: 'ecd5', name: 'Estudios Críticos del Diseño', credits: 3, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'dcm6', name: 'Diseño Colonial y Modernidad', credits: 2, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'dr7', name: 'Disidencias y Resistencias', credits: 3, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
-        { id: 'pe5', name: 'Proyecto. Entorno', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
-        { id: 'pb6', name: 'Proyecto. Biosfera', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
-        { id: 'pp7', name: 'Proyecto. Producto', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
-        { id: 'pg8', name: 'Proyecto. Gestión', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
-        { id: 'pff9', name: 'Proyecto Final. Formulación', credits: 3, cycle: 'Profesional', area: 'Diseño', prerequisites: ['im1'] },
-        { id: 'pfd10', name: 'Proyecto Final. Desarrollo', credits: 4, cycle: 'Profesional', area: 'Diseño', prerequisites: ['pff9'] },
-        { id: 'hdv4', name: 'Herramientas Digitales. Visualización', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-        { id: 'mpp5', name: 'Materiales y Procesos. Polímeros', credits: 3, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-        { id: 'hdp5', name: 'Herramientas Digitales. Programación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-        { id: 'mpnm6', name: 'Materiales y Procesos. Nuevos Materiales', credits: 3, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-        { id: 'hds6', name: 'Herramientas Digitales. Simulación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
-        { id: 'hdc7', name: 'Herramientas Digitales. Comprobación', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+        // Ciclo Básico (AB)
+        { id: '506026C', name: 'ESCRITURA, EXPRESIÓN Y COMUNICACIÓN', credits: 3, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507048C', name: 'PRODUCCIÓN INTERSUBJETIVA DEL ESPACIO FÍSICO Y SOCIAL', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507031C', name: 'DISEÑO MUNDO', credits: 3, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507044C', name: 'DISEÑO PARA LA PAZ SOSTENIBLE', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507026C', name: 'SEMINARIO DE INVESTIGACIÓN', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507046C', name: 'FUNDAMENTOS SOCIALES Y CULTURALES DEL DISEÑO', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507055C', name: 'PERCEPCIÓN VISUAL', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+        { id: '5070170', name: 'MÉTODOS DE DISEÑO', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+        { id: '507025C', name: 'PROYECTO - SER HUMANO', credits: 7, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+        { id: '507008C', name: 'CREACIÓN DE LA FORMA', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+        { id: '507024C', name: 'PROYECTOS - RELACIONES Y VÍNCULOS', credits: 4, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+        { id: '507053C', name: 'ESTUDIOS VISUALES', credits: 2, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+        { id: '507021C', name: 'PROYECTOS - ESTRUCTURAS Y AUTONOMÍAS', credits: 4, cycle: 'Básico', area: 'Diseño', prerequisites: [] },
+        { id: '507010C', name: 'GEOMETRÍA', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+        { id: '507011C', name: 'HERRAMIENTAS DIGITALES - PROGRAMACIÓN', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+        { id: '507012C', name: 'INTRODUCCIÓN MATERIALES Y PROCESOS', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+        { id: '507013C', name: 'MATEMÁTICAS', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+        { id: '507047C', name: 'HERRAMIENTAS DIGITALES - REPRESENTACIÓN', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+        { id: '507009C', name: 'FÍSICA PARA EL DISEÑO', credits: 2, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+        { id: '507014C', name: 'MATERIALES Y PROCESOS - METALES', credits: 3, cycle: 'Básico', area: 'Tecnología', prerequisites: [] },
+
+        // Ciclo Profesional (AP)
+        { id: '507015C', name: 'MATERIALES Y PROCESOS - NUEVOS MATERIALES', credits: 3, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+        { id: '507023C', name: 'PROYECTO - PRODUCTO', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
+        { id: '507059C', name: 'HERRAMIENTAS DIGITALES - COMPROBACIÓN', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+        { id: '507095C', name: 'PROYECTO FINAL DESARROLLO', credits: 4, cycle: 'Profesional', area: 'Diseño', prerequisites: ['507096C'] },
+        { id: '507111C', name: 'DISEÑO COLONIAL Y MODERNIDAD D.I.', credits: 2, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507115C', name: 'PROYECTO - GESTIÓN', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
+        { id: '507016C', name: 'MATERIALES Y PROCESOS - POLIMEROS', credits: 3, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+        { id: '507020C', name: 'PROYECTO - ENTORNO', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
+        { id: '507035C', name: 'DISIDENCIAS Y RESISTENCIAS', credits: 3, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507060C', name: 'HERRAMIENTAS DIGITALES - CREACIÓN VISUALIZACIÓN', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+        { id: '507019C', name: 'PROYECTO - BIOSFERA', credits: 7, cycle: 'Profesional', area: 'Diseño', prerequisites: [] },
+        { id: '507036C', name: 'ESTUDIOS CRÍTICOS DEL DISEÑO', credits: 3, cycle: 'Profesional', area: 'Sociedad y cultura', prerequisites: [] },
+        { id: '507058C', name: 'HERRAMIENTAS DIGITALES - SIMULACIÓN', credits: 2, cycle: 'Profesional', area: 'Tecnología', prerequisites: [] },
+        { id: '507096C', name: 'PROYECTO FINAL FORMULACIÓN', credits: 3, cycle: 'Profesional', area: 'Diseño', prerequisites: ['507012C'] }
     ];
 
     const predefinedProfElectives = [
@@ -110,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: "506015C", name: "COMUNICACIÓN, GÉNERO Y DIVERSIDAD", credits: 3 },
         { id: "415011C", name: "EDUCACIÓN COMUNIDADES NEGRAS, AFROCOLOMBIANAS, RAIZALES, PALENQUERAS", credits: 3 },
         { id: "801042C", name: "INTRODUCCIÓN AL DERECHO Y CONSTITUCIÓN POLÍTICA", credits: 3 },
-        { id: "507044C", name: "DISEÑO PARA LA PAZ SOSTENIBLE", credits: 2 },
         { id: "730025C", name: "SEMINARIO EN CONSTITUCIÓN, LEGISLACIÓN Y ÉTICA DE LA PROFESIÓN", credits: 2 },
         { id: "730011C", name: "FUNDAMENTOS SISTEMAS SOCIOECOLÓGICOS", credits: 3 },
         { id: "204058C", name: "RESOLUCIÓN DE CONFLICTOS EN LA ESCUELA GÉNERO Y DIVERSIDAD", credits: 3 },
@@ -145,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: "303003C", name: "TEORÍA SOCIAL", credits: 3 },
         // Lenguaje y Comunicación
         { id: "204133C", name: "COMPRENSIÓN Y PRODUCCIÓN DE TEXTOS ACADÉMICOS GENERALES", credits: 2 },
-        { id: "506026C", name: "ESCRITURA, EXPRESIÓN Y COMUNICACIÓN", credits: 3 },
         { id: "203012C", name: "ESPAÑOL Y COMUNICACIÓN I", credits: 2 },
         { id: "415008C", name: "TALLER DE LECTURA Y ESCRITURA I", credits: 2 },
         { id: "416009C", name: "HERRAMIENTAS PARA PENSAR Y RECREAR - ARGUMENTOS Y TEXTOS ACADÉMICOS", credits: 2 },
@@ -229,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.draggable = true;
         
         let deleteButton = '';
-        if (subject.isElective) {
+        if (subject.isElective && subject.id.startsWith('elective-')) { // Only custom electives can be deleted
             deleteButton = `<button class="delete-elective-btn" data-id="${subject.id}" title="Eliminar electiva">&times;</button>`;
         }
 
@@ -280,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragend', handleDragEnd);
         
-        if (subject.isElective) {
+        if (deleteButton) {
             card.querySelector('.delete-elective-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteElective(subject.id);
@@ -837,7 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return results;
     }
 
-    // --- ORGANIZADOR DESDE TABULADO (CORREGIDO) ---
+    // --- ORGANIZADOR DESDE TABULADO (LÓGICA MEJORADA) ---
     function organizeFromTabulado(tabuladoData) {
         // 1. Crear un mapa de materias aprobadas del tabulado para búsqueda rápida.
         const approvedSubjectsMap = new Map();
@@ -847,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     
-        // 2. Cargar una lista fresca de todas las materias posibles (del plan de estudios).
+        // 2. Usar una copia fresca del plan de estudios como base.
         let newSubjectsList = initialSubjects.map(s => ({ ...s, location: 'bank', completed: false, isElective: false }));
     
         // 3. Mantener las electivas personalizadas que el usuario ya haya creado.
@@ -862,21 +863,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     
-        // 5. Añadir materias aprobadas del tabulado que no estaban en la lista (electivas oficiales).
+        // 5. Añadir electivas oficiales aprobadas del tabulado que no estaban en la lista.
         approvedSubjectsMap.forEach(item => {
-            const newElective = {
-                id: item.id,
-                name: item.name,
-                credits: item.credits,
-                cycle: 'Electiva',
-                area: item.type === 'fg' ? 'Formación General' : 'Electivas Profesionales',
-                prerequisites: [],
-                location: 'bank', // Se moverá a un semestre en el siguiente paso
-                completed: true,
-                isElective: true,
-                electiveType: item.type
-            };
-            newSubjectsList.push(newElective);
+            // Evitar duplicados si ya existe
+            if (!newSubjectsList.some(s => s.id === item.id)) {
+                const newElective = {
+                    id: item.id,
+                    name: item.name,
+                    credits: item.credits,
+                    cycle: 'Electiva',
+                    area: item.type === 'fg' ? 'Formación General' : 'Electivas Profesionales',
+                    prerequisites: [],
+                    location: 'bank', // Se moverá a un semestre en el siguiente paso
+                    completed: true,
+                    isElective: true,
+                    electiveType: item.type
+                };
+                newSubjectsList.push(newElective);
+            }
         });
     
         // 6. Actualizar la lista de materias del estado principal.
@@ -903,7 +907,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     
             sortedCompleted.forEach(subject => {
-                if (currentSemesterCredits + subject.credits > 18 && currentSemesterCredits > 0) {
+                if (currentSemesterCredits > 0 && currentSemesterCredits + subject.credits > 18) {
                     currentSemesterId++;
                     currentSemesterCredits = 0;
                     state.semesters.push({
