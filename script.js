@@ -801,14 +801,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function parseTabulado(text) {
         const lines = text.split('\n');
         const results = [];
-        let currentSemester = 0;
 
         lines.forEach(line => {
-            // Limpiar y dividir la línea
             const cleaned = line.trim();
             if (!cleaned) return;
 
-            // Dividir por tabulaciones o múltiples espacios
             const parts = cleaned.split(/\t|\s{2,}/).filter(part => part.trim() !== '');
             if (parts.length < 9) return;
 
@@ -817,13 +814,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const creditos = parseInt(parts[7]);
             const calificacion = parseFloat(parts[8].replace(',', '.')) || 0;
             const funcion = parts[5].trim();
-            const cancelada = line.includes('CANCELACIÓN') || isNaN(calificacion);
+            const cancelada = line.includes('CANCELACIÓN') || isNaN(calificacion) || calificacion === 0;
 
-            // Determinar tipo de materia
             let tipo = 'desconocido';
             if (funcion === 'AB') tipo = 'básica';
             else if (funcion === 'AP') tipo = 'profesional';
-            else if (funcion === 'EC' || funcion === 'FG') tipo = 'fg';
+            else if (funcion === 'EC' || funcion === 'LCO') tipo = 'fg';
             else if (funcion === 'EP') tipo = 'prof';
 
             if (codigo && nombre && !isNaN(creditos)) {
@@ -838,91 +834,91 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
-
         return results;
     }
 
-    // --- ORGANIZADOR DESDE TABULADO ---
+    // --- ORGANIZADOR DESDE TABULADO (CORREGIDO) ---
     function organizeFromTabulado(tabuladoData) {
-        // 1. Resetear estado actual de materias (no electivas personalizadas)
-        state.subjects = state.subjects.filter(s => s.isElective).map(s => {
-            s.completed = false;
-            s.location = 'bank';
-            return s;
-        });
-
-        // 2. Agregar materias del tabulado
+        // 1. Crear un mapa de materias aprobadas del tabulado para búsqueda rápida.
+        const approvedSubjectsMap = new Map();
         tabuladoData.forEach(item => {
-            if (!item.completed) return;
-
-            let subject = state.subjects.find(s => s.id === item.id);
-            if (!subject) {
-                // Es una materia nueva (electiva o básica/profesional no registrada)
-                subject = {
-                    id: item.id,
-                    name: item.name,
-                    credits: item.credits,
-                    cycle: item.type === 'fg' || item.type === 'prof' ? 'Electiva' : (item.type === 'básica' ? 'Básico' : 'Profesional'),
-                    area: item.type === 'fg' ? 'Formación General' : (item.type === 'prof' ? 'Electivas Profesionales' : 'Asignaturas'),
-                    prerequisites: [],
-                    location: 'bank',
-                    completed: true,
-                    isElective: item.type === 'fg' || item.type === 'prof'
-                };
-                if (subject.isElective) {
-                    subject.electiveType = item.type;
-                }
-                state.subjects.push(subject);
-            } else {
-                // Actualizar materia existente
-                subject.completed = true;
+            if (item.completed) {
+                approvedSubjectsMap.set(item.id, item);
             }
         });
-
-        // 3. Organizar en semestres lógicos
+    
+        // 2. Cargar una lista fresca de todas las materias posibles (del plan de estudios).
+        let newSubjectsList = initialSubjects.map(s => ({ ...s, location: 'bank', completed: false, isElective: false }));
+    
+        // 3. Mantener las electivas personalizadas que el usuario ya haya creado.
+        const customElectives = state.subjects.filter(s => s.isElective && s.id.startsWith('elective-'));
+        newSubjectsList.push(...customElectives);
+    
+        // 4. Actualizar el estado de las materias basándose en el tabulado.
+        newSubjectsList.forEach(subject => {
+            if (approvedSubjectsMap.has(subject.id)) {
+                subject.completed = true;
+                approvedSubjectsMap.delete(subject.id); // Remover para no añadirla de nuevo
+            }
+        });
+    
+        // 5. Añadir materias aprobadas del tabulado que no estaban en la lista (electivas oficiales).
+        approvedSubjectsMap.forEach(item => {
+            const newElective = {
+                id: item.id,
+                name: item.name,
+                credits: item.credits,
+                cycle: 'Electiva',
+                area: item.type === 'fg' ? 'Formación General' : 'Electivas Profesionales',
+                prerequisites: [],
+                location: 'bank', // Se moverá a un semestre en el siguiente paso
+                completed: true,
+                isElective: true,
+                electiveType: item.type
+            };
+            newSubjectsList.push(newElective);
+        });
+    
+        // 6. Actualizar la lista de materias del estado principal.
+        state.subjects = newSubjectsList;
+    
+        // 7. Organizar las materias completadas en semestres.
         const completedSubjects = state.subjects.filter(s => s.completed);
         state.semesters = [];
-        let currentSemesterId = 1;
-        let currentSemesterCredits = 0;
-        let currentSemesterSubjects = [];
-
-        // Ordenar por tipo para agrupar mejor (básicas primero, luego profesionales, luego electivas)
-        const sortedSubjects = [...completedSubjects].sort((a, b) => {
-            const order = { 'Básico': 1, 'Profesional': 2, 'Electiva': 3 };
-            return (order[a.cycle] || 4) - (order[b.cycle] || 4);
-        });
-
-        sortedSubjects.forEach(subject => {
-            if (currentSemesterCredits + subject.credits > 18) {
-                state.semesters.push({
-                    id: currentSemesterId,
-                    subjects: currentSemesterSubjects,
-                    color: defaultSemesterColor(),
-                    period: ''
-                });
-                currentSemesterId++;
-                currentSemesterCredits = 0;
-                currentSemesterSubjects = [];
-            }
-            currentSemesterSubjects.push(subject.id);
-            currentSemesterCredits += subject.credits;
-            subject.location = currentSemesterId;
-        });
-
-        // Agregar el último semestre si tiene materias
-        if (currentSemesterSubjects.length > 0) {
+        state.nextSemesterId = 1; 
+    
+        if (completedSubjects.length > 0) {
+            let currentSemesterId = 1;
+            let currentSemesterCredits = 0;
+            
             state.semesters.push({
                 id: currentSemesterId,
-                subjects: currentSemesterSubjects,
                 color: defaultSemesterColor(),
                 period: ''
             });
+    
+            const sortedCompleted = [...completedSubjects].sort((a, b) => {
+                const order = { 'Básico': 1, 'Profesional': 2, 'Electiva': 3 };
+                return (order[a.cycle] || 4) - (order[b.cycle] || 4);
+            });
+    
+            sortedCompleted.forEach(subject => {
+                if (currentSemesterCredits + subject.credits > 18 && currentSemesterCredits > 0) {
+                    currentSemesterId++;
+                    currentSemesterCredits = 0;
+                    state.semesters.push({
+                        id: currentSemesterId,
+                        color: defaultSemesterColor(),
+                        period: ''
+                    });
+                }
+                subject.location = currentSemesterId;
+                currentSemesterCredits += subject.credits;
+            });
+            state.nextSemesterId = currentSemesterId + 1;
         }
-
-        // Actualizar el próximo ID de semestre
-        state.nextSemesterId = currentSemesterId + 1;
-
-        // Guardar y renderizar
+    
+        // 8. Las materias no completadas se quedarán en el banco por defecto. Renderizar el estado actualizado.
         saveState();
         render();
     }
@@ -958,6 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
             organizeFromTabulado(parsedData);
             alert(`Se organizaron ${parsedData.filter(item => item.completed).length} materias aprobadas.`);
         } catch (error) {
+            console.error("Error al procesar tabulado:", error);
             organizeError.textContent = 'Error al procesar: ' + error.message;
             organizeError.style.display = 'block';
         }
