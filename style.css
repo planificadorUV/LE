@@ -17,11 +17,11 @@
     --text-secondary: #a0a0a0;
     --border-color: #3a3a3a;
     
-    /* Nuevas variables para layout */
+    /* Variables para layout AMPLIADO */
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 60px;
-    --header-height: 70px;
-    --animation-speed: 0.25s;
+    --header-height: 80px; /* AUMENTADO para el logo más pequeño */
+    --animation-speed: 0.2s; /* MÁS RÁPIDO */
     --border-radius: 12px;
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.15);
@@ -61,18 +61,11 @@ body {
     display: none !important;
 }
 
-/* Mejoras en animaciones globales - MÁS SUAVES */
+/* Mejoras en animaciones globales - SIN PROBLEMAS */
 * {
     transition: background-color var(--animation-speed) ease, 
                 color var(--animation-speed) ease, 
                 border-color var(--animation-speed) ease;
-}
-
-/* Transiciones específicas para elementos que se mueven */
-.subject-card {
-    transition: transform var(--animation-speed) cubic-bezier(0.4, 0.0, 0.2, 1),
-                opacity var(--animation-speed) ease,
-                box-shadow var(--animation-speed) ease !important;
 }
 
 /* Glassmorphism mejorado */
@@ -187,22 +180,23 @@ body {
     border-radius: inherit;
 }
 
-/* Logo principal GRANDE sin cuadro amarillo */
+/* Logo principal CORREGIDO - 40% más pequeño (120px) */
 .logo-main-container {
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all var(--animation-speed) ease;
+    flex-shrink: 0;
 }
 
 .logo-main-container:hover {
-    transform: scale(1.02);
+    transform: scale(1.05);
     filter: brightness(1.1);
 }
 
 .logo-main-container img {
-    width: 200px;
+    width: 120px; /* 40% más pequeño que 200px */
     height: auto;
     object-fit: contain;
 }
@@ -212,7 +206,7 @@ body {
     opacity: 0.8;
 }
 
-/* User Avatar MEJORADO Y MÁS AMPLIO */
+/* User Avatar MEJORADO */
 .user-avatar {
     width: 36px;
     height: 36px;
@@ -392,7 +386,7 @@ body {
     font-size: 48px;
 }
 
-/* App Header MEJORADO */
+/* App Header AMPLIADO */
 .app-header {
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
@@ -400,14 +394,14 @@ body {
     top: 0;
     z-index: 100;
     backdrop-filter: blur(10px);
-    height: var(--header-height);
+    height: var(--header-height); /* 80px ahora */
 }
 
 .header-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px;
+    padding: 16px 24px; /* Más padding vertical */
     max-width: 100%;
     margin: 0 auto;
     height: 100%;
@@ -421,7 +415,7 @@ body {
 }
 
 .header-info h1 {
-    font-size: 24px;
+    font-size: 22px; /* Reducido ligeramente */
     font-weight: 700;
     color: var(--career-yellow);
     margin-bottom: 2px;
@@ -442,14 +436,15 @@ body {
 
 .welcome-message-container {
     position: relative;
+    width: 100%; /* OCUPAR TODO EL ESPACIO */
 }
 
-/* WELCOME MESSAGE MÁS AMPLIO PARA NOMBRES LARGOS */
+/* WELCOME MESSAGE AMPLIADO A TODO EL ESPACIO */
 .toggle-welcome-btn {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 14px 24px;
+    padding: 16px 24px; /* Más padding */
     color: var(--text-primary);
     cursor: pointer;
     display: flex;
@@ -457,8 +452,10 @@ body {
     gap: 12px;
     font-weight: 500;
     transition: all var(--animation-speed) ease;
-    min-width: 380px;
-    max-width: 500px;
+    width: 100%; /* OCUPAR TODO EL ANCHO DISPONIBLE */
+    max-width: 600px; /* Límite máximo */
+    min-width: 300px; /* Mínimo */
+    justify-content: space-between; /* Distribuir contenido */
     white-space: nowrap;
     overflow: hidden;
 }
@@ -472,7 +469,8 @@ body {
 .toggle-welcome-btn.collapsed {
     min-width: 50px;
     max-width: 50px;
-    padding: 14px;
+    padding: 16px;
+    justify-content: center;
 }
 
 .toggle-welcome-btn.collapsed .welcome-content {
@@ -512,7 +510,7 @@ body {
     flex: 0 0 auto;
 }
 
-/* Theme Toggle CORREGIDO */
+/* Theme Toggle */
 .theme-toggle-container {
     display: flex;
     align-items: center;
@@ -579,11 +577,7 @@ input:checked + .slider:before {
     position: relative;
 }
 
-.main-content.left-collapsed {
-    grid-template-columns: var(--sidebar-collapsed-width) 1fr var(--sidebar-width);
-}
-
-/* Left Panel */
+/* Left Panel - SOLO EL BANCO SE CONTRAE */
 .left-panel {
     background: var(--bg-secondary);
     border-right: 1px solid var(--border-color);
@@ -595,17 +589,11 @@ input:checked + .slider:before {
     gap: 24px;
 }
 
-.left-panel.collapsed {
-    padding: 24px 8px;
-}
-
-.left-panel.collapsed .section-header h3,
-.left-panel.collapsed .stats-board,
-.left-panel.collapsed .subject-bank,
-.left-panel.collapsed .action-buttons {
-    opacity: 0;
-    transform: translateX(-20px);
-    pointer-events: none;
+/* Stats Board SIEMPRE VISIBLE */
+.stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .section-header {
@@ -624,6 +612,7 @@ input:checked + .slider:before {
     gap: 8px;
 }
 
+/* Toggle SOLO para el banco de materias */
 .toggle-bank-btn {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
@@ -641,7 +630,12 @@ input:checked + .slider:before {
     transform: scale(1.05);
 }
 
-.left-panel.collapsed .toggle-bank-btn .toggle-icon {
+/* Banco de materias CONTRAÍBLE */
+.bank-section.collapsed #subject-bank {
+    display: none;
+}
+
+.bank-section.collapsed .toggle-bank-btn .toggle-icon {
     transform: rotate(180deg);
 }
 
@@ -722,9 +716,10 @@ input:checked + .slider:before {
     border-radius: var(--border-radius);
     padding: 16px;
     border: 1px solid var(--border-color);
+    display: block; /* Siempre visible por defecto */
 }
 
-/* Subject Cards CLICKEABLES PARA MARCAR COMO VISTA */
+/* Subject Cards CLICKEABLES Y DRAGGEABLES */
 .subject-card {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
@@ -736,6 +731,7 @@ input:checked + .slider:before {
     margin-bottom: 8px;
     user-select: none;
     transform: translateX(0);
+    transition: all var(--animation-speed) ease;
 }
 
 .subject-card[draggable="true"] {
@@ -757,6 +753,7 @@ input:checked + .slider:before {
     transform: rotate(2deg) scale(1.02);
     z-index: 1000;
     box-shadow: var(--shadow-lg);
+    cursor: grabbing !important;
 }
 
 .subject-card.locked {
@@ -844,7 +841,7 @@ input:checked + .slider:before {
     gap: 12px;
 }
 
-/* Semestre Grid MEJORADO */
+/* Semestre Grid SIN ANIMACIONES PROBLEMÁTICAS */
 .semesters-grid-container {
     display: flex;
     gap: 20px;
@@ -862,41 +859,25 @@ input:checked + .slider:before {
     border-radius: 16px;
     display: flex;
     flex-direction: column;
-    transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition: width var(--animation-speed) ease, min-width var(--animation-speed) ease;
     box-shadow: var(--shadow-sm);
     position: relative;
-    animation: slideInUp 0.5s ease forwards;
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    /* SIN ANIMACIÓN DE ENTRADA PROBLEMÁTICA */
 }
 
 .semester-column:hover {
     box-shadow: var(--shadow-md);
     border-color: var(--career-yellow);
-    transform: translateY(-4px);
+    transform: translateY(-2px);
 }
 
 .semester-column.collapsed {
     width: 80px;
     min-width: 80px;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .semester-column.collapsed .semester-content {
-    opacity: 0;
-    transform: scaleY(0);
-    height: 0;
-    padding: 0;
-    overflow: hidden;
+    display: none; /* Ocultar directamente sin animaciones */
 }
 
 .semester-column.collapsed .semester-header h3 {
@@ -918,7 +899,7 @@ input:checked + .slider:before {
     background: var(--career-yellow);
     color: #000;
     font-weight: 600;
-    transition: all var(--animation-speed) ease;
+    transition: background var(--animation-speed) ease;
 }
 
 .semester-header h3 {
@@ -935,7 +916,7 @@ input:checked + .slider:before {
     gap: 8px;
 }
 
-/* Color picker CORREGIDO - más elegante */
+/* Color picker elegante */
 .color-picker {
     width: 20px;
     height: 20px;
@@ -1036,7 +1017,6 @@ input:checked + .slider:before {
     overflow-y: auto;
     min-height: 200px;
     border-radius: 0 0 14px 14px;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .drop-zone {
@@ -1681,14 +1661,14 @@ input:checked + .slider:before {
     background: var(--career-yellow);
 }
 
-/* RESPONSIVIDAD */
+/* RESPONSIVIDAD MEJORADA */
 @media (max-width: 1200px) {
     :root {
         --sidebar-width: 250px;
     }
     
     .toggle-welcome-btn {
-        min-width: 300px;
+        min-width: 250px;
         max-width: 400px;
     }
 }
@@ -1729,13 +1709,13 @@ input:checked + .slider:before {
     }
     
     .logo-main-container img {
-        width: 150px;
+        width: 100px;
     }
 }
 
 @media (max-width: 768px) {
     :root {
-        --header-height: 90px;
+        --header-height: 100px;
     }
     
     .auth-card {
@@ -1744,9 +1724,9 @@ input:checked + .slider:before {
     }
     
     .header-content {
-        padding: 12px 16px;
+        padding: 16px;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
     }
     
     .header-left, .header-right {
@@ -1762,7 +1742,7 @@ input:checked + .slider:before {
     
     .toggle-welcome-btn {
         min-width: 200px;
-        max-width: 300px;
+        max-width: 400px;
     }
     
     .logo-placeholder {
@@ -1771,7 +1751,7 @@ input:checked + .slider:before {
     }
     
     .logo-main-container img {
-        width: 120px;
+        width: 80px;
     }
     
     .header-info h1 {
@@ -1838,7 +1818,7 @@ input:checked + .slider:before {
     }
     
     .logo-main-container img {
-        width: 100px;
+        width: 60px;
     }
     
     .semester-column {
@@ -1859,47 +1839,10 @@ input:checked + .slider:before {
     
     .toggle-welcome-btn {
         min-width: 150px;
-        max-width: 250px;
+        max-width: 300px;
     }
     
     .welcome-text {
         font-size: 13px;
     }
-}
-
-/* QUITAR ANIMACIONES PROBLEMÁTICAS */
-.semester-column {
-    /* Sin animación de entrada */
-    animation: none !important;
-    transition: width 0.2s ease, min-width 0.2s ease !important;
-}
-
-.semester-content {
-    /* Transición más suave para colapsar */
-    transition: opacity 0.2s ease !important;
-}
-
-.semester-column.collapsed .semester-content {
-    /* Sin animaciones complejas de escala */
-    transform: none !important;
-    transition: opacity 0.2s ease !important;
-}
-
-/* Hacer las materias más clickeables */
-.subject-card {
-    cursor: pointer !important;
-    transition: transform 0.1s ease, box-shadow 0.1s ease !important;
-}
-
-.subject-card:hover {
-    transform: translateY(-1px) !important;
-}
-
-.subject-card:active {
-    transform: translateY(0px) scale(0.98) !important;
-}
-
-.subject-card.dragging {
-    cursor: grabbing !important;
-    transform: rotate(1deg) scale(1.01) !important;
 }
