@@ -23,7 +23,6 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-
 // =================== ELEMENTOS DEL DOM ===================
 const authContainer = document.getElementById('auth-container');
 const appContainer = document.getElementById('app-container');
@@ -42,6 +41,60 @@ let plannerState = {};
 let currentCareerId = null;
 let unsubscribePlanner = null;
 let draggedElementId = null;
+
+// =================== SISTEMA DE NOTIFICACIONES ===================
+function showNotification(message, type = 'success') {
+    // Eliminar notificación anterior si existe
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">
+                ${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}
+            </span>
+            <span class="notification-message">${message}</span>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    // Agregar estilos de notificación
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 20px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        z-index: 1100;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        max-width: 400px;
+        background: ${type === 'success' ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 
+                     type === 'error' ? 'linear-gradient(135deg, #e20511, #dc2626)' : 
+                     'linear-gradient(135deg, #f59e0b, #d97706)'};
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
+}
 
 // =================== TEMA ===================
 const themeToggle = document.getElementById('theme-toggle');
@@ -157,7 +210,7 @@ if (logoutBtnCareer) {
     logoutBtnCareer.addEventListener('click', () => auth.signOut());
 }
 
-// =================== WELCOME MESSAGE TOGGLE ===================
+// =================== UI INTERACTIONS ===================
 document.addEventListener('DOMContentLoaded', () => {
     const toggleWelcomeBtn = document.getElementById('toggle-welcome-btn');
     
@@ -176,7 +229,22 @@ document.addEventListener('DOMContentLoaded', () => {
             leftPanel.classList.toggle('collapsed');
         });
     }
+    
+    // Hacer logos clickeables para Instagram
+    makeLegionLogosClickable();
 });
+
+// =================== LOGOS CLICKEABLES ===================
+function makeLegionLogosClickable() {
+    const logos = document.querySelectorAll('#legion-logo-career, #legion-logo-main, .logo-placeholder-main');
+    logos.forEach(logo => {
+        logo.style.cursor = 'pointer';
+        logo.addEventListener('click', () => {
+            window.open('https://instagram.com/univallelegionestudiantil', '_blank');
+        });
+        logo.title = 'Ir a @univallelegionestudiantil';
+    });
+}
 
 // =================== SELECCIÓN DE CARRERA ===================
 function showCareerSelection(user) {
@@ -185,6 +253,9 @@ function showCareerSelection(user) {
         welcomeMsg.textContent = `¡Bienvenid@, ${user.displayName || 'Usuario'}!`;
     }
     careerSelectionContainer.classList.remove('hidden');
+    
+    // Hacer logo clickeable
+    setTimeout(makeLegionLogosClickable, 100);
 }
 
 const careerList = document.getElementById('career-list');
@@ -222,7 +293,7 @@ function loadPlannerData(userId, careerId) {
         initializeAppUI(auth.currentUser);
     }, error => {
         console.error("Error al cargar datos: ", error);
-        alert("No se pudieron cargar tus datos. Inténtalo de nuevo.");
+        showNotification("No se pudieron cargar tus datos. Inténtalo de nuevo.", 'error');
         loadingOverlay.classList.add('hidden');
     });
 }
@@ -233,6 +304,7 @@ function savePlannerData() {
     const plannerDocRef = db.collection('users').doc(auth.currentUser.uid).collection('planners').doc(currentCareerId);
     return plannerDocRef.set(plannerState, { merge: true }).catch(error => {
         console.error("Error al guardar:", error);
+        showNotification("Error al guardar los datos", 'error');
     });
 }
 
@@ -297,7 +369,20 @@ function getInitialState() {
 function initializeAppUI(user) {
     const welcomeMsg = document.getElementById('welcome-message-main');
     if (welcomeMsg) {
-        welcomeMsg.textContent = `¡Bienvenid@, ${user.displayName || 'Usuario'}!`;
+        const welcomeContent = welcomeMsg.querySelector('.welcome-content');
+        const welcomeText = welcomeContent?.querySelector('.welcome-text') || welcomeMsg;
+        
+        const photoURL = user.photoURL;
+        const displayName = user.displayName || 'Usuario';
+        
+        if (photoURL && welcomeContent) {
+            welcomeContent.innerHTML = `
+                <img src="${photoURL}" alt="Foto de perfil" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
+                <span class="welcome-text">¡Bienvenid@, ${displayName}!</span>
+            `;
+        } else {
+            welcomeText.textContent = `¡Bienvenid@, ${displayName}!`;
+        }
     }
     
     // Crear semestre inicial si no existe
@@ -319,10 +404,12 @@ function initializeAppUI(user) {
     render();
     setTimeout(() => render(), 100);
     setTimeout(() => render(), 500);
+    setTimeout(() => render(), 1000);
     
     setupEventListeners();
     renderEquivalencyModal();
     setupModalTabs();
+    makeLegionLogosClickable();
 }
 
 // =================== RENDERIZADO PRINCIPAL ===================
@@ -379,7 +466,7 @@ function renderSubjectBank() {
     const bankSubjects = plannerState.subjects.filter(s => s.location === 'bank');
     
     if (bankSubjects.length === 0) {
-        bankContainer.innerHTML = '<p class="text-center text-gray-500">Todas las materias han sido asignadas</p>';
+        bankContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-style: italic;">Todas las materias han sido asignadas</p>';
     } else {
         bankSubjects.forEach(s => bankContainer.appendChild(createSubjectCard(s)));
     }
@@ -407,11 +494,36 @@ function renderSemesterWithColorPicker(semester) {
     const totalCredits = semesterSubjects.reduce((sum, s) => sum + s.credits, 0);
     
     semesterColumn.innerHTML = `
-        <div class="semester-header" style="border-left: 4px solid ${semester.color || '#ffdd53'}">
+        <div class="semester-header" style="background: ${semester.color || '#ffdd53'}; color: #000;">
+            <button class="delete-semester-btn" title="Eliminar semestre" style="
+                background: var(--primary-red);
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 4px 8px;
+                cursor: pointer;
+                font-size: 12px;
+                position: absolute;
+                top: 8px;
+                left: 8px;
+                opacity: 0;
+                transition: all 0.3s ease;
+                z-index: 10;
+            ">✕</button>
             <input type="color" class="color-picker" value="${semester.color || '#ffdd53'}" 
-                   title="Cambiar color del semestre">
+                   title="Cambiar color del semestre" style="
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                border: 2px solid rgba(0, 0, 0, 0.2);
+                cursor: pointer;
+                z-index: 10;
+            ">
             <h3>${semester.name || `Semestre ${semester.id}`}</h3>
-            <div class="semester-credits">${totalCredits}C</div>
+            <div class="semester-credits" style="background: rgba(0, 0, 0, 0.1); color: #000;">${totalCredits}C</div>
             <button class="semester-toggle-btn" title="Colapsar/Expandir">
                 ${semester.collapsed ? '▶' : '▼'}
             </button>
@@ -424,13 +536,31 @@ function renderSemesterWithColorPicker(semester) {
         </div>
     `;
     
+    // Mostrar botón eliminar al hacer hover
+    const header = semesterColumn.querySelector('.semester-header');
+    const deleteBtn = semesterColumn.querySelector('.delete-semester-btn');
+    
+    header.addEventListener('mouseenter', () => {
+        deleteBtn.style.opacity = '1';
+    });
+    
+    header.addEventListener('mouseleave', () => {
+        deleteBtn.style.opacity = '0';
+    });
+    
+    // Event listener para eliminar semestre
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteSemester(semester.id);
+    });
+    
     // Event listener para color picker
     const colorPicker = semesterColumn.querySelector('.color-picker');
     colorPicker.addEventListener('change', (e) => {
         const semesterIndex = plannerState.semesters.findIndex(s => s.id === semester.id);
         if (semesterIndex !== -1) {
             plannerState.semesters[semesterIndex].color = e.target.value;
-            semesterColumn.querySelector('.semester-header').style.borderLeftColor = e.target.value;
+            header.style.background = e.target.value;
             savePlannerData();
         }
     });
@@ -455,7 +585,7 @@ function renderEquivalencies() {
     container.innerHTML = '';
     
     if (plannerState.equivalencies.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-500">No hay equivalencias registradas</p>';
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-style: italic;">No hay equivalencias registradas</p>';
         return;
     }
     
@@ -498,6 +628,30 @@ function createSubjectCard(subject) {
     `;
     
     return card;
+}
+
+// =================== FUNCIONES DE GESTIÓN ===================
+function deleteSemester(semesterId) {
+    if (confirm('¿Estás seguro de eliminar este semestre? Las materias volverán al banco.')) {
+        // Mover materias del semestre al banco
+        plannerState.subjects.forEach(subject => {
+            if (subject.location === `semester-${semesterId}`) {
+                subject.location = 'bank';
+            }
+        });
+        
+        // Eliminar semestre
+        plannerState.semesters = plannerState.semesters.filter(s => s.id !== semesterId);
+        
+        render();
+        showNotification('Semestre eliminado correctamente', 'success');
+    }
+}
+
+function removeEquivalency(id) {
+    plannerState.equivalencies = plannerState.equivalencies.filter(eq => eq.id !== id);
+    render();
+    showNotification('Equivalencia eliminada', 'success');
 }
 
 // =================== DRAG AND DROP ===================
@@ -571,6 +725,7 @@ function handleDrop(e) {
     if (newLocation && subject.location !== newLocation) {
         subject.location = newLocation;
         render();
+        showNotification('Materia movida correctamente', 'success');
     }
 }
 
@@ -598,7 +753,7 @@ function updateStats() {
     updateStatCard('basic-cycle-credits', basicCredits, 61);
     updateStatCard('professional-cycle-credits', profCredits, 57);
     updateStatCard('fg-credits', fgCredits, 17);
-    updateStatCard('prof-electives-credits', 0, 17); // Implementar lógica de electivas
+    updateStatCard('prof-electives-credits', 0, 17);
 }
 
 function updateStatCard(id, current, total) {
@@ -615,76 +770,108 @@ function updateStatCard(id, current, total) {
     }
 }
 
-// =================== IMPORTAR SIRA ===================
+// =================== IMPORTAR SIRA MEJORADO ===================
 function processSiraData(siraText) {
     const lines = siraText.split('\n');
     const processedSubjects = [];
-    const semesterData = {};
+    const periodsFound = new Set();
     
     let currentPeriod = null;
+    let foundAnySubject = false;
+    let processedCount = 0;
     
     lines.forEach(line => {
-        // Detectar período
-        if (line.includes('PERIODO:')) {
-            const periodMatch = line.match(/PERIODO:\s*(.+)/);
-            if (periodMatch) {
-                currentPeriod = periodMatch[1].trim();
-                if (!semesterData[currentPeriod]) {
-                    semesterData[currentPeriod] = [];
-                }
+        // Detectar período con múltiples formatos
+        const periodPatterns = [
+            /PERIODO:\s*(.+)/i,
+            /PERÍODO:\s*(.+)/i,
+            /Periodo:\s*(.+)/i,
+            /Período:\s*(.+)/i
+        ];
+        
+        for (const pattern of periodPatterns) {
+            const match = line.match(pattern);
+            if (match) {
+                currentPeriod = match[1].trim();
+                periodsFound.add(currentPeriod);
+                break;
             }
         }
         
-        // Detectar materias
-        const subjectMatch = line.match(/^(\d{6}C|\d{7}C)\s*\d*\s*\d*\s*(.+?)\s+[A-Z]+\s+[A-Z]+\s+(\d+)\s+([\d.]+)/);
+        // Detectar materias con patrones flexibles
+        const subjectPatterns = [
+            /^(\d{6}C|\d{7}C)\s*\d*\s*\d*\s*(.+?)\s+[A-Z]+\s+[A-Z]+\s+(\d+)\s+([\d.]+)/,
+            /^(\d{6}C|\d{7}C)\s+(.+?)\s+(\d+)\s+([\d.]+)/,
+            /(\d{6}C|\d{7}C).*?(\d+)\s+([\d.]+)$/,
+            /(\d{6}C|\d{7}C)\s+(.+?)\s+([\d.]+)/
+        ];
         
-        if (subjectMatch && currentPeriod) {
-            const [, code, name, credits, grade] = subjectMatch;
-            const cleanName = name.replace(/\s+/g, ' ').trim();
-            const numericGrade = parseFloat(grade);
-            
-            if (numericGrade >= 3.0) {
-                const existingSubject = plannerState.subjects.find(s => s.id === code);
+        for (const pattern of subjectPatterns) {
+            const match = line.match(pattern);
+            if (match) {
+                const code = match[1];
+                let credits = 0;
+                let grade = 0;
                 
-                if (existingSubject) {
-                    existingSubject.completed = true;
-                    processedSubjects.push({
-                        id: code,
-                        name: cleanName,
-                        credits: parseInt(credits),
-                        period: currentPeriod,
-                        grade: numericGrade
-                    });
-                    
-                    semesterData[currentPeriod].push(existingSubject);
+                // Extraer créditos y calificación dependiendo del patrón
+                if (match.length >= 5) {
+                    credits = parseInt(match[3]) || 0;
+                    grade = parseFloat(match[4]) || 0;
+                } else if (match.length >= 4) {
+                    grade = parseFloat(match[3]) || 0;
+                } else {
+                    continue;
                 }
+                
+                if (grade >= 3.0) {
+                    const existingSubject = plannerState.subjects.find(s => s.id === code);
+                    
+                    if (existingSubject && !existingSubject.completed) {
+                        existingSubject.completed = true;
+                        foundAnySubject = true;
+                        processedCount++;
+                        
+                        // Crear semestre solo si hay período y no existe
+                        if (currentPeriod) {
+                            const semesterName = `${currentPeriod}`;
+                            let existingSemester = plannerState.semesters.find(s => s.name === semesterName);
+                            
+                            if (!existingSemester) {
+                                const newSemester = {
+                                    id: plannerState.nextSemesterId++,
+                                    name: semesterName,
+                                    collapsed: false,
+                                    color: '#ffdd53'
+                                };
+                                plannerState.semesters.push(newSemester);
+                                existingSemester = newSemester;
+                            }
+                            
+                            existingSubject.location = `semester-${existingSemester.id}`;
+                        }
+                        
+                        processedSubjects.push({
+                            id: code,
+                            period: currentPeriod,
+                            grade: grade
+                        });
+                    }
+                }
+                break;
             }
         }
     });
     
-    // Crear semestres automáticamente
-    Object.keys(semesterData).forEach((period, index) => {
-        if (semesterData[period].length > 0) {
-            const semesterId = plannerState.nextSemesterId++;
-            const newSemester = {
-                id: semesterId,
-                name: `Semestre ${semesterId} (${period})`,
-                collapsed: false,
-                color: '#ffdd53'
-            };
-            
-            plannerState.semesters.push(newSemester);
-            
-            semesterData[period].forEach(subject => {
-                subject.location = `semester-${semesterId}`;
-            });
-        }
-    });
+    if (!foundAnySubject) {
+        showNotification('No se encontraron materias aprobadas en el formato proporcionado. Verifica que incluya códigos de materias y calificaciones.', 'warning');
+        return [];
+    }
     
+    showNotification(`Se procesaron ${processedCount} materias${periodsFound.size > 0 ? ` de ${periodsFound.size} períodos` : ''}`, 'success');
     return processedSubjects;
 }
 
-// =================== EQUIVALENCIAS ===================
+// =================== MODAL DE EQUIVALENCIAS ===================
 function renderEquivalencyModal() {
     const searchInput = document.getElementById('search-subject');
     const searchResults = document.getElementById('search-results');
@@ -731,11 +918,6 @@ function renderEquivalencyModal() {
     }
 }
 
-function removeEquivalency(id) {
-    plannerState.equivalencies = plannerState.equivalencies.filter(eq => eq.id !== id);
-    render();
-}
-
 // =================== EVENT LISTENERS ===================
 function setupEventListeners() {
     // Agregar semestre
@@ -750,6 +932,7 @@ function setupEventListeners() {
             };
             plannerState.semesters.push(newSemester);
             render();
+            showNotification('Semestre agregado correctamente', 'success');
         });
     }
     
@@ -761,7 +944,7 @@ function setupEventListeners() {
         });
     }
     
-    // Procesar SIRA
+    // Procesar SIRA mejorado
     const processSiraBtn = document.getElementById('process-sira-btn');
     if (processSiraBtn) {
         processSiraBtn.addEventListener('click', () => {
@@ -769,7 +952,7 @@ function setupEventListeners() {
             const siraText = siraInput.value.trim();
             
             if (!siraText) {
-                alert('Por favor, pega los datos del SIRA');
+                showNotification('Por favor, pega los datos del SIRA', 'warning');
                 return;
             }
             
@@ -779,13 +962,23 @@ function setupEventListeners() {
                 if (processed.length > 0) {
                     render();
                     document.getElementById('sira-modal').classList.add('hidden');
-                    alert(`Se procesaron ${processed.length} materias aprobadas`);
-                } else {
-                    alert('No se encontraron materias aprobadas en los datos proporcionados');
+                    siraInput.value = '';
                 }
             } catch (error) {
                 console.error('Error al procesar SIRA:', error);
-                alert('Error al procesar los datos del SIRA. Verifica el formato.');
+                showNotification('Error al procesar los datos. Verifica el formato.', 'error');
+            }
+        });
+    }
+    
+    // Reiniciar datos
+    const resetBtn = document.getElementById('reset-data-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de reiniciar todos los datos? Esta acción no se puede deshacer.')) {
+                plannerState = getInitialState();
+                render();
+                showNotification('Datos reiniciados correctamente', 'success');
             }
         });
     }
@@ -806,7 +999,7 @@ function setupEventListeners() {
             const type = document.getElementById('equiv-type').value;
             
             if (!name || !credits || !type) {
-                alert('Por favor completa todos los campos');
+                showNotification('Por favor completa todos los campos', 'warning');
                 return;
             }
             
@@ -827,6 +1020,7 @@ function setupEventListeners() {
             
             render();
             document.getElementById('equivalency-modal').classList.add('hidden');
+            showNotification('Equivalencia agregada correctamente', 'success');
         });
     }
     
@@ -838,6 +1032,7 @@ function setupEventListeners() {
         collapseAllBtn.addEventListener('click', () => {
             plannerState.semesters.forEach(s => s.collapsed = true);
             render();
+            showNotification('Todos los semestres contraídos', 'success');
         });
     }
     
@@ -845,6 +1040,7 @@ function setupEventListeners() {
         expandAllBtn.addEventListener('click', () => {
             plannerState.semesters.forEach(s => s.collapsed = false);
             render();
+            showNotification('Todos los semestres expandidos', 'success');
         });
     }
     
@@ -880,256 +1076,7 @@ function setupModalTabs() {
     });
 }
 
-// Función global para remover equivalencias (llamada desde HTML)
-window.removeEquivalency = removeEquivalency;
-// =================== FUNCIONES MEJORADAS ===================
-
-// Sistema de notificaciones
-function showNotification(message, type = 'success') {
-    // Eliminar notificación anterior si existe
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-    
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => notification.classList.add('show'), 100);
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
-}
-
-// Función mejorada para renderizar semestre con botón eliminar
-function renderSemesterWithColorPicker(semester) {
-    const semesterColumn = document.createElement('div');
-    semesterColumn.className = `semester-column ${semester.collapsed ? 'collapsed' : ''}`;
-    semesterColumn.dataset.semesterId = semester.id;
-    semesterColumn.style.setProperty('--semester-color', semester.color || '#ffdd53');
-    
-    const semesterSubjects = plannerState.subjects.filter(s => s.location === `semester-${semester.id}`);
-    const totalCredits = semesterSubjects.reduce((sum, s) => sum + s.credits, 0);
-    
-    semesterColumn.innerHTML = `
-        <div class="semester-header" style="background: ${semester.color || '#ffdd53'}">
-            <button class="delete-semester-btn" title="Eliminar semestre" onclick="deleteSemester(${semester.id})">
-                ✕
-            </button>
-            <input type="color" class="color-picker" value="${semester.color || '#ffdd53'}" 
-                   title="Cambiar color del semestre">
-            <h3>${semester.name || `Semestre ${semester.id}`}</h3>
-            <div class="semester-credits">${totalCredits}C</div>
-            <button class="semester-toggle-btn" title="Colapsar/Expandir">
-                ${semester.collapsed ? '▶' : '▼'}
-            </button>
-        </div>
-        <div class="semester-content">
-            ${semesterSubjects.length === 0 ? 
-                '<div class="drop-zone">Arrastra materias aquí</div>' : 
-                semesterSubjects.map(s => createSubjectCard(s).outerHTML).join('')
-            }
-        </div>
-    `;
-    
-    // Event listeners
-    const colorPicker = semesterColumn.querySelector('.color-picker');
-    colorPicker.addEventListener('change', (e) => {
-        const semesterIndex = plannerState.semesters.findIndex(s => s.id === semester.id);
-        if (semesterIndex !== -1) {
-            plannerState.semesters[semesterIndex].color = e.target.value;
-            semesterColumn.style.setProperty('--semester-color', e.target.value);
-            semesterColumn.querySelector('.semester-header').style.background = e.target.value;
-            savePlannerData();
-        }
-    });
-    
-    const toggleBtn = semesterColumn.querySelector('.semester-toggle-btn');
-    toggleBtn.addEventListener('click', () => {
-        const semesterIndex = plannerState.semesters.findIndex(s => s.id === semester.id);
-        if (semesterIndex !== -1) {
-            plannerState.semesters[semesterIndex].collapsed = !plannerState.semesters[semesterIndex].collapsed;
-            render();
-        }
-    });
-    
-    return semesterColumn;
-}
-
-// Función para eliminar semestre
-function deleteSemester(semesterId) {
-    if (confirm('¿Estás seguro de eliminar este semestre? Las materias volverán al banco.')) {
-        // Mover materias del semestre al banco
-        plannerState.subjects.forEach(subject => {
-            if (subject.location === `semester-${semesterId}`) {
-                subject.location = 'bank';
-            }
-        });
-        
-        // Eliminar semestre
-        plannerState.semesters = plannerState.semesters.filter(s => s.id !== semesterId);
-        
-        render();
-        showNotification('Semestre eliminado correctamente', 'success');
-    }
-}
-
-// SIRA mejorado que no borra semestres existentes
-function processSiraData(siraText) {
-    const lines = siraText.split('\n');
-    const processedSubjects = [];
-    const periodsFound = new Set();
-    
-    let currentPeriod = null;
-    let foundAnySubject = false;
-    
-    lines.forEach(line => {
-        // Detectar período con múltiples formatos
-        const periodPatterns = [
-            /PERIODO:\s*(.+)/i,
-            /PERÍODO:\s*(.+)/i,
-            /Periodo:\s*(.+)/i,
-            /Período:\s*(.+)/i
-        ];
-        
-        for (const pattern of periodPatterns) {
-            const match = line.match(pattern);
-            if (match) {
-                currentPeriod = match[1].trim();
-                periodsFound.add(currentPeriod);
-                break;
-            }
-        }
-        
-        // Detectar materias con patrones flexibles
-        const subjectPatterns = [
-            /^(\d{6}C|\d{7}C)\s*\d*\s*\d*\s*(.+?)\s+[A-Z]+\s+[A-Z]+\s+(\d+)\s+([\d.]+)/,
-            /^(\d{6}C|\d{7}C)\s+(.+?)\s+(\d+)\s+([\d.]+)/,
-            /(\d{6}C|\d{7}C).*?(\d+)\s+([\d.]+)$/
-        ];
-        
-        for (const pattern of subjectPatterns) {
-            const match = line.match(pattern);
-            if (match && currentPeriod) {
-                const code = match[1];
-                const credits = parseInt(match[match.length - 2] || match[3]);
-                const grade = parseFloat(match[match.length - 1]);
-                
-                if (grade >= 3.0) {
-                    const existingSubject = plannerState.subjects.find(s => s.id === code);
-                    
-                    if (existingSubject && !existingSubject.completed) {
-                        existingSubject.completed = true;
-                        foundAnySubject = true;
-                        
-                        // Crear semestre solo si no existe
-                        const semesterName = `Semestre - ${currentPeriod}`;
-                        let existingSemester = plannerState.semesters.find(s => s.name === semesterName);
-                        
-                        if (!existingSemester) {
-                            const newSemester = {
-                                id: plannerState.nextSemesterId++,
-                                name: semesterName,
-                                collapsed: false,
-                                color: '#ffdd53'
-                            };
-                            plannerState.semesters.push(newSemester);
-                            existingSemester = newSemester;
-                        }
-                        
-                        existingSubject.location = `semester-${existingSemester.id}`;
-                        processedSubjects.push({
-                            id: code,
-                            period: currentPeriod,
-                            grade: grade
-                        });
-                    }
-                }
-                break;
-            }
-        }
-    });
-    
-    if (!foundAnySubject) {
-        showNotification('No se encontraron materias aprobadas en el formato proporcionado', 'warning');
-        return [];
-    }
-    
-    showNotification(`Se procesaron ${processedSubjects.length} materias de ${periodsFound.size} períodos`, 'success');
-    return processedSubjects;
-}
-
-// Hacer logo clickeable
-function makeLegionLogoClickable() {
-    const logos = document.querySelectorAll('.logo-placeholder-small');
-    logos.forEach(logo => {
-        logo.style.cursor = 'pointer';
-        logo.addEventListener('click', () => {
-            window.open('https://instagram.com/univallelegionestudiantil', '_blank');
-        });
-    });
-}
-
-// Event listeners adicionales
-function setupAdditionalEventListeners() {
-    // Reiniciar datos
-    const resetBtn = document.getElementById('reset-data-btn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            if (confirm('¿Estás seguro de reiniciar todos los datos? Esta acción no se puede deshacer.')) {
-                plannerState = getInitialState();
-                render();
-                showNotification('Datos reiniciados correctamente', 'success');
-            }
-        });
-    }
-    
-    // Hacer logos clickeables
-    makeLegionLogoClickable();
-    
-    // Procesar SIRA mejorado
-    const processSiraBtn = document.getElementById('process-sira-btn');
-    if (processSiraBtn) {
-        processSiraBtn.replaceWith(processSiraBtn.cloneNode(true)); // Remover listeners anteriores
-        
-        document.getElementById('process-sira-btn').addEventListener('click', () => {
-            const siraInput = document.getElementById('sira-input');
-            const siraText = siraInput.value.trim();
-            
-            if (!siraText) {
-                showNotification('Por favor, pega los datos del SIRA', 'warning');
-                return;
-            }
-            
-            try {
-                const processed = processSiraData(siraText);
-                
-                if (processed.length > 0) {
-                    render();
-                    document.getElementById('sira-modal').classList.add('hidden');
-                    siraInput.value = '';
-                } else {
-                    // El error ya se muestra en processSiraData
-                }
-            } catch (error) {
-                console.error('Error al procesar SIRA:', error);
-                showNotification('Error al procesar los datos. Verifica el formato.', 'error');
-            }
-        });
-    }
-}
-
-// Actualizar setupEventListeners
-const originalSetupEventListeners = setupEventListeners;
-setupEventListeners = function() {
-    originalSetupEventListeners();
-    setupAdditionalEventListeners();
-};
-
-// Hacer funciones globales
+// =================== FUNCIONES GLOBALES ===================
 window.deleteSemester = deleteSemester;
+window.removeEquivalency = removeEquivalency;
 window.showNotification = showNotification;
