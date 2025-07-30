@@ -1,5 +1,4 @@
 // =================== CONFIGURACIÓN DE FIREBASE ===================
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDnGsR3zwxDS22OFBoyR0FPntSRnDTXkno",
   authDomain: "planificadoruv.firebaseapp.com",
@@ -69,7 +68,9 @@ registerForm.addEventListener('submit', e => {
         .then(userCredential => {
             return userCredential.user.updateProfile({ displayName: name });
         })
-        .catch(error => { authError.textContent = error.message; });
+        .catch(error => { 
+            authError.textContent = getSpanishErrorMessage(error.message);
+        });
 });
 
 loginForm.addEventListener('submit', e => {
@@ -77,13 +78,33 @@ loginForm.addEventListener('submit', e => {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
     auth.signInWithEmailAndPassword(email, password)
-        .catch(error => { authError.textContent = error.message; });
+        .catch(error => { 
+            authError.textContent = getSpanishErrorMessage(error.message);
+        });
 });
 
 googleSignInBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
-        .catch(error => { authError.textContent = error.message; });
+        .catch(error => { 
+            authError.textContent = getSpanishErrorMessage(error.message);
+        });
 });
+
+function getSpanishErrorMessage(errorMessage) {
+    const errorMap = {
+        'auth/user-not-found': 'Usuario no encontrado',
+        'auth/wrong-password': 'Contraseña incorrecta',
+        'auth/email-already-in-use': 'Este correo ya está registrado',
+        'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres',
+        'auth/invalid-email': 'Correo electrónico inválido',
+        'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde'
+    };
+    
+    for (const [key, value] of Object.entries(errorMap)) {
+        if (errorMessage.includes(key)) return value;
+    }
+    return 'Error de autenticación. Inténtalo de nuevo.';
+}
 
 logoutBtnMain.addEventListener('click', () => auth.signOut());
 logoutBtnCareer.addEventListener('click', () => auth.signOut());
@@ -99,6 +120,7 @@ document.getElementById('career-list').addEventListener('click', e => {
         currentCareerId = e.target.dataset.careerId;
         careerSelectionContainer.classList.add('hidden');
         loadingOverlay.classList.remove('hidden');
+        document.getElementById('loading-text').textContent = 'Cargando tu plan de carrera...';
         loadPlannerData(auth.currentUser.uid, currentCareerId);
     }
 });
@@ -119,19 +141,29 @@ function loadPlannerData(userId, careerId) {
     }, error => {
         console.error("Error al cargar datos: ", error);
         alert("No se pudieron cargar tus datos. Inténtalo de nuevo.");
+        loadingOverlay.classList.add('hidden');
     });
 }
 
 function savePlannerData() {
     if (!auth.currentUser || !currentCareerId) return;
     const plannerDocRef = db.collection('users').doc(auth.currentUser.uid).collection('planners').doc(currentCareerId);
-    return plannerDocRef.set(plannerState, { merge: true });
+    return plannerDocRef.set(plannerState, { merge: true }).catch(error => {
+        console.error("Error al guardar:", error);
+    });
 }
 
 // =================== INICIALIZACIÓN DE LA INTERFAZ DE LA APP ===================
 function initializeAppUI(user) {
     document.getElementById('welcome-message-main').textContent = `¡Bienvenid@, ${user.displayName || 'Usuario'}!`;
     loadPersonalization(user);
+    
+    // Crear semestre inicial si no existe
+    if (plannerState.semesters.length === 0) {
+        plannerState.semesters.push({ id: 1, collapsed: false });
+        plannerState.nextSemesterId = 2;
+    }
+    
     render();
     loadingOverlay.classList.add('hidden');
     appContainer.classList.remove('hidden');
@@ -152,6 +184,7 @@ const predefinedProfElectives = [
     { id: "507122C", name: "DISEÑO INDUSTRIAL CONTEMPORÁNEO", credits: 3 }, { id: "507121C", name: "REUSO Y RECICLAJE CREATIVO", credits: 3 },
     { id: "507120C", name: "MODELOS EN REPETICIÓN", credits: 3 }, { id: "507119C", name: "DISEÑO + ARTE CONTEMPORÁNEO", credits: 3 },
 ];
+
 const predefinedFGElectives = [
     { id: "417016C", name: "ESTRATEGIAS PARA EL APRENDIZAJE AUTÓNOMO", credits: 3 }, { id: "417017C", name: "APROPIACIÓN DIGITAL Y APRENDIZAJE SIGNIFICATIVO", credits: 3 },
     { id: "106030C", name: "HUMANITAS, CIENCIA, AGRICULTURA Y CAMBIO CLIMÁTICO", credits: 3 }, { id: "801127C", name: "CONFLUENCIA DE REALIDADES: NATURALEZA Y SOCIEDAD", credits: 3 },
@@ -232,7 +265,7 @@ function createSubjectCard(subject) {
     const card = document.createElement('div');
     card.id = `subject-${subject.id}`;
     card.dataset.id = subject.id;
-    card.className = 'subject-card p-3 rounded-lg flex flex-col items-start relative';
+    card.className = 'subject-card';
     card.draggable = true;
     
     const prereqsMet = subject.prerequisites.every(pId => plannerState.subjects.find(s => s.id === pId)?.completed);
@@ -240,13 +273,13 @@ function createSubjectCard(subject) {
 
     card.innerHTML = `
         <div class="w-full flex justify-between items-start">
-            <div class="flex-grow">
-                <p class="subject-name text-sm font-medium pr-2">${subject.name}</p>
-                <p class="subject-code text-xs text-secondary">${subject.id}</p>
+            <div class="flex-grow min-w-0 pr-2">
+                <p class="subject-name">${subject.name}</p>
+                <p class="subject-code">${subject.id}</p>
             </div>
-            <span class="credits-badge text-xs font-bold px-2 py-1 rounded-full flex-shrink-0">${subject.credits} C</span>
+            <span class="credits-badge">${subject.credits}C</span>
         </div>
-        ${subject.completed ? '<div class="absolute inset-0 bg-green-500 opacity-20 pointer-events-none"></div><span class="absolute top-1 right-1 text-lg pointer-events-none">✔️</span>' : ''}
+        ${subject.completed ? '<div class="absolute inset-0 bg-green-500/10 pointer-events-none rounded-lg"></div><span class="absolute top-2 right-8 text-green-500 text-lg pointer-events-none">✓</span>' : ''}
     `;
     
     if (subject.completed) card.classList.add('completed');
@@ -261,6 +294,7 @@ function createSubjectCard(subject) {
 function renderSemesters() {
     const grid = document.getElementById('semesters-grid');
     grid.innerHTML = '';
+    
     plannerState.semesters.forEach(semester => {
         const semesterCol = document.createElement('div');
         semesterCol.id = `semester-${semester.id}`;
@@ -274,8 +308,8 @@ function renderSemesters() {
         semesterCol.innerHTML = `
             <div class="semester-header">
                 <h3>Semestre ${semester.id}</h3>
-                <span class="semester-credits font-bold">${creditsInSemester} Créditos</span>
-                <button class="semester-toggle-btn p-1 rounded hover:bg-tertiary">${semester.collapsed ? '▶' : '▼'}</button>
+                <span class="semester-credits">${creditsInSemester}C</span>
+                <button class="semester-toggle-btn">${semester.collapsed ? '▶' : '▼'}</button>
             </div>
             <div class="semester-content"></div>
         `;
@@ -283,13 +317,17 @@ function renderSemesters() {
         const contentEl = semesterCol.querySelector('.semester-content');
         subjectsInSemester.forEach(s => contentEl.appendChild(createSubjectCard(s)));
         
+        // Drag and drop events
         semesterCol.addEventListener('dragover', handleDragOver);
         semesterCol.addEventListener('drop', handleDrop);
+        
+        // Toggle button
         semesterCol.querySelector('.semester-toggle-btn').addEventListener('click', () => {
             const sem = plannerState.semesters.find(s => s.id === semester.id);
             sem.collapsed = !sem.collapsed;
             render();
         });
+        
         grid.appendChild(semesterCol);
     });
 }
@@ -301,11 +339,16 @@ function renderSubjectBank() {
     
     const bankContainer = document.createElement('div');
     bankContainer.id = 'bank-drop-area';
-    bankContainer.className = 'space-y-2';
+    bankContainer.className = 'space-y-2 min-h-[200px] p-2 border-2 border-dashed border-slate-600 rounded-lg';
     bankContainer.addEventListener('dragover', handleDragOver);
     bankContainer.addEventListener('drop', handleDrop);
     
-    bankSubjects.forEach(s => bankContainer.appendChild(createSubjectCard(s)));
+    if (bankSubjects.length === 0) {
+        bankContainer.innerHTML = '<p class="text-center text-slate-400 py-8">Todas las materias han sido asignadas</p>';
+    } else {
+        bankSubjects.forEach(s => bankContainer.appendChild(createSubjectCard(s)));
+    }
+    
     bankContent.appendChild(bankContainer);
 }
 
@@ -314,15 +357,22 @@ function renderStatsBoard() {
     if (!container.innerHTML) {
         const stats = [
             { id: 'total-credits', label: 'CRÉDITOS TOTALES', total: 152 },
-            { id: 'basic-cycle-credits', label: 'CICLO BÁSICO', total: 61 }, // 49 + 12 de inglés
+            { id: 'basic-cycle-credits', label: 'CICLO BÁSICO', total: 61 },
             { id: 'professional-cycle-credits', label: 'CICLO PROFESIONAL', total: 57 },
             { id: 'fg-credits', label: 'FORMACIÓN GENERAL', total: 17 },
             { id: 'prof-electives-credits', label: 'ELECTIVAS PROFESIONALES', total: 17 }
         ];
+        
         stats.forEach(stat => {
             const card = document.createElement('div');
-            card.className = 'text-center bg-secondary p-4 rounded-lg';
-            card.innerHTML = `<h3 class="text-xs font-semibold text-secondary uppercase">${stat.label}</h3><p id="${stat.id}" class="text-xl font-bold">0 / ${stat.total}</p><div class="progress-bar-container mt-2"><div id="${stat.id}-bar" class="progress-bar-fill"></div></div>`;
+            card.className = 'stat-card';
+            card.innerHTML = `
+                <div class="stat-label">${stat.label}</div>
+                <div id="${stat.id}" class="stat-value">0 / ${stat.total}</div>
+                <div class="progress-bar-container">
+                    <div id="${stat.id}-bar" class="progress-bar-fill"></div>
+                </div>
+            `;
             container.appendChild(card);
         });
     }
@@ -345,6 +395,7 @@ function updateStats() {
             barEl.style.width = total > 0 ? `${Math.min((current / total) * 100, 100)}%` : '0%';
         }
     };
+    
     updateStat('total-credits', totalCredits, 152);
     updateStat('basic-cycle-credits', basicCredits, 61);
     updateStat('professional-cycle-credits', profCredits, 57);
@@ -355,6 +406,7 @@ function updateStats() {
 // =================== MANEJADORES DE EVENTOS ===================
 
 document.getElementById('add-semester-btn').addEventListener('click', () => {
+    if (!plannerState.nextSemesterId) plannerState.nextSemesterId = plannerState.semesters.length + 1;
     plannerState.semesters.push({ id: plannerState.nextSemesterId++, collapsed: false });
     render();
 });
@@ -369,10 +421,12 @@ document.getElementById('reset-button').addEventListener('click', () => {
 function toggleSubjectComplete(subjectId) {
     const subject = plannerState.subjects.find(s => s.id === subjectId);
     if (!subject) return;
+    
     if (subject.location === 'bank') {
         alert('Debes arrastrar la materia a un semestre para poder marcarla como cursada.');
         return;
     }
+    
     if (subject.completed) {
         const dependents = plannerState.subjects.filter(s => s.prerequisites.includes(subjectId) && s.completed);
         if (dependents.length > 0) {
@@ -392,13 +446,25 @@ function toggleSubjectComplete(subjectId) {
 }
 
 // --- Drag and Drop ---
-function handleDragStart(e) { draggedElementId = e.target.dataset.id; e.target.classList.add('dragging'); }
-function handleDragEnd(e) { if(e.target) e.target.classList.remove('dragging'); draggedElementId = null; }
-function handleDragOver(e) { e.preventDefault(); }
+function handleDragStart(e) { 
+    draggedElementId = e.target.dataset.id; 
+    e.target.classList.add('dragging'); 
+}
+
+function handleDragEnd(e) { 
+    if(e.target) e.target.classList.remove('dragging'); 
+    draggedElementId = null; 
+}
+
+function handleDragOver(e) { 
+    e.preventDefault(); 
+}
+
 function handleDrop(e) {
     e.preventDefault();
     const dropTarget = e.target.closest('.semester-column, #bank-drop-area');
     if (!dropTarget || !draggedElementId) return;
+    
     const subject = plannerState.subjects.find(s => s.id === draggedElementId);
     if (!subject) return;
     
@@ -436,13 +502,20 @@ document.getElementById('add-equivalence-form').addEventListener('submit', e => 
 function renderEquivalencies() {
     const list = document.getElementById('equivalencies-list');
     list.innerHTML = '';
-    if (!plannerState.equivalencies) return;
+    if (!plannerState.equivalencies || plannerState.equivalencies.length === 0) {
+        list.innerHTML = '<p class="text-center text-slate-400 py-4">No hay equivalencias registradas</p>';
+        return;
+    }
+    
     plannerState.equivalencies.forEach(eq => {
         const item = document.createElement('div');
-        item.className = 'flex justify-between items-center p-2 bg-tertiary rounded-md';
+        item.className = 'flex justify-between items-center p-3 bg-slate-700 rounded-lg';
         item.innerHTML = `
-            <p>${eq.name} (${eq.credits} C)</p>
-            <button data-id="${eq.id}" class="delete-equivalence-btn text-red-500 font-bold">&times;</button>
+            <div>
+                <p class="font-medium">${eq.name}</p>
+                <p class="text-sm text-slate-400">${eq.credits} créditos</p>
+            </div>
+            <button data-id="${eq.id}" class="delete-equivalence-btn text-red-400 hover:text-red-300 font-bold text-xl">&times;</button>
         `;
         item.querySelector('.delete-equivalence-btn').addEventListener('click', (e) => {
             const idToDelete = e.target.dataset.id;
@@ -481,11 +554,27 @@ const populateCatalog = (type) => {
     const searchInput = document.getElementById('elective-search');
     catalogList.innerHTML = '';
     const searchTerm = searchInput.value.toLowerCase();
-    list.filter(e => e.name.toLowerCase().includes(searchTerm) || e.id.toLowerCase().includes(searchTerm))
-        .forEach(elective => {
+    
+    const filteredList = list.filter(e => 
+        e.name.toLowerCase().includes(searchTerm) || 
+        e.id.toLowerCase().includes(searchTerm)
+    );
+    
+    if (filteredList.length === 0) {
+        catalogList.innerHTML = '<p class="text-center text-slate-400 py-4">No se encontraron electivas</p>';
+        return;
+    }
+    
+    filteredList.forEach(elective => {
         const item = document.createElement('div');
-        item.className = 'flex justify-between items-center p-2 bg-tertiary rounded-md';
-        item.innerHTML = `<div><p class="font-semibold">${elective.name}</p><p class="text-xs text-secondary">${elective.id} - ${elective.credits} créditos</p></div><button class="btn-primary text-sm px-3 py-1 rounded-md">Añadir</button>`;
+        item.className = 'flex justify-between items-center p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors';
+        item.innerHTML = `
+            <div>
+                <p class="font-semibold">${elective.name}</p>
+                <p class="text-sm text-slate-400">${elective.id} - ${elective.credits} créditos</p>
+            </div>
+            <button class="btn-primary text-sm px-3 py-1">Añadir</button>
+        `;
         item.querySelector('button').addEventListener('click', () => {
             addElective({ name: elective.name, credits: elective.credits, id: elective.id }, currentElectiveType);
             closeModal(electiveModal);
@@ -496,18 +585,21 @@ const populateCatalog = (type) => {
 
 openFgElectiveBtn.addEventListener('click', () => {
     currentElectiveType = 'fg';
-    document.getElementById('elective-modal-title').textContent = 'Seleccionar Electiva de Formación General';
+    document.getElementById('elective-modal-title').textContent = '📚 Electiva de Formación General';
     populateCatalog('fg');
     openModal(electiveModal);
 });
+
 openProfElectiveBtn.addEventListener('click', () => {
     currentElectiveType = 'prof';
-    document.getElementById('elective-modal-title').textContent = 'Seleccionar Electiva Profesional';
+    document.getElementById('elective-modal-title').textContent = '🎓 Electiva Profesional';
     populateCatalog('prof');
     openModal(electiveModal);
 });
+
 document.getElementById('close-elective-modal-btn').addEventListener('click', () => closeModal(electiveModal));
 document.getElementById('elective-search').addEventListener('input', () => populateCatalog(currentElectiveType));
+
 document.getElementById('add-custom-elective-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('custom-elective-name').value;
@@ -522,9 +614,13 @@ function addElective(electiveData, type) {
         id: electiveData.id || `custom-${plannerState.nextElectiveId++}`,
         name: electiveData.name,
         credits: electiveData.credits,
-        cycle: 'Electiva', area: type === 'fg' ? 'Formación General' : 'Electiva Profesional',
-        prerequisites: [], location: 'bank', completed: false,
-        isElective: true, electiveType: type
+        cycle: 'Electiva', 
+        area: type === 'fg' ? 'Formación General' : 'Electiva Profesional',
+        prerequisites: [], 
+        location: 'bank', 
+        completed: false,
+        isElective: true, 
+        electiveType: type
     };
     plannerState.subjects.push(newElective);
     render();
@@ -546,23 +642,33 @@ document.querySelectorAll('.modal-tab').forEach(tab => {
 
 // Theme Toggle
 const themeToggle = document.getElementById('theme-toggle');
+
 const setAppTheme = (theme) => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('univalleTheme', theme);
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem('univalleTheme', theme);
+    }
     themeToggle.checked = theme === 'light';
 };
-themeToggle.addEventListener('change', () => setAppTheme(themeToggle.checked ? 'light' : 'dark'));
+
+themeToggle.addEventListener('change', () => {
+    setAppTheme(themeToggle.checked ? 'light' : 'dark');
+});
 
 // Personalization
 const profilePicContainer = document.getElementById('profile-pic-container');
 const profilePicUpload = document.getElementById('profile-pic-upload');
+
 profilePicContainer.addEventListener('click', () => profilePicUpload.click());
+
 profilePicUpload.addEventListener('change', (e) => {
     if (e.target.files && e.target.files[0]) {
         const reader = new FileReader();
         reader.onload = (event) => {
             const dataUrl = event.target.result;
-            localStorage.setItem(`userProfilePic_${auth.currentUser.uid}`, dataUrl);
+            if (typeof(Storage) !== "undefined" && auth.currentUser) {
+                localStorage.setItem(`userProfilePic_${auth.currentUser.uid}`, dataUrl);
+            }
             document.getElementById('profile-pic').src = dataUrl;
         };
         reader.readAsDataURL(e.target.files[0]);
@@ -570,34 +676,52 @@ profilePicUpload.addEventListener('change', (e) => {
 });
 
 function loadPersonalization(user) {
-    const savedPic = localStorage.getItem(`userProfilePic_${user.uid}`);
-    if (savedPic) {
-        document.getElementById('profile-pic').src = savedPic;
-    } else {
-        document.getElementById('profile-pic').src = user.photoURL || `https://placehold.co/100x100/2a2a2a/e5e5e5?text=${(user.displayName || 'U').charAt(0)}`;
+    // Load profile picture
+    if (typeof(Storage) !== "undefined") {
+        const savedPic = localStorage.getItem(`userProfilePic_${user.uid}`);
+        if (savedPic) {
+            document.getElementById('profile-pic').src = savedPic;
+        } else {
+            const fallbackSrc = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'Usuario')}&background=3b82f6&color=fff&size=100`;
+            document.getElementById('profile-pic').src = fallbackSrc;
+        }
+        
+        // Load theme
+        const savedTheme = localStorage.getItem('univalleTheme') || 'dark';
+        setAppTheme(savedTheme);
     }
-    const savedTheme = localStorage.getItem('univalleTheme') || 'dark';
-    setAppTheme(savedTheme);
 }
 
 // PDF Generation
 function generatePDF(studentName, studentId) {
     document.getElementById('loading-text').textContent = 'Generando PDF...';
     openModal(loadingOverlay);
+    
     const reportElement = document.createElement('div');
-    reportElement.style.padding = '20px';
-    reportElement.style.fontFamily = 'Arial, sans-serif';
-    reportElement.style.color = '#333';
-    const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+    reportElement.style.cssText = `
+        padding: 20px;
+        font-family: 'Inter', Arial, sans-serif;
+        color: #333;
+        background: white;
+        max-width: 800px;
+        margin: 0 auto;
+    `;
+    
+    const date = new Date().toLocaleDateString('es-ES', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
     let html = `
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="font-size: 24px; margin: 0;">Reporte de Progreso Académico</h1>
-            <p style="font-size: 16px; margin: 5px 0;">Diseño Industrial - Universidad del Valle</p>
+        <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #3b82f6; padding-bottom: 20px;">
+            <h1 style="font-size: 28px; margin: 0; color: #1e293b; font-weight: 700;">Reporte de Progreso Académico</h1>
+            <p style="font-size: 18px; margin: 10px 0; color: #3b82f6; font-weight: 600;">Diseño Industrial - Universidad del Valle</p>
         </div>
-        <div style="margin-bottom: 20px;">
-            <p><strong>Estudiante:</strong> ${studentName}</p>
-            <p><strong>Código:</strong> ${studentId}</p>
-            <p><strong>Fecha:</strong> ${date}</p>
+        <div style="margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <p style="margin: 5px 0; font-size: 16px;"><strong>Estudiante:</strong> ${studentName}</p>
+            <p style="margin: 5px 0; font-size: 16px;"><strong>Código:</strong> ${studentId}</p>
+            <p style="margin: 5px 0; font-size: 16px;"><strong>Fecha:</strong> ${date}</p>
         </div>
     `;
 
@@ -610,46 +734,137 @@ function generatePDF(studentName, studentId) {
     const totalCredits = basicCredits + profCredits + fgCredits + profElectivesCredits + completedEquivalencies;
 
     html += `
-        <h2 style="font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Resumen de Créditos</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
-            <tr style="background-color: #eee;">
-                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Componente</th>
-                <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Créditos Cursados / Totales</th>
-            </tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Ciclo Básico</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${basicCredits} / 61</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Ciclo Profesional</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${profCredits} / 57</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Formación General</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${fgCredits} / 17</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Electivas Profesionales</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${profElectivesCredits} / 17</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Equivalencias</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${completedEquivalencies}</td></tr>
-            <tr style="background-color: #eee; font-weight: bold;"><td style="padding: 8px; border: 1px solid #ddd;">TOTAL APROBADO</td><td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${totalCredits} / 152</td></tr>
+        <h2 style="font-size: 22px; color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; margin-bottom: 20px;">📊 Resumen de Créditos</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <thead>
+                <tr style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;">
+                    <th style="padding: 12px; text-align: left; font-weight: 600;">Componente</th>
+                    <th style="padding: 12px; text-align: right; font-weight: 600;">Créditos Cursados / Totales</th>
+                    <th style="padding: 12px; text-align: right; font-weight: 600;">Progreso</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="background: #f8fafc;"><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">Ciclo Básico</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">${basicCredits} / 61</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Math.round((basicCredits/61)*100)}%</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">Ciclo Profesional</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">${profCredits} / 57</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Math.round((profCredits/57)*100)}%</td></tr>
+                <tr style="background: #f8fafc;"><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">Formación General</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">${fgCredits} / 17</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Math.round((fgCredits/17)*100)}%</td></tr>
+                <tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">Electivas Profesionales</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">${profElectivesCredits} / 17</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right;">${Math.round((profElectivesCredits/17)*100)}%</td></tr>
+                <tr style="background: #f8fafc;"><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">Equivalencias</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">${completedEquivalencies}</td><td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right;">-</td></tr>
+                <tr style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; font-weight: 700;"><td style="padding: 12px;">TOTAL APROBADO</td><td style="padding: 12px; text-align: right;">${totalCredits} / 152</td><td style="padding: 12px; text-align: right;">${Math.round((totalCredits/152)*100)}%</td></tr>
+            </tbody>
         </table>
     `;
 
-    html += `<h2 style="font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">Plan de Carrera</h2>`;
+    html += `<h2 style="font-size: 22px; color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; margin-bottom: 20px;">📅 Plan de Carrera</h2>`;
+    
     plannerState.semesters.forEach(semester => {
-        html += `<h3 style="font-size: 18px; margin-top: 20px; margin-bottom: 10px;">Semestre ${semester.id}</h3>`;
         const subjectsInSemester = plannerState.subjects.filter(s => s.location === semester.id);
+        const semesterCredits = subjectsInSemester.reduce((sum, s) => sum + s.credits, 0);
+        
+        html += `<h3 style="font-size: 18px; margin-top: 25px; margin-bottom: 12px; color: #1e293b; background: #f1f5f9; padding: 10px; border-radius: 6px;">📚 Semestre ${semester.id} (${semesterCredits} créditos)</h3>`;
+        
         if (subjectsInSemester.length > 0) {
-            html += `<table style="width: 100%; border-collapse: collapse; font-size: 12px;">`;
+            html += `<table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px;">`;
             subjectsInSemester.forEach(subject => {
-                html += `<tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #eee;">${subject.name}</td>
-                    <td style="padding: 5px; border-bottom: 1px solid #eee; text-align: right;">${subject.credits} C</td>
-                    <td style="padding: 5px; border-bottom: 1px solid #eee; text-align: right;">${subject.completed ? '<strong>Cursada</strong>' : 'Pendiente'}</td>
+                const statusColor = subject.completed ? '#22c55e' : '#6b7280';
+                const statusText = subject.completed ? '✅ Cursada' : '⏳ Pendiente';
+                html += `<tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 8px; font-weight: 500;">${subject.name}</td>
+                    <td style="padding: 8px; text-align: center; color: #6b7280; font-size: 11px;">${subject.id}</td>
+                    <td style="padding: 8px; text-align: center; font-weight: 600;">${subject.credits}C</td>
+                    <td style="padding: 8px; text-align: center; color: ${statusColor}; font-weight: 600;">${statusText}</td>
                 </tr>`;
             });
             html += `</table>`;
         } else {
-            html += `<p style="font-size: 12px;">No hay materias planeadas.</p>`;
+            html += `<p style="font-size: 14px; color: #6b7280; font-style: italic; padding: 10px; background: #f9fafb; border-radius: 6px;">No hay materias planeadas para este semestre.</p>`;
         }
     });
 
+    // Add equivalencies if any
+    if (plannerState.equivalencies && plannerState.equivalencies.length > 0) {
+        html += `<h2 style="font-size: 22px; color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; margin: 30px 0 20px 0;">⚖️ Materias por Equivalencia</h2>`;
+        html += `<table style="width: 100%; border-collapse: collapse; font-size: 13px;">`;
+        plannerState.equivalencies.forEach(eq => {
+            html += `<tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 8px; font-weight: 500;">${eq.name}</td>
+                <td style="padding: 8px; text-align: center; font-weight: 600;">${eq.credits}C</td>
+                <td style="padding: 8px; text-align: center; color: #22c55e; font-weight: 600;">✅ Homologada</td>
+            </tr>`;
+        });
+        html += `</table>`;
+    }
+
+    html += `
+        <div style="margin-top: 40px; padding: 20px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <p style="font-size: 12px; color: #6b7280; margin: 0; text-align: center;">
+                Reporte generado por el Planificador de Carrera - Univalle<br>
+                Desarrollado por la Representación de Diseño Industrial y Legión Estudiantil
+            </p>
+        </div>
+    `;
+
     reportElement.innerHTML = html;
+    
     const opt = {
-        margin: 10, filename: `Reporte_Progreso_${studentName.replace(/\s/g, '_')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 },
+        margin: [10, 10, 10, 10],
+        filename: `Reporte_Progreso_${studentName.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().from(reportElement).set(opt).save().then(() => closeModal(loadingOverlay));
+    html2pdf().from(reportElement).set(opt).save().then(() => {
+        closeModal(loadingOverlay);
+    }).catch(error => {
+        console.error('Error generating PDF:', error);
+        closeModal(loadingOverlay);
+        alert('Error al generar el PDF. Inténtalo de nuevo.');
+    });
 }
+
+// =================== INICIALIZACIÓN CUANDO EL DOM ESTÁ LISTO ===================
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial logo size
+    const legionLogo = document.getElementById('legion-logo');
+    const headerLogo = document.getElementById('header-logo');
+    
+    if (legionLogo) {
+        legionLogo.style.width = '100px';
+        legionLogo.style.height = '100px';
+    }
+    
+    if (headerLogo) {
+        headerLogo.style.width = '48px';
+        headerLogo.style.height = '48px';
+    }
+    
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.classList.add('hidden');
+        }
+    });
+    
+    // Prevent modal content clicks from closing modal
+    document.querySelectorAll('.modal-content').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+    
+    // Handle escape key to close modals
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(modal => {
+                modal.classList.add('hidden');
+            });
+        }
+    });
+});
+
+// =================== FUNCIÓN AUXILIAR PARA DEBUGGING ===================
+window.debugPlanner = function() {
+    console.log('Current planner state:', plannerState);
+    console.log('Current user:', auth.currentUser);
+    console.log('Current career ID:', currentCareerId);
+};
