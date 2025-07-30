@@ -220,19 +220,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Bank toggle
-    const toggleBankBtn = document.getElementById('toggle-bank-btn');
-    const leftPanel = document.getElementById('left-panel');
-    
-    if (toggleBankBtn && leftPanel) {
-        toggleBankBtn.addEventListener('click', () => {
-            leftPanel.classList.toggle('collapsed');
-        });
-    }
+    // Panel toggle mejorado
+    setupPanelToggle();
     
     // Hacer logos clickeables para Instagram
     makeLegionLogosClickable();
 });
+
+// =================== FUNCIÓN PARA TOGGLE DE PANEL IZQUIERDO ===================
+function setupPanelToggle() {
+    const toggleBankBtn = document.getElementById('toggle-bank-btn');
+    const leftPanel = document.getElementById('left-panel');
+    const mainContent = document.querySelector('.main-content');
+    
+    if (toggleBankBtn && leftPanel && mainContent) {
+        toggleBankBtn.addEventListener('click', () => {
+            leftPanel.classList.toggle('collapsed');
+            mainContent.classList.toggle('left-collapsed');
+        });
+    }
+}
 
 // =================== LOGOS CLICKEABLES ===================
 function makeLegionLogosClickable() {
@@ -365,22 +372,26 @@ function getInitialState() {
     };
 }
 
-// =================== INICIALIZACIÓN DE LA APP ===================
+// =================== INICIALIZACIÓN DE LA APP CON FOTO DE USUARIO ===================
 function initializeAppUI(user) {
     const welcomeMsg = document.getElementById('welcome-message-main');
-    if (welcomeMsg) {
-        const welcomeContent = welcomeMsg.querySelector('.welcome-content');
-        const welcomeText = welcomeContent?.querySelector('.welcome-text') || welcomeMsg;
-        
-        const photoURL = user.photoURL;
+    const userAvatar = document.getElementById('user-avatar');
+    
+    if (welcomeMsg && userAvatar) {
+        const welcomeText = welcomeMsg.querySelector('.welcome-text');
         const displayName = user.displayName || 'Usuario';
         
-        if (photoURL && welcomeContent) {
-            welcomeContent.innerHTML = `
-                <img src="${photoURL}" alt="Foto de perfil" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
-                <span class="welcome-text">¡Bienvenid@, ${displayName}!</span>
-            `;
+        // Actualizar avatar
+        if (user.photoURL) {
+            userAvatar.innerHTML = `<img src="${user.photoURL}" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
         } else {
+            // Mostrar inicial del nombre o emoji por defecto
+            const initial = displayName.charAt(0).toUpperCase();
+            userAvatar.innerHTML = `<span style="font-size: 14px; font-weight: 600;">${initial}</span>`;
+        }
+        
+        // Actualizar texto de bienvenida
+        if (welcomeText) {
             welcomeText.textContent = `¡Bienvenid@, ${displayName}!`;
         }
     }
