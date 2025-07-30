@@ -23,7 +23,7 @@
         <div class="auth-card glassmorphism">
             <div class="auth-header">
                 <div class="logo-placeholder" title="Logo Legion Estudiantil">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhE..." alt="Legion Estudiantil" style="width: 100%; height: 100%; object-fit: contain; border-radius: inherit;">
+                    <div class="logo-fallback">📚</div>
                 </div>
                 <h1>Planificador Académico</h1>
                 <p>Universidad del Valle</p>
@@ -59,7 +59,7 @@
             </div>
 
             <button id="google-signin-btn" class="btn-google">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -81,7 +81,7 @@
         <div class="career-header">
             <div class="career-header-content">
                 <div class="logo-placeholder" title="Logo Legion Estudiantil" id="legion-logo-career">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhE..." alt="Legion Estudiantil" style="width: 100%; height: 100%; object-fit: contain; border-radius: inherit; cursor: pointer;">
+                    <div class="logo-fallback">🎓</div>
                 </div>
                 <div class="career-welcome">
                     <h2 id="welcome-message-career">¡Bienvenid@, Usuario!</h2>
@@ -111,7 +111,7 @@
             <div class="header-content">
                 <div class="header-left">
                     <div class="logo-placeholder-main" title="Logo Legion Estudiantil" id="legion-logo-main">
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhE..." alt="Legion Estudiantil" style="width: 100%; height: 100%; object-fit: contain; border-radius: inherit; cursor: pointer;">
+                        <div class="logo-fallback">🎓</div>
                     </div>
                     <div class="header-info">
                         <h1>Diseño Industrial</h1>
@@ -123,6 +123,9 @@
                     <div class="welcome-message-container">
                         <button id="toggle-welcome-btn" class="toggle-welcome-btn">
                             <div id="welcome-message-main" class="welcome-content">
+                                <div class="user-avatar" id="user-avatar">
+                                    <span class="avatar-fallback">👤</span>
+                                </div>
                                 <span class="welcome-text">¡Bienvenid@, Usuario!</span>
                             </div>
                             <span class="toggle-icon">▼</span>
@@ -145,14 +148,14 @@
             </div>
         </header>
 
-        <!-- Main Content -->
+        <!-- Main Content con layout mejorado -->
         <main class="main-content">
             <!-- Left Panel -->
             <aside id="left-panel" class="left-panel">
                 <!-- Stats Board -->
                 <div class="stats-section">
                     <div class="section-header">
-                        <h3>Progreso Académico</h3>
+                        <h3>📊 Progreso Académico</h3>
                     </div>
                     <div class="stats-board"></div>
                 </div>
@@ -160,7 +163,7 @@
                 <!-- Subject Bank -->
                 <div class="bank-section">
                     <div class="section-header">
-                        <h3>Banco de Materias</h3>
+                        <h3>📚 Banco de Materias</h3>
                         <button id="toggle-bank-btn" class="toggle-bank-btn">
                             <span class="toggle-icon">◀</span>
                         </button>
@@ -182,38 +185,117 @@
                 </div>
             </aside>
 
-            <!-- Right Panel -->
-            <section id="right-panel" class="right-panel">
+            <!-- Center Panel (Semestres) -->
+            <section id="center-panel" class="center-panel">
                 <div class="semesters-container">
                     <div class="semesters-header">
-                        <h2>Plan de Estudios</h2>
+                        <h2>📅 Plan de Estudios</h2>
                         <div class="semester-controls">
-                            <button id="collapse-all-btn" class="btn-secondary">Contraer Todo</button>
-                            <button id="expand-all-btn" class="btn-secondary">Expandir Todo</button>
+                            <button id="collapse-all-btn" class="btn-secondary">
+                                <span>📋</span> Contraer Todo
+                            </button>
+                            <button id="expand-all-btn" class="btn-secondary">
+                                <span>📖</span> Expandir Todo
+                            </button>
                         </div>
                     </div>
                     <div id="semesters-grid" class="semesters-grid-container"></div>
+                </div>
+            </section>
+
+            <!-- Right Panel (Herramientas) -->
+            <aside id="right-panel" class="right-panel">
+                <div class="tools-section">
+                    <div class="section-header">
+                        <h3>🛠️ Herramientas</h3>
+                    </div>
                     
-                    <!-- Botones secundarios reorganizados -->
-                    <div class="bottom-actions">
-                        <button id="add-equivalency-btn" class="btn-secondary">
-                            <span>🔄</span> Gestionar Equivalencias
+                    <div class="tool-card">
+                        <button id="add-equivalency-btn" class="tool-btn">
+                            <span class="tool-icon">🔄</span>
+                            <div class="tool-content">
+                                <h4>Equivalencias</h4>
+                                <p>Gestionar materias homologadas</p>
+                            </div>
                         </button>
-                        <button id="export-report-btn" class="btn-secondary">
-                            <span>📊</span> Exportar Reporte
+                    </div>
+                    
+                    <div class="tool-card">
+                        <button id="export-report-btn" class="tool-btn">
+                            <span class="tool-icon">📊</span>
+                            <div class="tool-content">
+                                <h4>Exportar Reporte</h4>
+                                <p>Descargar plan de estudios</p>
+                            </div>
                         </button>
                     </div>
                 </div>
-            </section>
+
+                <!-- Universidad Links -->
+                <div class="university-links-section">
+                    <div class="section-header">
+                        <h3>🏛️ Enlaces Universitarios</h3>
+                    </div>
+                    
+                    <div class="links-grid">
+                        <a href="https://linktr.ee/legionestudiantil" target="_blank" class="link-card legion">
+                            <span class="link-icon">🤝</span>
+                            <div class="link-content">
+                                <h4>Legión Estudiantil</h4>
+                                <p>Apoyo y dudas universitarias</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://sira.univalle.edu.co/sra" target="_blank" class="link-card sira">
+                            <span class="link-icon">📝</span>
+                            <div class="link-content">
+                                <h4>SIRA</h4>
+                                <p>Matrícula y notas</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://proxse25.univalle.edu.co/login" target="_blank" class="link-card financial">
+                            <span class="link-icon">💳</span>
+                            <div class="link-content">
+                                <h4>Matrícula Financiera</h4>
+                                <p>Recibos y pagos</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://registro.univalle.edu.co/estudiantes-pregrado/pregrado-programacion-academica" target="_blank" class="link-card academic">
+                            <span class="link-icon">📅</span>
+                            <div class="link-content">
+                                <h4>Programación Académica</h4>
+                                <p>Horarios y salones</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://diseno.univalle.edu.co/res-188" target="_blank" class="link-card design">
+                            <span class="link-icon">🎨</span>
+                            <div class="link-content">
+                                <h4>Diseño Industrial</h4>
+                                <p>Pensum oficial</p>
+                            </div>
+                        </a>
+                        
+                        <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="link-card contact">
+                            <span class="link-icon">✉️</span>
+                            <div class="link-content">
+                                <h4>Dirección Programa</h4>
+                                <p>Contacto oficial</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </aside>
         </main>
     </div>
 
-    <!-- Modals -->
-    <!-- SIRA Import Modal -->
+    <!-- Modals (sin cambios en estructura, solo mejorados) -->
     <div id="sira-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="modal-close-btn">&times;</button>
-            <h2>Importar datos del SIRA</h2>
+            <h2>📄 Importar datos del SIRA</h2>
             <div class="modal-tabs">
                 <div class="modal-tab active" data-tab="import">Importar</div>
                 <div class="modal-tab" data-tab="guide">Guía</div>
@@ -232,7 +314,7 @@
             <div id="guide-tab" class="modal-tab-content">
                 <h3>Cómo obtener los datos del SIRA:</h3>
                 <ol>
-                    <li>Ingresa al sistema SIRA de la Universidad</li>
+                    <li>Ingresa al <a href="https://sira.univalle.edu.co/sra" target="_blank">sistema SIRA</a></li>
                     <li>Ve a la sección de "Registro de Calificaciones"</li>
                     <li>Copia todo el contenido o solo fragmentos que incluyan:</li>
                 </ol>
@@ -253,7 +335,7 @@ O solo líneas como:
     <div id="equivalency-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="modal-close-btn">&times;</button>
-            <h2>Gestionar Equivalencias</h2>
+            <h2>🔄 Gestionar Equivalencias</h2>
             
             <div class="equivalency-form">
                 <div class="form-row">
@@ -308,9 +390,6 @@ O solo líneas como:
             <p id="loading-text">Cargando...</p>
         </div>
     </div>
-
-    <!-- Notification Container -->
-    <div id="notification-container" class="notification-container"></div>
 
     <script src="script.js"></script>
 </body>
