@@ -81,7 +81,7 @@
         <div class="career-header">
             <div class="career-header-content">
                 <div class="logo-placeholder" title="Logo Legion Estudiantil" id="legion-logo-career">
-                    <img src="images/logole.png" alt="Legion Estudiantil" style="width: 100%; height: 100%; object-fit: contain; border-radius: inherit; cursor: pointer;">
+                    <img src="images/logole.png" alt="Legion Estudiantil" style="width: 100%; height: 100%; object-fit: contain; border-radius: inherit;">
                 </div>
                 <div class="career-welcome">
                     <h2 id="welcome-message-career">¡Bienvenid@, Usuario!</h2>
@@ -106,12 +106,12 @@
 
     <!-- Main App Container -->
     <div id="app-container" class="hidden">
-        <!-- Header -->
+        <!-- Header AMPLIADO -->
         <header class="app-header">
             <div class="header-content">
                 <div class="header-left">
                     <div class="logo-main-container" title="Logo Legion Estudiantil" id="legion-logo-main">
-                        <img src="images/logole.png" alt="Legion Estudiantil" style="width: 200px; height: auto; object-fit: contain; cursor: pointer;">
+                        <img src="images/logole.png" alt="Legion Estudiantil" style="width: 120px; height: auto; object-fit: contain;">
                     </div>
                     <div class="header-info">
                         <h1>Diseño Industrial</h1>
@@ -148,7 +148,7 @@
             </div>
         </header>
 
-        <!-- Main Content con layout mejorado -->
+        <!-- Main Content -->
         <main class="main-content">
             <!-- Left Panel -->
             <aside id="left-panel" class="left-panel">
@@ -160,18 +160,18 @@
                     <div class="stats-board"></div>
                 </div>
 
-                <!-- Subject Bank -->
+                <!-- Subject Bank CONTRAÍBLE -->
                 <div class="bank-section">
                     <div class="section-header">
                         <h3>📚 Banco de Materias</h3>
                         <button id="toggle-bank-btn" class="toggle-bank-btn">
-                            <span class="toggle-icon">◀</span>
+                            <span class="toggle-icon">▼</span>
                         </button>
                     </div>
                     <div id="subject-bank" class="subject-bank"></div>
                 </div>
 
-                <!-- Action Buttons Principal -->
+                <!-- Action Buttons -->
                 <div class="action-buttons">
                     <button id="add-semester-btn" class="btn-primary">
                         <span>➕</span> Agregar Semestre
@@ -231,7 +231,7 @@
                     </div>
                 </div>
 
-                <!-- Universidad Links con colores alternados -->
+                <!-- Universidad Links -->
                 <div class="university-links-section">
                     <div class="section-header">
                         <h3>🏛️ Enlaces Universitarios</h3>
@@ -302,8 +302,8 @@
             </div>
             
             <div id="import-tab" class="modal-tab-content active">
-                <p>Pega aquí la información de tus materias aprobadas desde el SIRA:</p>
-                <textarea id="sira-input" class="form-input" rows="10" placeholder="Pega aquí el contenido del SIRA...&#10;&#10;Puedes pegar solo fragmentos, el sistema reconocerá las materias automáticamente."></textarea>
+                <p>Pega aquí la información completa de tus materias aprobadas desde el SIRA:</p>
+                <textarea id="sira-input" class="form-input" rows="12" placeholder="Pega aquí TODO el contenido del SIRA tal como aparece...&#10;&#10;El sistema procesará automáticamente las materias aprobadas."></textarea>
                 <div class="import-status" id="import-status"></div>
                 <div class="modal-actions">
                     <button id="process-sira-btn" class="btn-primary">Procesar Datos</button>
@@ -315,18 +315,16 @@
                 <h3>Cómo obtener los datos del SIRA:</h3>
                 <ol>
                     <li>Ingresa al <a href="https://sira.univalle.edu.co/sra" target="_blank">sistema SIRA</a></li>
-                    <li>Ve a la sección de "Registro de Calificaciones"</li>
-                    <li>Copia todo el contenido o solo fragmentos que incluyan:</li>
+                    <li>Ve a "Registro de Calificaciones"</li>
+                    <li>Copia y pega TODO el contenido tal como aparece</li>
                 </ol>
                 <div class="sira-example">
-                    <pre>PERIODO: AGOSTO/2023 - DICIEMBRE/2023
-507013C MATEMÁTICAS 2 3.1
-507017C MÉTODOS DE DISEÑO 2 4.0
-
-O solo líneas como:
-507025C PROYECTO - SER HUMANO 7 4.5</pre>
+                    <pre>El sistema reconoce automáticamente:
+- Códigos de materia: 507035C, 204025C, etc.
+- Calificaciones: 3.0, 4.5, etc.
+- Períodos académicos</pre>
                 </div>
-                <p><strong>Importante:</strong> El sistema es flexible y reconocerá las materias automáticamente sin borrar tus semestres existentes.</p>
+                <p><strong>Importante:</strong> Pega todo el contenido sin modificar. El sistema procesará solo las materias aprobadas.</p>
             </div>
         </div>
     </div>
