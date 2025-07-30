@@ -21,7 +21,7 @@
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 60px;
     --header-height: 70px;
-    --animation-speed: 0.3s;
+    --animation-speed: 0.25s;
     --border-radius: 12px;
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.15);
@@ -57,13 +57,18 @@ body {
     display: none !important;
 }
 
-/* Mejoras en animaciones globales */
+/* Mejoras en animaciones globales - MÁS SUAVES */
 * {
     transition: background-color var(--animation-speed) ease, 
                 color var(--animation-speed) ease, 
-                border-color var(--animation-speed) ease,
-                transform var(--animation-speed) ease,
-                opacity var(--animation-speed) ease;
+                border-color var(--animation-speed) ease;
+}
+
+/* Transiciones específicas para elementos que se mueven */
+.subject-card {
+    transition: transform var(--animation-speed) cubic-bezier(0.4, 0.0, 0.2, 1),
+                opacity var(--animation-speed) ease,
+                box-shadow var(--animation-speed) ease !important;
 }
 
 /* Glassmorphism mejorado */
@@ -80,7 +85,7 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-/* Auth Container (sin cambios mayores) */
+/* Auth Container */
 .auth-container {
     min-height: 100vh;
     display: flex;
@@ -155,7 +160,7 @@ body {
     margin-bottom: 40px;
 }
 
-/* Logo placeholders CORREGIDOS */
+/* Logo placeholders CORREGIDOS con la nueva ruta */
 .logo-placeholder, .logo-placeholder-main {
     display: flex;
     align-items: center;
@@ -175,6 +180,13 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.logo-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: inherit;
+}
+
 .logo-placeholder-main {
     width: 45px;
     height: 45px;
@@ -187,6 +199,13 @@ body {
     box-shadow: 0 4px 16px rgba(255, 221, 83, 0.3);
 }
 
+.logo-placeholder-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: inherit;
+}
+
 .logo-fallback {
     font-size: 24px;
     opacity: 0.8;
@@ -196,10 +215,10 @@ body {
     font-size: 20px;
 }
 
-/* User Avatar mejorado */
+/* User Avatar MEJORADO Y MÁS GRANDE */
 .user-avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
@@ -208,8 +227,9 @@ body {
     background: var(--career-yellow);
     color: #000;
     font-weight: 600;
-    margin-right: 8px;
+    margin-right: 12px;
     transition: all var(--animation-speed) ease;
+    flex-shrink: 0;
 }
 
 .user-avatar img {
@@ -427,11 +447,12 @@ body {
     position: relative;
 }
 
+/* WELCOME MESSAGE MEJORADO - MÁS GRANDE */
 .toggle-welcome-btn {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 12px 20px;
+    padding: 14px 24px;
     color: var(--text-primary);
     cursor: pointer;
     display: flex;
@@ -439,7 +460,8 @@ body {
     gap: 12px;
     font-weight: 500;
     transition: all var(--animation-speed) ease;
-    max-width: 300px;
+    min-width: 320px;
+    max-width: 400px;
     white-space: nowrap;
     overflow: hidden;
 }
@@ -451,23 +473,35 @@ body {
 }
 
 .toggle-welcome-btn.collapsed {
+    min-width: 50px;
     max-width: 50px;
-    padding: 12px;
+    padding: 14px;
 }
 
 .toggle-welcome-btn.collapsed .welcome-content {
     opacity: 0;
     transform: scale(0);
+    width: 0;
 }
 
 .welcome-content {
     display: flex;
     align-items: center;
     transition: all var(--animation-speed) ease;
+    min-width: 0;
+    flex: 1;
+}
+
+.welcome-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px;
 }
 
 .toggle-icon {
     transition: transform var(--animation-speed) ease;
+    flex-shrink: 0;
 }
 
 .toggle-welcome-btn.collapsed .toggle-icon {
@@ -679,7 +713,7 @@ input:checked + .slider:before {
     width: 0%;
 }
 
-/* Subject Bank ANIMADO */
+/* Subject Bank */
 .bank-section {
     flex: 1;
 }
@@ -693,19 +727,22 @@ input:checked + .slider:before {
     border: 1px solid var(--border-color);
 }
 
-/* Subject Cards MEJORADAS */
+/* Subject Cards MEJORADAS - CLICKEABLES */
 .subject-card {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-left: 4px solid var(--career-yellow);
     border-radius: 8px;
     padding: 12px;
-    cursor: grab;
-    transition: all var(--animation-speed) ease;
+    cursor: pointer;
     position: relative;
     margin-bottom: 8px;
     user-select: none;
     transform: translateX(0);
+}
+
+.subject-card[draggable="true"] {
+    cursor: grab;
 }
 
 .subject-card:hover {
@@ -719,8 +756,8 @@ input:checked + .slider:before {
 }
 
 .subject-card.dragging {
-    opacity: 0.7;
-    transform: rotate(3deg) scale(1.02);
+    opacity: 0.8;
+    transform: rotate(2deg) scale(1.02);
     z-index: 1000;
     box-shadow: var(--shadow-lg);
 }
@@ -769,7 +806,7 @@ input:checked + .slider:before {
     right: 8px;
 }
 
-/* Action Buttons MEJORADOS */
+/* Action Buttons */
 .action-buttons {
     display: flex;
     flex-direction: column;
@@ -828,7 +865,7 @@ input:checked + .slider:before {
     border-radius: 16px;
     display: flex;
     flex-direction: column;
-    transition: all var(--animation-speed) ease;
+    transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
     box-shadow: var(--shadow-sm);
     position: relative;
     animation: slideInUp 0.5s ease forwards;
@@ -865,17 +902,22 @@ input:checked + .slider:before {
     overflow: hidden;
 }
 
+.semester-column.collapsed .semester-controls {
+    display: none;
+}
+
 .semester-column.collapsed .semester-header h3 {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
+    font-size: 14px;
 }
 
+/* HEADER DE SEMESTRE REORGANIZADO */
 .semester-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
+    flex-direction: column;
+    padding: 16px;
     border-bottom: 1px solid var(--border-color);
     border-radius: 14px 14px 0 0;
     position: relative;
@@ -885,20 +927,28 @@ input:checked + .slider:before {
     transition: all var(--animation-speed) ease;
 }
 
+/* Fila superior: título y controles principales */
+.semester-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
 .semester-header h3 {
     font-size: 16px;
     font-weight: 700;
     color: #000;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+    margin-right: 8px;
 }
 
-.semester-credits {
-    font-size: 12px;
-    font-weight: 600;
-    background: rgba(0, 0, 0, 0.15);
-    color: #000;
-    padding: 4px 8px;
-    border-radius: 6px;
+/* Controles principales (toggle y eliminar) */
+.semester-main-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .semester-toggle-btn {
@@ -918,12 +968,86 @@ input:checked + .slider:before {
     transform: scale(1.1);
 }
 
+.delete-semester-btn {
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all var(--animation-speed) ease;
+    opacity: 0;
+}
+
+.semester-header:hover .delete-semester-btn {
+    opacity: 1;
+}
+
+.delete-semester-btn:hover {
+    background: var(--primary-red-hover);
+    transform: scale(1.05);
+}
+
+/* Fila inferior: controles secundarios */
+.semester-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.semester-left-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-picker {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all var(--animation-speed) ease;
+}
+
+.color-picker:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.mark-all-btn {
+    background: rgba(34, 197, 94, 0.8);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    transition: all var(--animation-speed) ease;
+}
+
+.mark-all-btn:hover {
+    background: #22c55e;
+    transform: translateY(-1px);
+}
+
+.semester-credits {
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.15);
+    color: #000;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
 .semester-content {
-    padding: 20px;
+    padding: 16px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     overflow-y: auto;
     min-height: 200px;
     border-radius: 0 0 14px 14px;
@@ -950,7 +1074,7 @@ input:checked + .slider:before {
     transform: scale(1.02);
 }
 
-/* Right Panel COMPLETAMENTE NUEVO */
+/* Right Panel */
 .right-panel {
     background: var(--bg-secondary);
     border-left: 1px solid var(--border-color);
@@ -1082,7 +1206,7 @@ input:checked + .slider:before {
     line-height: 1.2;
 }
 
-/* Buttons MEJORADOS */
+/* Buttons */
 .btn-primary {
     background: linear-gradient(135deg, var(--career-yellow), #f59e0b);
     color: #000;
@@ -1197,7 +1321,7 @@ input:checked + .slider:before {
     transform: scale(1.05);
 }
 
-/* Modales MEJORADOS */
+/* Modales */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1296,7 +1420,7 @@ input:checked + .slider:before {
     animation: fadeIn var(--animation-speed) ease;
 }
 
-/* Form Elements MEJORADOS */
+/* Form Elements */
 .form-input, .form-textarea {
     width: 100%;
     padding: 14px 16px;
@@ -1369,7 +1493,7 @@ input:checked + .slider:before {
     border-top: 1px solid var(--border-color);
 }
 
-/* Search Results MEJORADOS */
+/* Search Results */
 .search-results {
     max-height: 200px;
     overflow-y: auto;
@@ -1401,7 +1525,7 @@ input:checked + .slider:before {
     border-bottom: none;
 }
 
-/* Loading MEJORADO */
+/* Loading */
 .loading-overlay {
     position: fixed;
     top: 0;
@@ -1436,7 +1560,7 @@ input:checked + .slider:before {
     100% { transform: rotate(360deg); }
 }
 
-/* Sistema de notificaciones MEJORADO */
+/* Sistema de notificaciones */
 .notification {
     position: fixed;
     top: 20px;
@@ -1541,7 +1665,7 @@ input:checked + .slider:before {
     border: 1px solid rgba(226, 5, 17, 0.2);
 }
 
-/* Scrollbars PERSONALIZADOS */
+/* Scrollbars */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -1562,7 +1686,7 @@ input:checked + .slider:before {
     background: var(--career-yellow);
 }
 
-/* RESPONSIVIDAD MEJORADA */
+/* RESPONSIVIDAD */
 @media (max-width: 1200px) {
     :root {
         --sidebar-width: 250px;
@@ -1600,6 +1724,7 @@ input:checked + .slider:before {
     .toggle-welcome-btn {
         width: 100%;
         max-width: none;
+        min-width: auto;
         justify-content: center;
     }
     
@@ -1610,7 +1735,7 @@ input:checked + .slider:before {
 
 @media (max-width: 768px) {
     :root {
-        --header-height: 80px;
+        --header-height: 90px;
     }
     
     .auth-card {
@@ -1633,6 +1758,10 @@ input:checked + .slider:before {
         order: 2;
         width: 100%;
         margin-top: 8px;
+    }
+    
+    .toggle-welcome-btn {
+        min-width: 200px;
     }
     
     .logo-placeholder {
@@ -1691,6 +1820,11 @@ input:checked + .slider:before {
         transform: scale(1.05);
         box-shadow: var(--shadow-md);
     }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1722,5 +1856,13 @@ input:checked + .slider:before {
     .user-avatar {
         width: 28px;
         height: 28px;
+    }
+    
+    .toggle-welcome-btn {
+        min-width: 150px;
+    }
+    
+    .welcome-text {
+        font-size: 13px;
     }
 }
