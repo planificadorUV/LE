@@ -243,7 +243,7 @@ function setupPanelToggle() {
 
 // =================== LOGOS CLICKEABLES ===================
 function makeLegionLogosClickable() {
-    const logos = document.querySelectorAll('#legion-logo-career, #legion-logo-main, .logo-placeholder-main');
+    const logos = document.querySelectorAll('#legion-logo-career, #legion-logo-main, .logo-main-container');
     logos.forEach(logo => {
         logo.style.cursor = 'pointer';
         logo.addEventListener('click', () => {
@@ -490,13 +490,13 @@ function renderSemesters() {
     container.innerHTML = '';
     
     plannerState.semesters.forEach(semester => {
-        container.appendChild(renderSemesterWithColorPicker(semester));
+        container.appendChild(renderSemesterWithControls(semester));
     });
     
     setupDragAndDrop();
 }
 
-function renderSemesterWithColorPicker(semester) {
+function renderSemesterWithControls(semester) {
     const semesterColumn = document.createElement('div');
     semesterColumn.className = `semester-column ${semester.collapsed ? 'collapsed' : ''}`;
     semesterColumn.dataset.semesterId = semester.id;
@@ -506,38 +506,19 @@ function renderSemesterWithColorPicker(semester) {
     
     semesterColumn.innerHTML = `
         <div class="semester-header" style="background: ${semester.color || '#ffdd53'}; color: #000;">
-            <button class="delete-semester-btn" title="Eliminar semestre" style="
-                background: var(--primary-red);
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 4px 8px;
-                cursor: pointer;
-                font-size: 12px;
-                position: absolute;
-                top: 8px;
-                left: 8px;
-                opacity: 0;
-                transition: all 0.3s ease;
-                z-index: 10;
-            ">✕</button>
-            <input type="color" class="color-picker" value="${semester.color || '#ffdd53'}" 
-                   title="Cambiar color del semestre" style="
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                width: 28px;
-                height: 28px;
-                border-radius: 50%;
-                border: 2px solid rgba(0, 0, 0, 0.2);
-                cursor: pointer;
-                z-index: 10;
-            ">
             <h3>${semester.name || `Semestre ${semester.id}`}</h3>
-            <div class="semester-credits" style="background: rgba(0, 0, 0, 0.1); color: #000;">${totalCredits}C</div>
-            <button class="semester-toggle-btn" title="Colapsar/Expandir">
-                ${semester.collapsed ? '▶' : '▼'}
-            </button>
+            <div class="semester-header-controls">
+                <input type="color" class="color-picker" value="${semester.color || '#ffdd53'}" 
+                       title="Cambiar color del semestre">
+                <button class="mark-all-btn" title="Marcar todas como vistas">
+                    ✓ Todas
+                </button>
+                <div class="semester-credits">${totalCredits}C</div>
+                <button class="semester-toggle-btn" title="Colapsar/Expandir">
+                    ${semester.collapsed ? '▶' : '▼'}
+                </button>
+                <button class="delete-semester-btn" title="Eliminar semestre">✕</button>
+            </div>
         </div>
         <div class="semester-content">
             ${semesterSubjects.length === 0 ? 
@@ -547,19 +528,8 @@ function renderSemesterWithColorPicker(semester) {
         </div>
     `;
     
-    // Mostrar botón eliminar al hacer hover
-    const header = semesterColumn.querySelector('.semester-header');
-    const deleteBtn = semesterColumn.querySelector('.delete-semester-btn');
-    
-    header.addEventListener('mouseenter', () => {
-        deleteBtn.style.opacity = '1';
-    });
-    
-    header.addEventListener('mouseleave', () => {
-        deleteBtn.style.opacity = '0';
-    });
-    
     // Event listener para eliminar semestre
+    const deleteBtn = semesterColumn.querySelector('.delete-semester-btn');
     deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         deleteSemester(semester.id);
@@ -571,9 +541,17 @@ function renderSemesterWithColorPicker(semester) {
         const semesterIndex = plannerState.semesters.findIndex(s => s.id === semester.id);
         if (semesterIndex !== -1) {
             plannerState.semesters[semesterIndex].color = e.target.value;
+            const header = semesterColumn.querySelector('.semester-header');
             header.style.background = e.target.value;
             savePlannerData();
         }
+    });
+    
+    // Event listener para marcar todas como vistas
+    const markAllBtn = semesterColumn.querySelector('.mark-all-btn');
+    markAllBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        markAllSubjectsInSemester(semester.id);
     });
     
     // Toggle collapse
@@ -587,6 +565,24 @@ function renderSemesterWithColorPicker(semester) {
     });
     
     return semesterColumn;
+}
+
+// =================== FUNCIÓN PARA MARCAR TODAS LAS MATERIAS DE UN SEMESTRE ===================
+function markAllSubjectsInSemester(semesterId) {
+    let changedCount = 0;
+    plannerState.subjects.forEach(subject => {
+        if (subject.location === `semester-${semesterId}` && !subject.completed) {
+            subject.completed = true;
+            changedCount++;
+        }
+    });
+    
+    if (changedCount > 0) {
+        render();
+        showNotification(`${changedCount} materias marcadas como vistas`, 'success');
+    } else {
+        showNotification('Todas las materias ya están marcadas como vistas', 'warning');
+    }
 }
 
 function renderEquivalencies() {
@@ -638,7 +634,28 @@ function createSubjectCard(subject) {
         <div class="credits-badge">${subject.credits}C</div>
     `;
     
+    // Event listener para marcar/desmarcar como vista
+    card.addEventListener('click', (e) => {
+        // Solo si no está siendo arrastrada
+        if (!e.target.classList.contains('dragging')) {
+            toggleSubjectCompleted(subject.id);
+        }
+    });
+    
     return card;
+}
+
+// =================== FUNCIÓN PARA MARCAR/DESMARCAR MATERIA COMO VISTA ===================
+function toggleSubjectCompleted(subjectId) {
+    const subject = plannerState.subjects.find(s => s.id === subjectId);
+    if (subject) {
+        subject.completed = !subject.completed;
+        render();
+        showNotification(
+            `Materia ${subject.completed ? 'marcada como vista' : 'desmarcada'}`, 
+            'success'
+        );
+    }
 }
 
 // =================== FUNCIONES DE GESTIÓN ===================
@@ -740,10 +757,12 @@ function handleDrop(e) {
     }
 }
 
-// =================== ESTADÍSTICAS ===================
+// =================== ESTADÍSTICAS CORREGIDAS ===================
 function updateStats() {
     const completedSubjects = plannerState.subjects.filter(s => s.completed);
-    const totalCredits = completedSubjects.reduce((sum, s) => sum + s.credits, 0);
+    
+    // Calcular créditos solo de materias del pensum (no equivalencias)
+    const pensumCredits = completedSubjects.reduce((sum, s) => sum + s.credits, 0);
     
     const basicCredits = completedSubjects
         .filter(s => s.cycle === 'Básico')
@@ -757,10 +776,12 @@ function updateStats() {
         .filter(s => s.area === 'Formación General')
         .reduce((sum, s) => sum + s.credits, 0);
     
+    // Créditos de equivalencias se cuentan APARTE
     const equivalencyCredits = plannerState.equivalencies
         .reduce((sum, eq) => sum + eq.credits, 0);
     
-    updateStatCard('total-credits', totalCredits + equivalencyCredits, 152);
+    // Total incluye pensum + equivalencias
+    updateStatCard('total-credits', pensumCredits + equivalencyCredits, 152);
     updateStatCard('basic-cycle-credits', basicCredits, 61);
     updateStatCard('professional-cycle-credits', profCredits, 57);
     updateStatCard('fg-credits', fgCredits, 17);
@@ -781,7 +802,7 @@ function updateStatCard(id, current, total) {
     }
 }
 
-// =================== IMPORTAR SIRA MEJORADO ===================
+// =================== IMPORTAR SIRA CORREGIDO ===================
 function processSiraData(siraText) {
     const lines = siraText.split('\n');
     const processedSubjects = [];
@@ -1091,3 +1112,5 @@ function setupModalTabs() {
 window.deleteSemester = deleteSemester;
 window.removeEquivalency = removeEquivalency;
 window.showNotification = showNotification;
+window.toggleSubjectCompleted = toggleSubjectCompleted;
+window.markAllSubjectsInSemester = markAllSubjectsInSemester;
