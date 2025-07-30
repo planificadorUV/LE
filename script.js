@@ -311,9 +311,14 @@ function initializeAppUI(user) {
         plannerState.nextSemesterId = 2;
     }
     
-    render();
+    // FORZAR RENDER INMEDIATO
     loadingOverlay.classList.add('hidden');
     appContainer.classList.remove('hidden');
+    
+    // Render múltiple para asegurar carga
+    render();
+    setTimeout(() => render(), 100);
+    setTimeout(() => render(), 500);
     
     setupEventListeners();
     renderEquivalencyModal();
