@@ -1,6 +1,6 @@
 // =================== CONFIGURACIÓN DE FIREBASE ===================
 const firebaseConfig = {
-  apiKey: "AIzaSyDnGsR3zwxDs22OFboyR0FPntSRnDTXkno", // REEMPLAZA ESTO CON TU API KEY
+  apiKey: "AIzaSyDnGsR3zwxDS22OFBoyR0FPntSRnDTXkno", // REEMPLAZA ESTO CON TU API KEY
   authDomain: "planificadoruv.firebaseapp.com",
   projectId: "planificadoruv",
   storageBucket: "planificadoruv.firebasestorage.app",
