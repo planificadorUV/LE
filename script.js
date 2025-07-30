@@ -1,11 +1,13 @@
 // =================== CONFIGURACIÓN DE FIREBASE ===================
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDnGsR3zwxDS22OFBoyR0FPntSRnDTXkno", // REEMPLAZA ESTO CON TU API KEY
+  apiKey: "AIzaSyDnGsR3zwxDS22OFBoyR0FPntSRnDTXkno",
   authDomain: "planificadoruv.firebaseapp.com",
   projectId: "planificadoruv",
   storageBucket: "planificadoruv.firebasestorage.app",
   messagingSenderId: "289578190596",
-  appId: "1:289578190596:web:d45140a8bd7aff44b13251"
+  appId: "1:289578190596:web:d45140a8bd7aff44b13251",
+  measurementId: "G-WQVMB3XP2W"
 };
 
 // =================== INICIALIZACIÓN DE SERVICIOS ===================
