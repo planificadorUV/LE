@@ -882,3 +882,254 @@ function setupModalTabs() {
 
 // Función global para remover equivalencias (llamada desde HTML)
 window.removeEquivalency = removeEquivalency;
+// =================== FUNCIONES MEJORADAS ===================
+
+// Sistema de notificaciones
+function showNotification(message, type = 'success') {
+    // Eliminar notificación anterior si existe
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
+}
+
+// Función mejorada para renderizar semestre con botón eliminar
+function renderSemesterWithColorPicker(semester) {
+    const semesterColumn = document.createElement('div');
+    semesterColumn.className = `semester-column ${semester.collapsed ? 'collapsed' : ''}`;
+    semesterColumn.dataset.semesterId = semester.id;
+    semesterColumn.style.setProperty('--semester-color', semester.color || '#ffdd53');
+    
+    const semesterSubjects = plannerState.subjects.filter(s => s.location === `semester-${semester.id}`);
+    const totalCredits = semesterSubjects.reduce((sum, s) => sum + s.credits, 0);
+    
+    semesterColumn.innerHTML = `
+        <div class="semester-header" style="background: ${semester.color || '#ffdd53'}">
+            <button class="delete-semester-btn" title="Eliminar semestre" onclick="deleteSemester(${semester.id})">
+                ✕
+            </button>
+            <input type="color" class="color-picker" value="${semester.color || '#ffdd53'}" 
+                   title="Cambiar color del semestre">
+            <h3>${semester.name || `Semestre ${semester.id}`}</h3>
+            <div class="semester-credits">${totalCredits}C</div>
+            <button class="semester-toggle-btn" title="Colapsar/Expandir">
+                ${semester.collapsed ? '▶' : '▼'}
+            </button>
+        </div>
+        <div class="semester-content">
+            ${semesterSubjects.length === 0 ? 
+                '<div class="drop-zone">Arrastra materias aquí</div>' : 
+                semesterSubjects.map(s => createSubjectCard(s).outerHTML).join('')
+            }
+        </div>
+    `;
+    
+    // Event listeners
+    const colorPicker = semesterColumn.querySelector('.color-picker');
+    colorPicker.addEventListener('change', (e) => {
+        const semesterIndex = plannerState.semesters.findIndex(s => s.id === semester.id);
+        if (semesterIndex !== -1) {
+            plannerState.semesters[semesterIndex].color = e.target.value;
+            semesterColumn.style.setProperty('--semester-color', e.target.value);
+            semesterColumn.querySelector('.semester-header').style.background = e.target.value;
+            savePlannerData();
+        }
+    });
+    
+    const toggleBtn = semesterColumn.querySelector('.semester-toggle-btn');
+    toggleBtn.addEventListener('click', () => {
+        const semesterIndex = plannerState.semesters.findIndex(s => s.id === semester.id);
+        if (semesterIndex !== -1) {
+            plannerState.semesters[semesterIndex].collapsed = !plannerState.semesters[semesterIndex].collapsed;
+            render();
+        }
+    });
+    
+    return semesterColumn;
+}
+
+// Función para eliminar semestre
+function deleteSemester(semesterId) {
+    if (confirm('¿Estás seguro de eliminar este semestre? Las materias volverán al banco.')) {
+        // Mover materias del semestre al banco
+        plannerState.subjects.forEach(subject => {
+            if (subject.location === `semester-${semesterId}`) {
+                subject.location = 'bank';
+            }
+        });
+        
+        // Eliminar semestre
+        plannerState.semesters = plannerState.semesters.filter(s => s.id !== semesterId);
+        
+        render();
+        showNotification('Semestre eliminado correctamente', 'success');
+    }
+}
+
+// SIRA mejorado que no borra semestres existentes
+function processSiraData(siraText) {
+    const lines = siraText.split('\n');
+    const processedSubjects = [];
+    const periodsFound = new Set();
+    
+    let currentPeriod = null;
+    let foundAnySubject = false;
+    
+    lines.forEach(line => {
+        // Detectar período con múltiples formatos
+        const periodPatterns = [
+            /PERIODO:\s*(.+)/i,
+            /PERÍODO:\s*(.+)/i,
+            /Periodo:\s*(.+)/i,
+            /Período:\s*(.+)/i
+        ];
+        
+        for (const pattern of periodPatterns) {
+            const match = line.match(pattern);
+            if (match) {
+                currentPeriod = match[1].trim();
+                periodsFound.add(currentPeriod);
+                break;
+            }
+        }
+        
+        // Detectar materias con patrones flexibles
+        const subjectPatterns = [
+            /^(\d{6}C|\d{7}C)\s*\d*\s*\d*\s*(.+?)\s+[A-Z]+\s+[A-Z]+\s+(\d+)\s+([\d.]+)/,
+            /^(\d{6}C|\d{7}C)\s+(.+?)\s+(\d+)\s+([\d.]+)/,
+            /(\d{6}C|\d{7}C).*?(\d+)\s+([\d.]+)$/
+        ];
+        
+        for (const pattern of subjectPatterns) {
+            const match = line.match(pattern);
+            if (match && currentPeriod) {
+                const code = match[1];
+                const credits = parseInt(match[match.length - 2] || match[3]);
+                const grade = parseFloat(match[match.length - 1]);
+                
+                if (grade >= 3.0) {
+                    const existingSubject = plannerState.subjects.find(s => s.id === code);
+                    
+                    if (existingSubject && !existingSubject.completed) {
+                        existingSubject.completed = true;
+                        foundAnySubject = true;
+                        
+                        // Crear semestre solo si no existe
+                        const semesterName = `Semestre - ${currentPeriod}`;
+                        let existingSemester = plannerState.semesters.find(s => s.name === semesterName);
+                        
+                        if (!existingSemester) {
+                            const newSemester = {
+                                id: plannerState.nextSemesterId++,
+                                name: semesterName,
+                                collapsed: false,
+                                color: '#ffdd53'
+                            };
+                            plannerState.semesters.push(newSemester);
+                            existingSemester = newSemester;
+                        }
+                        
+                        existingSubject.location = `semester-${existingSemester.id}`;
+                        processedSubjects.push({
+                            id: code,
+                            period: currentPeriod,
+                            grade: grade
+                        });
+                    }
+                }
+                break;
+            }
+        }
+    });
+    
+    if (!foundAnySubject) {
+        showNotification('No se encontraron materias aprobadas en el formato proporcionado', 'warning');
+        return [];
+    }
+    
+    showNotification(`Se procesaron ${processedSubjects.length} materias de ${periodsFound.size} períodos`, 'success');
+    return processedSubjects;
+}
+
+// Hacer logo clickeable
+function makeLegionLogoClickable() {
+    const logos = document.querySelectorAll('.logo-placeholder-small');
+    logos.forEach(logo => {
+        logo.style.cursor = 'pointer';
+        logo.addEventListener('click', () => {
+            window.open('https://instagram.com/univallelegionestudiantil', '_blank');
+        });
+    });
+}
+
+// Event listeners adicionales
+function setupAdditionalEventListeners() {
+    // Reiniciar datos
+    const resetBtn = document.getElementById('reset-data-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de reiniciar todos los datos? Esta acción no se puede deshacer.')) {
+                plannerState = getInitialState();
+                render();
+                showNotification('Datos reiniciados correctamente', 'success');
+            }
+        });
+    }
+    
+    // Hacer logos clickeables
+    makeLegionLogoClickable();
+    
+    // Procesar SIRA mejorado
+    const processSiraBtn = document.getElementById('process-sira-btn');
+    if (processSiraBtn) {
+        processSiraBtn.replaceWith(processSiraBtn.cloneNode(true)); // Remover listeners anteriores
+        
+        document.getElementById('process-sira-btn').addEventListener('click', () => {
+            const siraInput = document.getElementById('sira-input');
+            const siraText = siraInput.value.trim();
+            
+            if (!siraText) {
+                showNotification('Por favor, pega los datos del SIRA', 'warning');
+                return;
+            }
+            
+            try {
+                const processed = processSiraData(siraText);
+                
+                if (processed.length > 0) {
+                    render();
+                    document.getElementById('sira-modal').classList.add('hidden');
+                    siraInput.value = '';
+                } else {
+                    // El error ya se muestra en processSiraData
+                }
+            } catch (error) {
+                console.error('Error al procesar SIRA:', error);
+                showNotification('Error al procesar los datos. Verifica el formato.', 'error');
+            }
+        });
+    }
+}
+
+// Actualizar setupEventListeners
+const originalSetupEventListeners = setupEventListeners;
+setupEventListeners = function() {
+    originalSetupEventListeners();
+    setupAdditionalEventListeners();
+};
+
+// Hacer funciones globales
+window.deleteSemester = deleteSemester;
+window.showNotification = showNotification;
