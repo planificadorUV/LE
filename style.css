@@ -1866,3 +1866,40 @@ input:checked + .slider:before {
         font-size: 13px;
     }
 }
+
+/* QUITAR ANIMACIONES PROBLEMÁTICAS */
+.semester-column {
+    /* Sin animación de entrada */
+    animation: none !important;
+    transition: width 0.2s ease, min-width 0.2s ease !important;
+}
+
+.semester-content {
+    /* Transición más suave para colapsar */
+    transition: opacity 0.2s ease !important;
+}
+
+.semester-column.collapsed .semester-content {
+    /* Sin animaciones complejas de escala */
+    transform: none !important;
+    transition: opacity 0.2s ease !important;
+}
+
+/* Hacer las materias más clickeables */
+.subject-card {
+    cursor: pointer !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+}
+
+.subject-card:hover {
+    transform: translateY(-1px) !important;
+}
+
+.subject-card:active {
+    transform: translateY(0px) scale(0.98) !important;
+}
+
+.subject-card.dragging {
+    cursor: grabbing !important;
+    transform: rotate(1deg) scale(1.01) !important;
+}
