@@ -654,24 +654,35 @@ function createSubjectCard(subject) {
     return card;
 }
 
-// =================== FUNCIÓN CORREGIDA PARA MARCAR/DESMARCAR ===================
 function toggleSubjectCompleted(subjectId) {
     const subject = plannerState.subjects.find(s => s.id === subjectId);
     if (subject) {
+        // Si está en el banco, no debería poder marcarse como completada
+        if (subject.location === 'bank') {
+            showNotification('Las materias en el banco no pueden marcarse como vistas. Muévelas a un semestre primero.', 'warning');
+            return;
+        }
+        
+        // Solo alternar completado si está en un semestre
         subject.completed = !subject.completed;
-        
-        // Guardar inmediatamente
-        savePlannerData();
-        
-        // Re-renderizar
         render();
-        
         showNotification(
             `${subject.name} ${subject.completed ? 'marcada como vista ✅' : 'desmarcada ❌'}`, 
             'success'
         );
     }
 }
+
+// Cuando se mueve una materia al banco, auto-destacar
+function moveSubjectToBank(subjectId) {
+    const subject = plannerState.subjects.find(s => s.id === subjectId);
+    if (subject) {
+        subject.location = 'bank';
+        subject.completed = false; // AUTO-DESTACAR al mover al banco
+        render();
+    }
+}
+
 
 // =================== FUNCIONES DE GESTIÓN ===================
 function deleteSemester(semesterId) {
@@ -848,7 +859,7 @@ function processSiraData(siraText) {
         const cleanLine = line.trim();
         if (!cleanLine) return;
         
-        /// Detectar período y asignar número de semestre incremental
+       // Detectar período y asignar número de semestre incremental
 const periodPatterns = [
     /PERIODO:\s*(.+)/i,
     /PERÍODO:\s*(.+)/i,
@@ -859,34 +870,29 @@ const periodPatterns = [
     /Fecha\s+Matrícula:\s*(.+)/i
 ];
 
+// Mapa para convertir períodos a números de semestre
 let semesterCount = 0;
-let currentPeriod = null;
-let periodToSemester = {};
+let periodToSemesterMap = {};
 
-lines.forEach(line => {
-    const cleanLine = line.trim();
-    if (!cleanLine) return;
-    
-    // Detectar períodos
-    for (const pattern of periodPatterns) {
-        const match = cleanLine.match(pattern);
-        if (match) {
-            const periodString = match[1].trim();
-            
-            // Si es un período nuevo, asignarle el siguiente número
-            if (!(periodString in periodToSemester)) {
-                semesterCount++;
-                periodToSemester[periodString] = semesterCount;
-            }
-            
-            // Usar "Semestre X" en lugar de la fecha
-            currentPeriod = `Semestre ${periodToSemester[periodString]}`;
-            periodsFound.add(currentPeriod); // Agregar el nombre limpio
-            return; // Continuar con la siguiente línea
+// En el procesamiento de líneas:
+for (const pattern of periodPatterns) {
+    const match = cleanLine.match(pattern);
+    if (match) {
+        const periodString = match[1].trim();
+        
+        // Si es un período nuevo, asignar el siguiente número
+        if (!periodToSemesterMap[periodString]) {
+            semesterCount++;
+            periodToSemesterMap[periodString] = semesterCount;
         }
+        
+        // Usar nombre limpio en lugar de fecha
+        currentPeriod = `Semestre ${periodToSemesterMap[periodString]}`;
+        periodsFound.add(currentPeriod);
+        return;
     }
-    
-});
+}
+
 
         
         // Detectar materias con patrones basados en el formato real del SIRA
