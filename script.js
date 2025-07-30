@@ -845,13 +845,13 @@ function updateStatCard(id, current, total) {
     }
 }
 
-// =================== IMPORTAR SIRA TOTALMENTE CORREGIDO ===================
+// =================== IMPORTAR SIRA CORREGIDO PARA TU FORMATO ===================
 function processSiraData(siraText) {
     const lines = siraText.split('\n');
     const processedSubjects = [];
     const periodsFound = new Set();
     
-    let currentPeriod = null;
+    let currentSemester = null;
     let foundAnySubject = false;
     let processedCount = 0;
     
@@ -859,57 +859,20 @@ function processSiraData(siraText) {
         const cleanLine = line.trim();
         if (!cleanLine) return;
         
-       // Detectar período y asignar número de semestre incremental
-const periodPatterns = [
-    /PERIODO:\s*(.+)/i,
-    /PERÍODO:\s*(.+)/i,
-    /Periodo:\s*(.+)/i,
-    /Período:\s*(.+)/i,
-    /^PERIODO\s+(.+)/i,
-    /^PERÍODO\s+(.+)/i,
-    /Fecha\s+Matrícula:\s*(.+)/i
-];
-
-// Mapa para convertir períodos a números de semestre
-let semesterCount = 0;
-let periodToSemesterMap = {};
-
-// En el procesamiento de líneas:
-for (const pattern of periodPatterns) {
-    const match = cleanLine.match(pattern);
-    if (match) {
-        const periodString = match[1].trim();
+        // Detectar etiquetas de semestre que el usuario añade manualmente
+        const semesterPattern = /^SEMESTRE\s+(\d+):/i;
+        const semesterMatch = cleanLine.match(semesterPattern);
         
-        // Si es un período nuevo, asignar el siguiente número
-        if (!periodToSemesterMap[periodString]) {
-            semesterCount++;
-            periodToSemesterMap[periodString] = semesterCount;
+        if (semesterMatch) {
+            const semesterNum = parseInt(semesterMatch[1]);
+            currentSemester = `Semestre ${semesterNum}`;
+            periodsFound.add(currentSemester);
+            return;
         }
         
-        // Usar nombre limpio en lugar de fecha
-        currentPeriod = `Semestre ${periodToSemesterMap[periodString]}`;
-        periodsFound.add(currentPeriod);
-        return;
-    }
-}
-
-
-        
-        // Detectar materias con patrones basados en el formato real del SIRA
+        // Detectar materias (código + calificación al final)
         const subjectPatterns = [
-            // Formato tabla: CÓDIGO NÚMERO NÚMERO NOMBRE TIPO TIPO TIPO NÚMERO DECIMAL
-            /^(\d{6}C|\d{7}C)\s+\d+\s+\d+\s+(.+?)\s+[A-Z]\s+[A-Z]{2,3}\s+[A-Z]{2,4}\s+(\d+)\s+([\d.]+)$/,
-            
-            // Formato alternativo con espacios múltiples
-            /^(\d{6}C|\d{7}C)\s+(.+?)\s+[A-Z]\s+[A-Z]{2,3}\s+[A-Z]{2,4}\s+(\d+)\s+([\d.]+)$/,
-            
-            // Formato más simple con solo código y calificación
-            /^(\d{6}C|\d{7}C).*?([\d.]+)\s*$/,
-            
-            // Formato con tabulaciones
-            /^(\d{6}C|\d{7}C)[\s\t]+.*?[\s\t]+([\d.]+)[\s\t]*$/,
-            
-            // Formato línea completa flexible
+            /^(\d{6}C|\d{7}C).*?([\d.]+)$/,
             /(\d{6}C|\d{7}C)[\s\S]*?([\d.]+)(?:\s|$)/
         ];
         
@@ -917,12 +880,12 @@ for (const pattern of periodPatterns) {
             const match = cleanLine.match(pattern);
             if (match) {
                 const code = match[1];
+                
+                // Buscar calificación al final de la línea
+                const numbers = cleanLine.match(/[\d.]+/g);
                 let grade = 0;
                 
-                // Obtener la calificación (último número en la línea)
-                const numbers = cleanLine.match(/[\d.]+/g);
                 if (numbers && numbers.length > 0) {
-                    // Buscar el último número que parezca una calificación (entre 0.0 y 5.0)
                     for (let i = numbers.length - 1; i >= 0; i--) {
                         const num = parseFloat(numbers[i]);
                         if (num >= 0.0 && num <= 5.0) {
@@ -932,7 +895,7 @@ for (const pattern of periodPatterns) {
                     }
                 }
                 
-                // Solo procesar si la calificación es aprobatoria (>= 3.0)
+                // Solo procesar materias aprobadas
                 if (grade >= 3.0) {
                     const existingSubject = plannerState.subjects.find(s => s.id === code);
                     
@@ -941,15 +904,14 @@ for (const pattern of periodPatterns) {
                         foundAnySubject = true;
                         processedCount++;
                         
-                        // Crear semestre solo si hay período
-                        if (currentPeriod) {
-                            const semesterName = `${currentPeriod}`;
-                            let existingSemester = plannerState.semesters.find(s => s.name === semesterName);
+                        // Crear o encontrar semestre
+                        if (currentSemester) {
+                            let existingSemester = plannerState.semesters.find(s => s.name === currentSemester);
                             
                             if (!existingSemester) {
                                 const newSemester = {
                                     id: plannerState.nextSemesterId++,
-                                    name: semesterName,
+                                    name: currentSemester,
                                     collapsed: false,
                                     color: '#ffdd53'
                                 };
@@ -962,7 +924,7 @@ for (const pattern of periodPatterns) {
                         
                         processedSubjects.push({
                             id: code,
-                            period: currentPeriod,
+                            semester: currentSemester,
                             grade: grade
                         });
                     }
@@ -973,13 +935,14 @@ for (const pattern of periodPatterns) {
     });
     
     if (!foundAnySubject) {
-        showNotification('No se encontraron materias aprobadas. Verifica que el formato incluya códigos de materia (ej: 507035C) y calificaciones mayores a 3.0', 'warning');
+        showNotification('No se encontraron materias aprobadas. Usa el formato: "SEMESTRE X:" seguido de las materias de ese semestre', 'warning');
         return [];
     }
     
-    showNotification(`✅ Se procesaron ${processedCount} materias${periodsFound.size > 0 ? ` de ${periodsFound.size} períodos` : ''}`, 'success');
+    showNotification(`✅ Se procesaron ${processedCount} materias en ${periodsFound.size} semestres`, 'success');
     return processedSubjects;
 }
+
 
 // =================== MODAL DE EQUIVALENCIAS ===================
 function renderEquivalencyModal() {
