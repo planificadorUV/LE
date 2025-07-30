@@ -504,6 +504,7 @@ function renderSemesterWithControls(semester) {
     const semesterSubjects = plannerState.subjects.filter(s => s.location === `semester-${semester.id}`);
     const totalCredits = semesterSubjects.reduce((sum, s) => sum + s.credits, 0);
     
+    // SIN ANIMACIONES PROBLEMÁTICAS - renderizado directo
     semesterColumn.innerHTML = `
         <div class="semester-header" style="background: ${semester.color || '#ffdd53'}; color: #000;">
             <h3>${semester.name || `Semestre ${semester.id}`}</h3>
@@ -612,7 +613,7 @@ function renderEquivalencies() {
     });
 }
 
-// =================== CREACIÓN DE ELEMENTOS ===================
+// =================== CREACIÓN DE ELEMENTOS CORREGIDA ===================
 function createSubjectCard(subject) {
     const card = document.createElement('div');
     card.id = `subject-${subject.id}`;
@@ -634,29 +635,53 @@ function createSubjectCard(subject) {
         <div class="credits-badge">${subject.credits}C</div>
     `;
     
-    // Event listener para marcar/desmarcar como vista
+    // Event listener CORREGIDO para marcar/desmarcar como vista
     card.addEventListener('click', (e) => {
-        // Solo si no está siendo arrastrada
-        if (!e.target.classList.contains('dragging')) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Solo si no está siendo arrastrada y no está bloqueada
+        if (!card.classList.contains('dragging') && !isLocked) {
             toggleSubjectCompleted(subject.id);
         }
+    });
+    
+    // Separar los eventos de drag de los de click
+    card.addEventListener('dragstart', (e) => {
+        card.classList.add('dragging');
+        // Cancelar el click durante el drag
+        card.style.pointerEvents = 'none';
+        setTimeout(() => {
+            card.style.pointerEvents = 'auto';
+        }, 100);
+    });
+    
+    card.addEventListener('dragend', (e) => {
+        card.classList.remove('dragging');
     });
     
     return card;
 }
 
-// =================== FUNCIÓN PARA MARCAR/DESMARCAR MATERIA COMO VISTA ===================
+// =================== FUNCIÓN CORREGIDA PARA MARCAR/DESMARCAR ===================
 function toggleSubjectCompleted(subjectId) {
     const subject = plannerState.subjects.find(s => s.id === subjectId);
     if (subject) {
         subject.completed = !subject.completed;
+        
+        // Guardar inmediatamente
+        savePlannerData();
+        
+        // Re-renderizar
         render();
+        
         showNotification(
-            `Materia ${subject.completed ? 'marcada como vista' : 'desmarcada'}`, 
+            `${subject.name} ${subject.completed ? 'marcada como vista ✅' : 'desmarcada ❌'}`, 
             'success'
         );
     }
 }
+
 
 // =================== FUNCIONES DE GESTIÓN ===================
 function deleteSemester(semesterId) {
@@ -802,106 +827,6 @@ function updateStatCard(id, current, total) {
     }
 }
 
-// =================== IMPORTAR SIRA CORREGIDO ===================
-function processSiraData(siraText) {
-    const lines = siraText.split('\n');
-    const processedSubjects = [];
-    const periodsFound = new Set();
-    
-    let currentPeriod = null;
-    let foundAnySubject = false;
-    let processedCount = 0;
-    
-    lines.forEach(line => {
-        // Detectar período con múltiples formatos
-        const periodPatterns = [
-            /PERIODO:\s*(.+)/i,
-            /PERÍODO:\s*(.+)/i,
-            /Periodo:\s*(.+)/i,
-            /Período:\s*(.+)/i
-        ];
-        
-        for (const pattern of periodPatterns) {
-            const match = line.match(pattern);
-            if (match) {
-                currentPeriod = match[1].trim();
-                periodsFound.add(currentPeriod);
-                break;
-            }
-        }
-        
-        // Detectar materias con patrones flexibles
-        const subjectPatterns = [
-            /^(\d{6}C|\d{7}C)\s*\d*\s*\d*\s*(.+?)\s+[A-Z]+\s+[A-Z]+\s+(\d+)\s+([\d.]+)/,
-            /^(\d{6}C|\d{7}C)\s+(.+?)\s+(\d+)\s+([\d.]+)/,
-            /(\d{6}C|\d{7}C).*?(\d+)\s+([\d.]+)$/,
-            /(\d{6}C|\d{7}C)\s+(.+?)\s+([\d.]+)/
-        ];
-        
-        for (const pattern of subjectPatterns) {
-            const match = line.match(pattern);
-            if (match) {
-                const code = match[1];
-                let credits = 0;
-                let grade = 0;
-                
-                // Extraer créditos y calificación dependiendo del patrón
-                if (match.length >= 5) {
-                    credits = parseInt(match[3]) || 0;
-                    grade = parseFloat(match[4]) || 0;
-                } else if (match.length >= 4) {
-                    grade = parseFloat(match[3]) || 0;
-                } else {
-                    continue;
-                }
-                
-                if (grade >= 3.0) {
-                    const existingSubject = plannerState.subjects.find(s => s.id === code);
-                    
-                    if (existingSubject && !existingSubject.completed) {
-                        existingSubject.completed = true;
-                        foundAnySubject = true;
-                        processedCount++;
-                        
-                        // Crear semestre solo si hay período y no existe
-                        if (currentPeriod) {
-                            const semesterName = `${currentPeriod}`;
-                            let existingSemester = plannerState.semesters.find(s => s.name === semesterName);
-                            
-                            if (!existingSemester) {
-                                const newSemester = {
-                                    id: plannerState.nextSemesterId++,
-                                    name: semesterName,
-                                    collapsed: false,
-                                    color: '#ffdd53'
-                                };
-                                plannerState.semesters.push(newSemester);
-                                existingSemester = newSemester;
-                            }
-                            
-                            existingSubject.location = `semester-${existingSemester.id}`;
-                        }
-                        
-                        processedSubjects.push({
-                            id: code,
-                            period: currentPeriod,
-                            grade: grade
-                        });
-                    }
-                }
-                break;
-            }
-        }
-    });
-    
-    if (!foundAnySubject) {
-        showNotification('No se encontraron materias aprobadas en el formato proporcionado. Verifica que incluya códigos de materias y calificaciones.', 'warning');
-        return [];
-    }
-    
-    showNotification(`Se procesaron ${processedCount} materias${periodsFound.size > 0 ? ` de ${periodsFound.size} períodos` : ''}`, 'success');
-    return processedSubjects;
-}
 
 // =================== MODAL DE EQUIVALENCIAS ===================
 function renderEquivalencyModal() {
