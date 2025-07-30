@@ -819,7 +819,7 @@ function updateStats() {
     updateStatCard('basic-cycle-credits', basicCredits, 49);
     updateStatCard('professional-cycle-credits', profCredits, 57);
     updateStatCard('fg-credits', fgCredits, 17);
-    updateStatCard('prof-electives-credits', 17);
+    updateStatCard('prof-electives-credits' 0, 17);
 }
 
 function updateStatCard(id, current, total) {
