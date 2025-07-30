@@ -312,22 +312,55 @@
             </div>
             
             <div id="guide-tab" class="modal-tab-content">
-                <h3>Cómo obtener los datos del SIRA:</h3>
-                <ol>
-                    <li>Ingresa al <a href="https://sira.univalle.edu.co/sra" target="_blank">sistema SIRA</a></li>
-                    <li>Ve a "Registro de Calificaciones"</li>
-                    <li>Copia y pega TODO el contenido tal como aparece</li>
-                </ol>
-                <div class="sira-example">
-                    <pre>El sistema reconoce automáticamente:
-- Códigos de materia: 507035C, 204025C, etc.
-- Calificaciones: 3.0, 4.5, etc.
-- Períodos académicos</pre>
-                </div>
-                <p><strong>Importante:</strong> Pega todo el contenido sin modificar. El sistema procesará solo las materias aprobadas.</p>
-            </div>
-        </div>
+    <h3>Cómo importar datos del SIRA correctamente:</h3>
+    <ol>
+        <li>Ingresa al <a href="https://sira.univalle.edu.co/sra" target="_blank">sistema SIRA</a></li>
+        <li>Ve a "Registro de Calificaciones"</li>
+        <li>Organiza los datos por semestre siguiendo este formato:</li>
+    </ol>
+    
+    <div class="sira-example">
+        <h4>📋 Formato recomendado (copia cada semestre de SIRA donde corresponda):</h4>
+        <pre>
+SEMESTRE 1:
+            
+SEMESTRE 2:
+            
+SEMESTRE 3:
+            
+SEMESTRE 4:
+
+SEMESTRE 5:
+
+SEMESTRE 6:
+            
+SEMESTRE 7:
+            
+SEMESTRE 8:
+
+</pre>
     </div>
+    
+    <div class="sira-tips">
+        <h4>💡 Consejos importantes:</h4>
+        <ul>
+            <li><strong>Etiqueta cada semestre</strong> con "SEMESTRE X:" donde X es el número</li>
+            <li><strong>Copia las líneas completas</strong> de cada materia tal como aparecen</li>
+            <li><strong>Incluye solo materias aprobadas</strong> (calificación ≥ 3.0)</li>
+            <li><strong>Mantén el formato original</strong> del SIRA sin modificar</li>
+            <li>El sistema creará automáticamente "Semestre 1", "Semestre 2", etc.</li>
+        </ul>
+    </div>
+    
+    <div class="sira-example">
+        <h4>⚠️ Ejemplo de lo que NO debes hacer:</h4>
+        <pre style="color: #ff6b6b;">❌ Pegar todo junto sin separar por semestres
+❌ Modificar los códigos de materia
+❌ Incluir materias con calificación < 3.0
+❌ Omitir las etiquetas "SEMESTRE X:"</pre>
+    </div>
+</div>
+
 
     <!-- Equivalency Modal -->
     <div id="equivalency-modal" class="modal-overlay hidden">
