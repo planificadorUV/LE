@@ -3,194 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificador de Carrera - Diseño Industrial (Univalle)</title>
+    <title>Planificador de Carrera - Univalle</title>
     
-    <!-- Favicon -->
-    <link rel="icon" href="https://www.univalle.edu.co/images/favicon.ico" type="image/x-icon">
+    <!-- Favicon (Logo de Univalle como SVG para que siempre cargue) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23C62828' d='M50,5.3L94.7,27.6L94.7,72.4L50,94.7L5.3,72.4L5.3,27.6L50,5.3M50,0L0,25v50l50,25l50-25V25L50,0z'/%3E%3Cpath fill='%23FFFFFF' d='M50 15l35 20v30L50 85 15 65V35L50 15zm0 5.8L22.4 35v21.2l27.6 15.9 27.6-15.9V35L50 20.8z'/%3E%3C/svg%3E" type="image/svg+xml">
     
     <!-- Librerías Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" xintegrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <!-- Fuentes de Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Enlace a tu hoja de estilos local -->
+    <!-- Hoja de estilos local -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="p-4 lg:p-8">
+<body class="bg-primary text-primary font-sans">
 
-    <div class="max-w-screen-2xl mx-auto">
-        <!-- App Header -->
-        <div class="flex justify-between items-center mb-6 px-2">
-            <div class="flex items-center gap-4">
-                <a href="https://www.instagram.com/univallelegionestudiantil" target="_blank" rel="noopener noreferrer">
-                    <img src="https://media.canva.com/v2/image-resize/format:PNG/height:550/quality:100/uri:ifs%3A%2F%2FM%2Ffa5e9b55-900d-403c-8dc2-262f7040000a/watermark:F/width:550?csig=AAAAAAAAAAAAAAAAAAAAACIdq9X75-PDq1UZ_vsHSbJBGAKmirySDTFdGxAm7DLK&exp=1752802591&osig=AAAAAAAAAAAAAAAAAAAAAEFnMBX7tY4Kb5AhX6pm6dGIFSsEftwYgl7TS_dXC3cQ&signer=media-rpc&x-canva-quality=thumbnail_large"
-                         class="h-12 w-auto">
-                </a>
+    <!-- CONTENEDOR DE AUTENTICACIÓN (Visible al inicio) -->
+    <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            <h1 class="text-3xl font-bold text-center mb-2">Planificador de Carrera</h1>
+            <p class="text-center text-secondary mb-8">Inicia sesión para continuar</p>
+            
+            <div id="auth-forms-container" class="bg-secondary p-8 rounded-xl shadow-lg">
+                <!-- Formulario de Inicio de Sesión (por defecto) -->
+                <form id="login-form" class="">
+                    <h2 class="text-xl font-bold mb-4">Iniciar Sesión</h2>
+                    <div class="mb-4">
+                        <label for="login-email" class="block mb-2 text-sm font-medium">Correo Electrónico</label>
+                        <input type="email" id="login-email" class="w-full p-3 bg-tertiary border border-color rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="login-password" class="block mb-2 text-sm font-medium">Contraseña</label>
+                        <input type="password" id="login-password" class="w-full p-3 bg-tertiary border border-color rounded-md" required>
+                    </div>
+                    <button type="submit" class="btn-primary w-full py-3 rounded-md font-semibold">Ingresar</button>
+                </form>
+
+                <!-- Formulario de Registro -->
+                <form id="register-form" class="hidden">
+                    <h2 class="text-xl font-bold mb-4">Crear Cuenta</h2>
+                     <div class="mb-4">
+                        <label for="register-name" class="block mb-2 text-sm font-medium">Nombre</label>
+                        <input type="text" id="register-name" class="w-full p-3 bg-tertiary border border-color rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="register-email" class="block mb-2 text-sm font-medium">Correo Electrónico</label>
+                        <input type="email" id="register-email" class="w-full p-3 bg-tertiary border border-color rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="register-password" class="block mb-2 text-sm font-medium">Contraseña (mín. 6 caracteres)</label>
+                        <input type="password" id="register-password" class="w-full p-3 bg-tertiary border border-color rounded-md" required>
+                    </div>
+                    <button type="submit" class="btn-primary w-full py-3 rounded-md font-semibold">Registrarse</button>
+                </form>
+
+                <p id="auth-error" class="text-red-500 text-sm mt-4 text-center"></p>
+                <p class="text-center text-sm mt-4">
+                    <a href="#" id="toggle-auth-mode" class="text-accent hover:underline">¿No tienes cuenta? Regístrate</a>
+                </p>
             </div>
-             <div class="flex items-center gap-4">
-                <button id="customize-btn" class="btn-secondary px-3 py-1.5 rounded-md text-sm">Personalizar</button>
-                <input type="file" id="bg-upload" class="hidden" accept="image/*">
-                <div class="theme-switch-wrapper">
-                    <label class="theme-switch" for="theme-toggle">
-                        <input type="checkbox" id="theme-toggle" />
-                        <span class="slider"></span>
-                    </label>
-                </div>
-             </div>
+
+            <div class="mt-6 text-center">
+                <p class="text-secondary text-sm mb-2">O inicia sesión con</p>
+                <button id="google-signin-btn" class="bg-white text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 flex items-center justify-center w-full max-w-xs mx-auto">
+                    <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google logo" class="h-6 mr-3">
+                    Continuar con Google
+                </button>
+            </div>
         </div>
+    </div>
 
-        <!-- Header -->
-        <header class="flex justify-center items-center text-center mb-8 relative">
-            <div>
-                <h1 class="text-3xl md:text-4xl font-bold">Planificador de Carrera</h1>
-                <p class="text-lg text-secondary">Diseño Industrial - Universidad del Valle</p>
+    <!-- CONTENEDOR DE SELECCIÓN DE CARRERA (Oculto) -->
+    <div id="career-selection-container" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md text-center">
+             <h1 id="welcome-message-career" class="text-3xl font-bold mb-8"></h1>
+             <p class="text-xl mb-4">¿Qué carrera quieres planificar hoy?</p>
+             <div id="career-list" class="space-y-4">
+                <button data-career-id="diseno-industrial" class="career-select-btn bg-secondary hover:bg-tertiary w-full p-4 rounded-lg text-lg font-semibold">
+                    Diseño Industrial
+                </button>
+                <!-- Más carreras se pueden añadir aquí -->
+             </div>
+             <button id="logout-btn-career" class="mt-8 text-sm text-secondary hover:text-primary">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL DE LA APP (Oculto) -->
+    <div id="app-container" class="hidden">
+        <!-- Encabezado -->
+        <header class="p-4 flex flex-wrap justify-between items-center gap-4 bg-secondary shadow-md sticky top-0 z-20">
+            <div class="flex items-center gap-4">
+                <div id="profile-pic-container">
+                    <img id="profile-pic" src="https://placehold.co/100x100/2a2a2a/e5e5e5?text=User" alt="Foto de perfil">
+                    <input type="file" id="profile-pic-upload" class="hidden" accept="image/*">
+                </div>
+                <div>
+                    <h1 id="welcome-message-main" class="text-lg font-bold"></h1>
+                    <p class="text-sm text-secondary">Diseño Industrial - Univalle</p>
+                </div>
             </div>
-            <div id="profile-pic-container" class="absolute right-0 top-1/2 -translate-y-1/2">
-                <img id="profile-pic" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIj48cGF0aCBkPSJNMTIgMmM1LjUyMyAwIDEwIDQuNDc3IDEwIDEwcy00LjQ3NyAxMC0xMCAxMFMxMiAxNy41MjMgMiAxMiA2LjQ3NyAyIDEyIDJtMCAxYTkgOSAwIDEgMCAwIDE4IDkgOSAwIDAgMCAwLTE4em0wIDVhMy41IDMuNSAwIDEgMSAwIDcgMy41IDMuNSAwIDAgMSAwLTd6bTAgMWE0LjUgNC41IDAgMSAwIDAgOSA0LjUgNC41IDAgMCAwIDAtOXptNS41IDEwLjVjLS4xNjQgMC0uMzI3LjAxNS0uNDg4LjA0MkE1LjQ4NiA1LjQ4NiAwIDAgMCAxMiAxNS41YTUuNDg2IDUuNDg2IDAgMCAwLTQuMDEyIDIuMDQyYy0uMTYxLS4wMjctLjMyNC0uMDQyLS40ODgtLjA0Mi0yLjQ4MSAwLTQuNSAyLjAxOS00LjUgNC41djFoMTh2LTFjMC0yLjQ4MS0yLjAxOS00LjUtNC41LTQuNXoiLz48L3N2Zz4=" alt="Foto de perfil">
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button id="logout-btn-main" class="btn-secondary text-xs sm:text-sm">Cerrar Sesión</button>
+                <label for="theme-toggle" class="theme-switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <input type="file" id="profile-pic-upload" class="hidden" accept="image/*">
         </header>
 
-        <!-- Stats Board -->
-        <div class="stats-board grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8 bg-primary/80 backdrop-blur-sm p-4 rounded-xl shadow-lg z-20 border border-color">
-        </div>
-
-        <!-- Main Layout -->
-        <div class="flex flex-col lg:flex-row gap-8 mt-8">
-            <!-- Subject Bank -->
-            <aside id="subject-bank-container" class="lg:w-1/3 xl:w-1/4 bg-secondary rounded-lg border border-color">
-                <div id="bank-header" class="p-4">
-                    <h2 class="text-xl font-bold text-center">Banco de Materias</h2>
+        <!-- Contenido Principal -->
+        <main class="flex flex-col lg:flex-row h-full">
+            <!-- Panel Izquierdo (Banco de Materias y Acciones) -->
+            <aside id="left-panel" class="w-full lg:w-1/3 xl:w-1/4 p-4 space-y-4 overflow-y-auto">
+                <div class="stats-board grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2"></div>
+                
+                <div class="action-buttons grid grid-cols-2 gap-2">
+                    <button id="add-semester-btn" class="btn-primary">Añadir Semestre</button>
+                    <button id="open-equivalencies-modal-btn" class="btn-primary">Equivalencias</button>
+                    <button id="open-fg-elective-modal-btn" class="btn-secondary">Electiva FG</button>
+                    <button id="open-prof-elective-modal-btn" class="btn-secondary">Electiva EP</button>
+                    <button id="open-pdf-modal-btn" class="btn-secondary">Exportar PDF</button>
+                    <button id="reset-button" class="btn-danger">Reiniciar Plan</button>
                 </div>
-                <div id="bank-content" class="bank-content p-4 pt-0 space-y-6"></div>
+
+                <div id="subject-bank" class="bg-secondary p-4 rounded-lg">
+                    <h2 class="text-xl font-bold mb-4">Banco de Materias</h2>
+                    <div id="bank-content"></div>
+                </div>
             </aside>
 
-            <!-- Semesters Plan -->
-            <main class="flex-1">
-                <div class="flex justify-between items-center mb-4 gap-4 flex-wrap">
-                    <h2 class="text-xl font-bold">Mis Semestres</h2>
-                    <div class="flex gap-2 flex-wrap">
-                        <button id="tabulado-organize-btn" class="btn-primary font-semibold px-4 py-2 rounded-md">📊 Organizar desde Tabulado</button>
-                        <button id="add-semester-btn" class="btn-primary font-semibold px-4 py-2 rounded-md">Añadir Semestre</button>
-                        <button id="open-pdf-modal-btn" class="btn-secondary font-semibold px-4 py-2 rounded-md">Generar Reporte</button>
-                    </div>
+            <!-- Panel Derecho (Semestres) -->
+            <section id="right-panel" class="w-full lg:w-2/3 xl:w-3/4 p-4 overflow-x-auto">
+                <div id="semesters-grid" class="semesters-grid-container">
+                    <!-- Los semestres se generan aquí -->
                 </div>
-                <div id="semesters-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4"></div>
-            </main>
-        </div>
-        
-        <!-- Electives Section -->
-        <div class="grid md:grid-cols-2 gap-8 mt-12">
-            <div class="bg-secondary p-6 rounded-xl border border-color flex flex-col justify-center items-center">
-                <h2 class="text-xl font-bold mb-2">Electivas de Formación General</h2>
-                <button id="open-fg-elective-modal-btn" class="btn-primary font-semibold px-4 py-2 rounded-md">Seleccionar del Catálogo</button>
-            </div>
-
-            <div class="bg-secondary p-6 rounded-xl border border-color flex flex-col justify-center items-center">
-                <h2 class="text-xl font-bold mb-2">Electivas Profesionales</h2>
-                <button id="open-prof-elective-modal-btn" class="btn-primary font-semibold px-4 py-2 rounded-md">Seleccionar del Catálogo</button>
-            </div>
-        </div>
-        
-        <!-- Reset Button -->
-        <div class="text-center mt-12">
-            <button id="reset-button" class="btn-secondary font-semibold px-6 py-2 rounded-md border border-red-500 text-red-500 hover:bg-red-500 hover:text-white">Reiniciar Progreso</button>
-        </div>
+            </section>
+        </main>
     </div>
 
-    <!-- Modals -->
-    <div id="welcome-modal" class="modal-overlay">
+    <!-- MODALES -->
+    <div id="pdf-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <button id="close-welcome-modal-btn" class="modal-close">&times;</button>
-            <h2 class="text-2xl font-bold mb-4">¡Bienvenido/a al Planificador de Carrera!</h2>
-            <p class="text-secondary mb-4">Esta herramienta fue creada con cariño desde <strong class="text-primary">Legión Estudiantil</strong> y la <strong class="text-primary">representación estudiantil de Diseño Industrial</strong>.</p>
-            <p class="text-secondary mb-4">Sabemos lo difícil que puede ser entender el pénsum y organizar la carrera, así que esperamos que esta página te sea de gran ayuda.</p>
-            <p class="text-secondary">¡No dudes en usarla y recomendarla a tus compañeros!</p>
-        </div>
-    </div>
-
-    <div id="pdf-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button id="close-pdf-modal-btn" class="modal-close">&times;</button>
-            <h2 class="text-2xl font-bold mb-4">Generar Reporte de Progreso</h2>
+            <button id="close-pdf-modal-btn" class="modal-close-btn">&times;</button>
+            <h2 class="text-xl font-bold mb-4">Generar Reporte PDF</h2>
             <form id="pdf-info-form">
-                <div class="mb-4">
-                    <label for="student-name" class="block mb-2">Nombre Completo</label>
-                    <input type="text" id="student-name" class="w-full p-2 bg-tertiary border border-color rounded-md" required>
-                </div>
-                <div class="mb-4">
-                    <label for="student-id" class="block mb-2">Código de Estudiante</label>
-                    <input type="text" id="student-id" class="w-full p-2 bg-tertiary border border-color rounded-md" required>
-                </div>
+                <div class="mb-4"><label for="student-name" class="block mb-2">Nombre Completo</label><input type="text" id="student-name" class="w-full p-2 bg-tertiary border border-color rounded-md" required></div>
+                <div class="mb-4"><label for="student-id" class="block mb-2">Código de Estudiante</label><input type="text" id="student-id" class="w-full p-2 bg-tertiary border border-color rounded-md" required></div>
                 <button type="submit" class="btn-primary w-full py-2 rounded-md font-semibold">Generar PDF</button>
             </form>
         </div>
     </div>
-    
-    <div id="organize-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button id="close-organize-modal-btn" class="modal-close">&times;</button>
-            <h2 class="text-2xl font-bold mb-4">📊 Organizar desde Tabulado</h2>
-            <p class="text-secondary mb-4">Pega aquí tu historial de materias (tabulado de SIRA). El sistema analizará automáticamente las materias aprobadas.</p>
-            <div class="tabulado-example">
-                <p class="text-xs text-secondary mb-2">Ejemplo de formato esperado:</p>
-                <pre class="text-xs">CÓDIGO	GR	SDE	ASIGNATURA	TM	FUN	COM	CRD	CAL	HAB
-504004C	01	00	TALLER DE TEATRO EN INGLÉS	N	EC	LCO	4			CANCELACIÓN:
-507020C	02	00	PROYECTO - ENTORNO	N	AP	SIN	7	4.4		
-507026C	01	00	SEMINARIO DE INVESTIGACIÓN	N	AB	SIN	2	4.7		
-507036C	01	00	ESTUDIOS CRÍTICOS DEL DISEÑO	N	AP	SIN	3	4.6		
-507055C	01	00	PERCEPCIÓN VISUAL	N	AB	SIN	2	4.9		
-507109C	01	00	SOSTENIBILIDAD EN LA INDUSTRIA TEXTIL	N	EP	SIN	3	4.9</pre>
-            </div>
-            <textarea id="tabulado-input" class="w-full h-48 p-2 bg-tertiary border border-color rounded-md" placeholder="Pega el texto de tu tabulado aquí..."></textarea>
-            <div id="organize-error" class="error-message"></div>
-            <button id="process-tabulado-btn" class="btn-primary w-full py-2 rounded-md font-semibold mt-4">Analizar y Organizar</button>
-        </div>
-    </div>
 
-    <div id="elective-modal" class="modal-overlay">
+    <div id="elective-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <button id="close-elective-modal-btn" class="modal-close">&times;</button>
-            <h2 id="elective-modal-title" class="text-2xl font-bold mb-4">Seleccionar Electiva</h2>
+            <button id="close-elective-modal-btn" class="modal-close-btn">&times;</button>
+            <h2 id="elective-modal-title" class="text-xl font-bold mb-4"></h2>
             <div class="flex border-b border-color mb-4">
-                <div id="tab-catalog" class="modal-tab active">Catálogo</div>
-                <div id="tab-custom" class="modal-tab">Personalizada</div>
+                <button id="tab-catalog" class="modal-tab active">Catálogo</button>
+                <button id="tab-custom" class="modal-tab">Personalizada</button>
             </div>
-            
-            <div id="content-catalog" class="modal-tab-content active flex-grow overflow-hidden flex flex-col">
-                <input type="text" id="elective-search" placeholder="Buscar por nombre o código..." class="w-full p-2 bg-tertiary border border-color rounded-md mb-4">
-                <div id="elective-catalog-list" class="space-y-2 pr-2">
-                    <!-- Catalog items will be injected here -->
-                </div>
+            <div id="content-catalog" class="modal-tab-content active">
+                <input type="text" id="elective-search" placeholder="Buscar por nombre o código..." class="w-full p-2 mb-4 bg-tertiary border border-color rounded-md">
+                <div id="elective-catalog-list" class="space-y-2 pr-2"></div>
             </div>
-
             <div id="content-custom" class="modal-tab-content">
                 <form id="add-custom-elective-form">
-                    <div class="mb-4">
-                        <label for="custom-elective-name" class="block mb-2">Nombre de la Materia</label>
-                        <input type="text" id="custom-elective-name" class="w-full p-2 bg-tertiary border border-color rounded-md" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="custom-elective-credits" class="block mb-2">Créditos</label>
-                        <input type="number" id="custom-elective-credits" class="w-full p-2 bg-tertiary border border-color rounded-md" min="1" max="10" required>
-                    </div>
-                    <button type="submit" class="btn-primary w-full py-2 rounded-md font-semibold">Añadir Electiva Personalizada</button>
+                    <div class="mb-4"><label for="custom-elective-name" class="block mb-2">Nombre</label><input type="text" id="custom-elective-name" class="w-full p-2 bg-tertiary border border-color rounded-md" required></div>
+                    <div class="mb-4"><label for="custom-elective-credits" class="block mb-2">Créditos</label><input type="number" id="custom-elective-credits" class="w-full p-2 bg-tertiary border border-color rounded-md" min="1" max="10" required></div>
+                    <button type="submit" class="btn-primary w-full py-2 rounded-md font-semibold">Añadir Personalizada</button>
                 </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="equivalencies-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="close-equivalencies-modal-btn" class="modal-close-btn">&times;</button>
+            <h2 class="text-xl font-bold mb-4">Materias por Equivalencia</h2>
+            <p class="text-sm text-secondary mb-4">Añade materias que hayas homologado de otras carreras o universidades. Estas contarán para tu progreso total.</p>
+            <form id="add-equivalence-form" class="flex gap-2 mb-4">
+                <input type="text" id="equivalence-name" placeholder="Nombre de la materia" class="flex-grow p-2 bg-tertiary border border-color rounded-md" required>
+                <input type="number" id="equivalence-credits" placeholder="Créditos" class="w-24 p-2 bg-tertiary border border-color rounded-md" min="1" max="10" required>
+                <button type="submit" class="btn-primary px-4 rounded-md font-semibold">Añadir</button>
+            </form>
+            <div id="equivalencies-list" class="space-y-2 max-h-60 overflow-y-auto">
+                <!-- Las equivalencias se listarán aquí -->
             </div>
         </div>
     </div>
 
     <div id="loading-overlay" class="modal-overlay hidden">
         <div class="loader"></div>
-        <p id="loading-text" class="mt-4 text-lg">Procesando...</p>
+        <p id="loading-text" class="mt-4 text-lg">Cargando...</p>
     </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- SDKs de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- Tu script principal -->
     <script src="script.js"></script>
 </body>
 </html>
