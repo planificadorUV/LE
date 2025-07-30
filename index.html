@@ -23,7 +23,7 @@
         <div class="auth-card glassmorphism">
             <div class="auth-header">
                 <div class="logo-placeholder" title="Logo Legion Estudiantil">
-                    <div class="logo-fallback">📚</div>
+                    <img src="images/logole.png" alt="Legion Estudiantil" style="width: 100%; height: 100%; object-fit: contain; border-radius: inherit;">
                 </div>
                 <h1>Planificador Académico</h1>
                 <p>Universidad del Valle</p>
@@ -81,7 +81,7 @@
         <div class="career-header">
             <div class="career-header-content">
                 <div class="logo-placeholder" title="Logo Legion Estudiantil" id="legion-logo-career">
-                    <div class="logo-fallback">🎓</div>
+                    <img src="images/logole.png" alt="Legion Estudiantil" style="width: 100%; height: 100%; object-fit: contain; border-radius: inherit; cursor: pointer;">
                 </div>
                 <div class="career-welcome">
                     <h2 id="welcome-message-career">¡Bienvenid@, Usuario!</h2>
@@ -110,8 +110,8 @@
         <header class="app-header">
             <div class="header-content">
                 <div class="header-left">
-                    <div class="logo-placeholder-main" title="Logo Legion Estudiantil" id="legion-logo-main">
-                        <div class="logo-fallback">🎓</div>
+                    <div class="logo-main-container" title="Logo Legion Estudiantil" id="legion-logo-main">
+                        <img src="images/logole.png" alt="Legion Estudiantil" style="width: 200px; height: auto; object-fit: contain; cursor: pointer;">
                     </div>
                     <div class="header-info">
                         <h1>Diseño Industrial</h1>
@@ -231,14 +231,14 @@
                     </div>
                 </div>
 
-                <!-- Universidad Links -->
+                <!-- Universidad Links con colores alternados -->
                 <div class="university-links-section">
                     <div class="section-header">
                         <h3>🏛️ Enlaces Universitarios</h3>
                     </div>
                     
                     <div class="links-grid">
-                        <a href="https://linktr.ee/legionestudiantil" target="_blank" class="link-card legion">
+                        <a href="https://linktr.ee/legionestudiantil" target="_blank" class="link-card" data-color="blue">
                             <span class="link-icon">🤝</span>
                             <div class="link-content">
                                 <h4>Legión Estudiantil</h4>
@@ -246,7 +246,7 @@
                             </div>
                         </a>
                         
-                        <a href="https://sira.univalle.edu.co/sra" target="_blank" class="link-card sira">
+                        <a href="https://sira.univalle.edu.co/sra" target="_blank" class="link-card" data-color="red">
                             <span class="link-icon">📝</span>
                             <div class="link-content">
                                 <h4>SIRA</h4>
@@ -254,7 +254,7 @@
                             </div>
                         </a>
                         
-                        <a href="https://proxse25.univalle.edu.co/login" target="_blank" class="link-card financial">
+                        <a href="https://proxse25.univalle.edu.co/login" target="_blank" class="link-card" data-color="blue">
                             <span class="link-icon">💳</span>
                             <div class="link-content">
                                 <h4>Matrícula Financiera</h4>
@@ -262,7 +262,7 @@
                             </div>
                         </a>
                         
-                        <a href="https://registro.univalle.edu.co/estudiantes-pregrado/pregrado-programacion-academica" target="_blank" class="link-card academic">
+                        <a href="https://registro.univalle.edu.co/estudiantes-pregrado/pregrado-programacion-academica" target="_blank" class="link-card" data-color="red">
                             <span class="link-icon">📅</span>
                             <div class="link-content">
                                 <h4>Programación Académica</h4>
@@ -270,7 +270,7 @@
                             </div>
                         </a>
                         
-                        <a href="https://diseno.univalle.edu.co/res-188" target="_blank" class="link-card design">
+                        <a href="https://diseno.univalle.edu.co/res-188" target="_blank" class="link-card" data-color="blue">
                             <span class="link-icon">🎨</span>
                             <div class="link-content">
                                 <h4>Diseño Industrial</h4>
@@ -278,7 +278,7 @@
                             </div>
                         </a>
                         
-                        <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="link-card contact">
+                        <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="link-card" data-color="red">
                             <span class="link-icon">✉️</span>
                             <div class="link-content">
                                 <h4>Dirección Programa</h4>
@@ -291,7 +291,7 @@
         </main>
     </div>
 
-    <!-- Modals (sin cambios en estructura, solo mejorados) -->
+    <!-- Modals -->
     <div id="sira-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="modal-close-btn">&times;</button>
