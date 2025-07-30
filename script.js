@@ -333,10 +333,10 @@ function savePlannerData() {
 function getInitialState() {
     const initialSubjects = [
         // Inglés corregido
-        { id: '204025C', name: 'INGLÉS CON FINES GENERALES Y ACADÉM. I', credits: 3, cycle: 'Básico', area: 'Formación General', prerequisites: [] },
-        { id: '204026C', name: 'INGLÉS FINES GENERALES Y ACADÉMICOS II', credits: 3, cycle: 'Básico', area: 'Formación General', prerequisites: ['204025C'] },
-        { id: '204027C', name: 'INGLÉS CON FINES GENERALES Y ACADÉM. III', credits: 3, cycle: 'Básico', area: 'Formación General', prerequisites: ['204026C'] },
-        { id: '204028C', name: 'INGLÉS FINES GENERALES Y ACADÉMICOS IV', credits: 3, cycle: 'Básico', area: 'Formación General', prerequisites: ['204027C'] },
+        { id: '204025C', name: 'INGLÉS CON FINES GENERALES Y ACADÉM. I', credits: 2, cycle: 'Básico', area: 'Lenguaje', prerequisites: [] },
+        { id: '204026C', name: 'INGLÉS FINES GENERALES Y ACADÉMICOS II', credits: 2, cycle: 'Básico', area: 'Lenguaje', prerequisites: ['204025C'] },
+        { id: '204027C', name: 'INGLÉS CON FINES GENERALES Y ACADÉM. III', credits: 2, cycle: 'Básico', area: 'Lenguaje', prerequisites: ['204026C'] },
+        { id: '204028C', name: 'INGLÉS FINES GENERALES Y ACADÉMICOS IV', credits: 2, cycle: 'Básico', area: 'Lenguaje', prerequisites: ['204027C'] },
         
         // Ciclo Básico
         { id: '506026C', name: 'ESCRITURA, EXPRESIÓN Y COMUNICACIÓN', credits: 2, cycle: 'Básico', area: 'Sociedad y cultura', prerequisites: [] },
@@ -456,8 +456,8 @@ function renderStatsBoard() {
     
     if (!container.innerHTML) {
         const stats = [
-            { id: 'total-credits', label: 'CRÉDITOS TOTALES', total: 152 },
-            { id: 'basic-cycle-credits', label: 'CICLO BÁSICO', total: 61 },
+            { id: 'total-credits', label: 'CRÉDITOS TOTALES', total: 140 },
+            { id: 'basic-cycle-credits', label: 'CICLO BÁSICO', total: 49 },
             { id: 'professional-cycle-credits', label: 'CICLO PROFESIONAL', total: 57 },
             { id: 'fg-credits', label: 'FORMACIÓN GENERAL', total: 17 },
             { id: 'prof-electives-credits', label: 'ELECTIVAS PROFESIONALES', total: 17 }
@@ -646,8 +646,6 @@ function createSubjectCard(subject) {
     card.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
-        // Solo si no está siendo arrastrada y no está bloqueada
         if (!card.classList.contains('dragging') && !isLocked) {
             toggleSubjectCompleted(subject.id);
         }
@@ -819,7 +817,7 @@ function updateStats() {
     updateStatCard('basic-cycle-credits', basicCredits, 49);
     updateStatCard('professional-cycle-credits', profCredits, 57);
     updateStatCard('fg-credits', fgCredits, 17);
-    updateStatCard('prof-electives-credits' 0, 17);
+    updateStatCard('prof-electives-credits', 0, 17);
 }
 
 function updateStatCard(id, current, total) {
@@ -850,25 +848,46 @@ function processSiraData(siraText) {
         const cleanLine = line.trim();
         if (!cleanLine) return;
         
-        // Detectar período con múltiples formatos más flexibles
-        const periodPatterns = [
-            /PERIODO:\s*(.+)/i,
-            /PERÍODO:\s*(.+)/i,
-            /Periodo:\s*(.+)/i,
-            /Período:\s*(.+)/i,
-            /^PERIODO\s+(.+)/i,
-            /^PERÍODO\s+(.+)/i,
-            /Fecha\s+Matrícula:\s*(.+)/i
-        ];
-        
-        for (const pattern of periodPatterns) {
-            const match = cleanLine.match(pattern);
-            if (match) {
-                currentPeriod = match[1].trim();
-                periodsFound.add(currentPeriod);
-                return;
+        /// Detectar período y asignar número de semestre incremental
+const periodPatterns = [
+    /PERIODO:\s*(.+)/i,
+    /PERÍODO:\s*(.+)/i,
+    /Periodo:\s*(.+)/i,
+    /Período:\s*(.+)/i,
+    /^PERIODO\s+(.+)/i,
+    /^PERÍODO\s+(.+)/i,
+    /Fecha\s+Matrícula:\s*(.+)/i
+];
+
+let semesterCount = 0;
+let currentPeriod = null;
+let periodToSemester = {};
+
+lines.forEach(line => {
+    const cleanLine = line.trim();
+    if (!cleanLine) return;
+    
+    // Detectar períodos
+    for (const pattern of periodPatterns) {
+        const match = cleanLine.match(pattern);
+        if (match) {
+            const periodString = match[1].trim();
+            
+            // Si es un período nuevo, asignarle el siguiente número
+            if (!(periodString in periodToSemester)) {
+                semesterCount++;
+                periodToSemester[periodString] = semesterCount;
             }
+            
+            // Usar "Semestre X" en lugar de la fecha
+            currentPeriod = `Semestre ${periodToSemester[periodString]}`;
+            periodsFound.add(currentPeriod); // Agregar el nombre limpio
+            return; // Continuar con la siguiente línea
         }
+    }
+    
+});
+
         
         // Detectar materias con patrones basados en el formato real del SIRA
         const subjectPatterns = [
