@@ -1,413 +1,301 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificador de Carrera - Univalle</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23C62828' d='M50,5.3L94.7,27.6L94.7,72.4L50,94.7L5.3,72.4L5.3,27.6L50,5.3M50,0L0,25v50l50,25l50-25V25L50,0z'/%3E%3Cpath fill='%23FFFFFF' d='M50 15l35 20v30L50 85 15 65V35L50 15zm0 5.8L22.4 35v21.2l27.6 15.9 27.6-15.9V35L50 20.8z'/%3E%3C/svg%3E" type="image/svg+xml">
-    
-    <!-- Librerías Externas -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- Fuentes -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Hoja de estilos local -->
-    <link rel="stylesheet" href="style.css">
+    <title>Planificador Univalle - Diseño Industrial</title>
+    <link rel="stylesheet" href="style-1.css">
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-red-950 via-red-900 to-black text-white font-inter overflow-x-hidden">
-
-    <!-- CONTENEDOR DE AUTENTICACIÓN -->
-    <div id="auth-container" class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-        <!-- Fondo dinámico -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="geometric-bg"></div>
-            <div class="floating-orb orb-1"></div>
-            <div class="floating-orb orb-2"></div>
-            <div class="floating-orb orb-3"></div>
+<body>
+    <!-- Auth Container -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-background">
+            <div class="floating-shape shape-1"></div>
+            <div class="floating-shape shape-2"></div>
+            <div class="floating-shape shape-3"></div>
         </div>
-
-        <div class="w-full max-w-lg relative z-10">
-            <!-- Header con logo -->
-            <div class="text-center mb-8">
-                <a href="https://instagram.com/univallelegionestudiantil" target="_blank" class="inline-block mb-6 group">
-                    <img id="legion-logo" src="data:image/png;base64,aquivaelcodigoqyapondreyomanualmentepqesmuylargooo=" 
-                         alt="Legión Estudiantil" class="w-32 h-32 mx-auto rounded-2xl shadow-2xl group-hover:scale-105 transition-all duration-500 ring-4 ring-red-500/30 group-hover:ring-red-400/50">
-                </a>
-                <h1 class="text-5xl font-black bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent mb-3 tracking-tight">
-                    Planificador
-                </h1>
-                <p class="text-xl text-red-200 font-medium mb-6">Univalle - Diseño Industrial</p>
-                
-                <div class="welcome-card">
-                    <p class="text-sm text-red-100 leading-relaxed">
-                        ¡Bienvenido! Esperamos que disfrutes esta herramienta.<br>
-                        Desarrollado por la Representación de Diseño Industrial y 
-                        <a href="https://instagram.com/univallelegionestudiantil" target="_blank" 
-                           class="text-yellow-300 hover:text-yellow-200 underline font-semibold">Legión Estudiantil</a>
-                    </p>
+        
+        <div class="auth-card glassmorphism">
+            <div class="auth-header">
+                <div class="logo-placeholder" title="Logo Legion Estudiantil">
+                    <span>📚</span> <!-- Placeholder temporal -->
+                    <small>Reemplazar con logo base64</small>
                 </div>
-            </div>
-            
-            <!-- Forms Container -->
-            <div id="auth-forms-container" class="modern-card">
-                <!-- Login Form -->
-                <form id="login-form" class="">
-                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Iniciar Sesión</h2>
-                    <div class="space-y-5">
-                        <div class="input-group">
-                            <label for="login-email" class="input-label">✉️ Correo Electrónico</label>
-                            <input type="email" id="login-email" class="modern-input" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="login-password" class="input-label">🔒 Contraseña</label>
-                            <input type="password" id="login-password" class="modern-input" required>
-                        </div>
-                        <button type="submit" class="modern-btn-primary">
-                            <span>Ingresar</span>
-                            <div class="btn-shine"></div>
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Register Form -->
-                <form id="register-form" class="hidden">
-                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Crear Cuenta</h2>
-                    <div class="space-y-5">
-                        <div class="input-group">
-                            <label for="register-name" class="input-label">👤 Nombre Completo</label>
-                            <input type="text" id="register-name" class="modern-input" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="register-email" class="input-label">✉️ Correo Electrónico</label>
-                            <input type="email" id="register-email" class="modern-input" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="register-password" class="input-label">🔒 Contraseña (mín. 6 caracteres)</label>
-                            <input type="password" id="register-password" class="modern-input" required>
-                        </div>
-                        <button type="submit" class="modern-btn-primary">
-                            <span>Registrarse</span>
-                            <div class="btn-shine"></div>
-                        </button>
-                    </div>
-                </form>
-
-                <p id="auth-error" class="text-red-600 text-sm mt-4 text-center font-medium"></p>
-                <p class="text-center text-sm mt-6">
-                    <a href="#" id="toggle-auth-mode" class="text-red-600 hover:text-red-700 underline transition-colors font-medium">
-                        ¿No tienes cuenta? Regístrate
-                    </a>
-                </p>
+                <h1>Planificador Académico</h1>
+                <p>Universidad del Valle</p>
             </div>
 
-            <!-- Google Sign In -->
-            <div class="mt-6 text-center">
-                <div class="divider">
-                    <span>O continuar con</span>
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <input type="email" id="login-email" class="form-input" placeholder="Correo electrónico" required>
                 </div>
-                <button id="google-signin-btn" class="google-btn">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    <span>Continuar con Google</span>
-                </button>
+                <div class="form-group">
+                    <input type="password" id="login-password" class="form-input" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="btn-primary">Iniciar Sesión</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form hidden">
+                <div class="form-group">
+                    <input type="text" id="register-name" class="form-input" placeholder="Nombre completo" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="register-email" class="form-input" placeholder="Correo electrónico" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="register-password" class="form-input" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="btn-primary">Registrarse</button>
+            </form>
+
+            <div class="auth-divider">
+                <span>o</span>
             </div>
+
+            <button id="google-signin-btn" class="btn-google">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5LjU3MTYgOC4yMDQ1NEgxMC4wMDAyVjEyLjI1OTFIMTUuNDc3M0MxNS4zMTA5IDEzLjM5NzcgMTQuNzIzIDE0LjM5NzcgMTMuODU3MyAxNS4wOTU1TDE2Ljk0ODggMTcuNDI5NUMxOC40ODYzIDE2LjAyMjcgMTkuNSAxMy45NTQ1IDE5LjUgMTAuNDE4MkMxOS41NzAyIDEwLjAyMjcgMTkuNTMxNiA5LjU4NjM2IDE5LjU3MTYgOC4yMDQ1NFoiIGZpbGw9IiM0Mjg1RjQiLz4KPC9zdmc+" alt="Google">
+                Continuar con Google
+            </button>
+
+            <p class="auth-toggle">
+                <a href="#" id="toggle-auth-mode">¿No tienes cuenta? Regístrate</a>
+            </p>
+
+            <div id="auth-error" class="error-message"></div>
         </div>
     </div>
 
-    <!-- CONTENEDOR DE SELECCIÓN DE CARRERA -->
-    <div id="career-selection-container" class="hidden min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-yellow-600 via-orange-500 to-red-600">
-        <div class="w-full max-w-md text-center modern-card">
-             <h1 id="welcome-message-career" class="text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent"></h1>
-             <p class="text-xl mb-6 text-gray-700">¿Qué carrera quieres planificar?</p>
-             <div id="career-list" class="space-y-4">
-                <button data-career-id="diseno-industrial" class="career-btn">
+    <!-- Career Selection Container -->
+    <div id="career-selection-container" class="career-selection hidden">
+        <div class="career-header">
+            <div class="career-header-content">
+                <div class="logo-placeholder" title="Logo Legion Estudiantil">
+                    <span>📚</span>
+                    <small>Logo base64</small>
+                </div>
+                <div class="career-welcome">
+                    <h2 id="welcome-message-career">¡Bienvenid@, Usuario!</h2>
+                    <p>Selecciona tu carrera para continuar</p>
+                </div>
+                <button id="logout-btn-career" class="btn-secondary">Cerrar Sesión</button>
+            </div>
+        </div>
+
+        <div class="career-grid">
+            <div id="career-list">
+                <button class="career-select-btn" data-career-id="diseno-industrial">
                     <span class="career-icon">🎨</span>
-                    <span class="career-name">Diseño Industrial</span>
-                    <div class="career-accent"></div>
+                    <div>
+                        <h3>Diseño Industrial</h3>
+                        <p>Planifica tu carrera profesional</p>
+                    </div>
                 </button>
-             </div>
-             <button id="logout-btn-career" class="mt-8 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-                Cerrar Sesión
-             </button>
+            </div>
         </div>
     </div>
 
-    <!-- CONTENEDOR PRINCIPAL DE LA APP -->
-    <div id="app-container" class="hidden min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100">
-        <!-- Header Responsivo -->
+    <!-- Main App Container -->
+    <div id="app-container" class="hidden">
+        <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <!-- Mobile Menu Toggle -->
-                <button id="mobile-menu-toggle" class="mobile-menu-btn md:hidden">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                </button>
-                
-                <!-- Logo y User Info -->
                 <div class="header-left">
-                    <a href="https://instagram.com/univallelegionestudiantil" target="_blank" class="header-logo">
-                        <img id="header-logo" src="data:image/png;base64,aquivaelcodigoqyapondreyomanualmentepqesmuylargooo=" 
-                             alt="Legión Estudiantil" class="logo-img">
-                    </a>
-                    <div class="user-info hidden md:block">
-                        <div id="profile-pic-container" class="profile-container">
-                            <img id="profile-pic" src="https://placehold.co/100x100/2a2a2a/e5e5e5?text=User" 
-                                 alt="Foto de perfil" class="profile-img">
-                            <input type="file" id="profile-pic-upload" class="hidden" accept="image/*">
-                        </div>
-                        <div class="user-details">
-                            <h1 id="welcome-message-main" class="user-name"></h1>
-                            <p class="user-program">Diseño Industrial - Univalle</p>
-                        </div>
+                    <div class="logo-placeholder-small" title="Logo Legion Estudiantil">
+                        <span>📚</span>
+                    </div>
+                    <div class="header-info">
+                        <h1>Diseño Industrial</h1>
+                        <span class="university-name">Universidad del Valle</span>
                     </div>
                 </div>
-                
-                <!-- Header Actions -->
-                <div class="header-actions">
-                    <button id="logout-btn-main" class="logout-btn">Cerrar Sesión</button>
-                    <div class="theme-toggle-wrapper">
-                        <label for="theme-toggle" class="modern-theme-switch">
+
+                <div class="header-center">
+                    <div class="welcome-message-container">
+                        <button id="toggle-welcome-btn" class="toggle-welcome-btn">
+                            <span id="welcome-message-main">¡Bienvenid@, Usuario!</span>
+                            <span class="toggle-icon">▼</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="theme-toggle-container">
+                        <span class="theme-label">🌙</span>
+                        <label class="theme-switch">
                             <input type="checkbox" id="theme-toggle">
-                            <span class="theme-slider">
-                                <span class="theme-icon sun-icon">☀️</span>
-                                <span class="theme-icon moon-icon">🌙</span>
+                            <span class="slider">
+                                <span class="slider-icon sun">☀️</span>
+                                <span class="slider-icon moon">🌙</span>
                             </span>
                         </label>
+                        <span class="theme-label">☀️</span>
                     </div>
+                    <button id="logout-btn-main" class="btn-secondary">Cerrar Sesión</button>
                 </div>
-            </div>
-            
-            <!-- Mobile User Info -->
-            <div class="mobile-user-info md:hidden">
-                <div id="mobile-profile-container" class="mobile-profile">
-                    <img id="mobile-profile-pic" src="https://placehold.co/100x100/2a2a2a/e5e5e5?text=User" 
-                         alt="Foto de perfil" class="mobile-profile-img">
-                </div>
-                <div class="mobile-details">
-                    <h1 id="mobile-welcome-message" class="mobile-user-name"></h1>
-                    <p class="mobile-program">Diseño Industrial</p>
-                </div>
-                <button id="mobile-collapse-toggle" class="collapse-btn">
-                    <span class="collapse-icon">▲</span>
-                </button>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="app-main">
-            <!-- Sidebar -->
-            <aside id="left-panel" class="app-sidebar">
-                <div class="sidebar-content">
-                    <!-- Stats Board -->
-                    <div class="stats-section">
-                        <h3 class="section-title">📊 Tu Progreso</h3>
-                        <div class="stats-grid"></div>
+        <main class="main-content">
+            <!-- Left Panel -->
+            <aside id="left-panel" class="left-panel">
+                <!-- Stats Board -->
+                <div class="stats-section">
+                    <div class="section-header">
+                        <h3>Progreso Académico</h3>
                     </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="actions-section">
-                        <h3 class="section-title">🛠️ Herramientas</h3>
-                        <div class="action-buttons">
-                            <button id="add-semester-btn" class="action-btn primary">
-                                <span class="btn-icon">📅</span>
-                                <span class="btn-text">Semestre</span>
-                            </button>
-                            <button id="open-sira-modal-btn" class="action-btn primary">
-                                <span class="btn-icon">📝</span>
-                                <span class="btn-text">SIRA</span>
-                            </button>
-                            <button id="open-equivalencies-modal-btn" class="action-btn secondary">
-                                <span class="btn-icon">⚖️</span>
-                                <span class="btn-text">Equivalencias</span>
-                            </button>
-                            <button id="open-fg-elective-modal-btn" class="action-btn secondary">
-                                <span class="btn-icon">📚</span>
-                                <span class="btn-text">Electiva FG</span>
-                            </button>
-                            <button id="open-prof-elective-modal-btn" class="action-btn secondary">
-                                <span class="btn-icon">🎓</span>
-                                <span class="btn-text">Electiva EP</span>
-                            </button>
-                            <button id="open-pdf-modal-btn" class="action-btn secondary">
-                                <span class="btn-icon">📄</span>
-                                <span class="btn-text">PDF</span>
-                            </button>
-                            <button id="reset-button" class="action-btn danger">
-                                <span class="btn-icon">🔄</span>
-                                <span class="btn-text">Reiniciar</span>
-                            </button>
-                        </div>
-                    </div>
+                    <div class="stats-board"></div>
+                </div>
 
-                    <!-- Subject Bank -->
-                    <div class="bank-section">
-                        <div class="bank-header">
-                            <h3 class="section-title">🏦 Banco de Materias</h3>
-                            <button id="toggle-bank-collapse" class="bank-toggle">
-                                <span class="toggle-icon">▼</span>
-                            </button>
-                        </div>
-                        <div id="subject-bank" class="bank-content">
-                            <div id="bank-content"></div>
-                        </div>
+                <!-- Subject Bank -->
+                <div class="bank-section">
+                    <div class="section-header">
+                        <h3>Banco de Materias</h3>
+                        <button id="toggle-bank-btn" class="toggle-bank-btn">
+                            <span class="toggle-icon">◀</span>
+                        </button>
                     </div>
+                    <div id="subject-bank" class="subject-bank"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="add-semester-btn" class="btn-primary">
+                        <span>➕</span> Agregar Semestre
+                    </button>
+                    <button id="import-sira-btn" class="btn-secondary">
+                        <span>📄</span> Importar SIRA
+                    </button>
+                    <button id="add-equivalency-btn" class="btn-secondary">
+                        <span>🔄</span> Equivalencias
+                    </button>
+                    <button id="export-report-btn" class="btn-secondary">
+                        <span>📊</span> Exportar Reporte
+                    </button>
                 </div>
             </aside>
 
-            <!-- Semesters Area -->
-            <section id="right-panel" class="semesters-area">
-                <div class="semesters-header">
-                    <h2 class="semesters-title">📚 Plan de Estudios</h2>
-                </div>
-                <div id="semesters-grid" class="semesters-container">
-                    <!-- Semestres se generan aquí -->
+            <!-- Right Panel -->
+            <section id="right-panel" class="right-panel">
+                <div class="semesters-container">
+                    <div class="semesters-header">
+                        <h2>Plan de Estudios</h2>
+                        <div class="semester-controls">
+                            <button id="collapse-all-btn" class="btn-secondary">Contraer Todo</button>
+                            <button id="expand-all-btn" class="btn-secondary">Expandir Todo</button>
+                        </div>
+                    </div>
+                    <div id="semesters-grid" class="semesters-grid-container"></div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- MODALES MODERNOS -->
-    
-    <!-- SIRA Modal -->
+    <!-- Modals -->
+    <!-- SIRA Import Modal -->
     <div id="sira-modal" class="modal-overlay hidden">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2 class="modal-title">📝 Importar desde SIRA</h2>
-                <button id="close-sira-modal-btn" class="modal-close">&times;</button>
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h2>Importar datos del SIRA</h2>
+            <div class="modal-tabs">
+                <div class="modal-tab active" data-tab="import">Importar</div>
+                <div class="modal-tab" data-tab="guide">Guía</div>
             </div>
-            <div class="modal-body">
-                <p class="modal-description">
-                    Pega aquí la información de tus materias aprobadas desde el SIRA:
-                </p>
-                <form id="sira-import-form" class="space-y-4">
-                    <div class="input-group">
-                        <label for="sira-data" class="input-label">Datos del SIRA</label>
-                        <textarea id="sira-data" class="modern-textarea" rows="8" 
-                                  placeholder="Pega aquí toda la información del SIRA..."></textarea>
-                    </div>
-                    <button type="submit" class="modern-btn-primary w-full">
-                        <span>Procesar Datos</span>
-                        <div class="btn-shine"></div>
-                    </button>
-                </form>
+            
+            <div id="import-tab" class="modal-tab-content active">
+                <p>Pega aquí la información de tus materias aprobadas desde el SIRA:</p>
+                <textarea id="sira-input" class="form-input" rows="10" placeholder="Pega aquí el contenido del SIRA..."></textarea>
+                <div class="modal-actions">
+                    <button id="process-sira-btn" class="btn-primary">Procesar Datos</button>
+                    <button class="btn-secondary" onclick="document.getElementById('sira-modal').classList.add('hidden')">Cancelar</button>
+                </div>
+            </div>
+            
+            <div id="guide-tab" class="modal-tab-content">
+                <h3>Cómo obtener los datos del SIRA:</h3>
+                <ol>
+                    <li>Ingresa al sistema SIRA de la Universidad</li>
+                    <li>Ve a la sección de "Registro de Calificaciones"</li>
+                    <li>Copia todo el contenido que incluya:</li>
+                </ol>
+                <div class="sira-example">
+                    <pre>PERIODO: AGOSTO/2023 - DICIEMBRE/2023
+Fecha Matricula: 2023-08-02 00:00:00
+CÓDIGO  ASIGNATURA  CRD  CAL
+507013C MATEMÁTICAS  2   3.1
+507017C MÉTODOS DE DISEÑO  2   4.0
+...</pre>
+                </div>
+                <p><strong>Importante:</strong> El sistema reconocerá automáticamente las materias aprobadas y las organizará por semestres.</p>
             </div>
         </div>
     </div>
 
-    <!-- PDF Modal -->
-    <div id="pdf-modal" class="modal-overlay hidden">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2 class="modal-title">📄 Generar Reporte PDF</h2>
-                <button id="close-pdf-modal-btn" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="pdf-info-form" class="space-y-4">
-                    <div class="input-group">
-                        <label for="student-name" class="input-label">👤 Nombre Completo</label>
-                        <input type="text" id="student-name" class="modern-input" required>
+    <!-- Equivalency Modal -->
+    <div id="equivalency-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h2>Gestionar Equivalencias</h2>
+            
+            <div class="equivalency-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Buscar materia existente:</label>
+                        <input type="text" id="search-subject" class="form-input" placeholder="Buscar por nombre o código...">
+                        <div id="search-results" class="search-results"></div>
                     </div>
-                    <div class="input-group">
-                        <label for="student-id" class="input-label">🎓 Código de Estudiante</label>
-                        <input type="text" id="student-id" class="modern-input" required>
-                    </div>
-                    <button type="submit" class="modern-btn-primary w-full">
-                        <span>Generar PDF</span>
-                        <div class="btn-shine"></div>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Elective Modal -->
-    <div id="elective-modal" class="modal-overlay hidden">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2 id="elective-modal-title" class="modal-title"></h2>
-                <button id="close-elective-modal-btn" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-tabs">
-                    <button id="tab-catalog" class="modal-tab active">📋 Catálogo</button>
-                    <button id="tab-custom" class="modal-tab">✏️ Personalizada</button>
                 </div>
-                <div id="content-catalog" class="modal-tab-content active">
-                    <div class="input-group mb-4">
-                        <input type="text" id="elective-search" placeholder="🔍 Buscar electiva..." class="modern-input">
-                    </div>
-                    <div id="elective-catalog-list" class="elective-list"></div>
+                
+                <div class="form-divider">O crear nueva equivalencia:</div>
+                
+                <div class="form-group">
+                    <label>Nombre de la materia:</label>
+                    <input type="text" id="equiv-name" class="form-input" placeholder="Nombre completo de la materia">
                 </div>
-                <div id="content-custom" class="modal-tab-content">
-                    <form id="add-custom-elective-form" class="space-y-4">
-                        <div class="input-group">
-                            <label for="custom-elective-name" class="input-label">📝 Nombre de la Electiva</label>
-                            <input type="text" id="custom-elective-name" class="modern-input" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="custom-elective-credits" class="input-label">🎯 Créditos</label>
-                            <input type="number" id="custom-elective-credits" class="modern-input" min="1" max="10" required>
-                        </div>
-                        <button type="submit" class="modern-btn-primary w-full">
-                            <span>Añadir Electiva</span>
-                            <div class="btn-shine"></div>
-                        </button>
-                    </form>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Créditos:</label>
+                        <input type="number" id="equiv-credits" class="form-input" min="1" max="10" placeholder="Créditos">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo:</label>
+                        <select id="equiv-type" class="form-input">
+                            <option value="">Seleccionar tipo</option>
+                            <option value="AB">Área Básica (AB)</option>
+                            <option value="AP">Área Profesional (AP)</option>
+                            <option value="EC">Electiva Complementaria (EC)</option>
+                            <option value="EP">Electiva Profesional (EP)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button id="add-equivalency-submit" class="btn-primary">Agregar Equivalencia</button>
+                    <button class="btn-secondary" onclick="document.getElementById('equivalency-modal').classList.add('hidden')">Cancelar</button>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Equivalencies Modal -->
-    <div id="equivalencies-modal" class="modal-overlay hidden">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2 class="modal-title">⚖️ Materias por Equivalencia</h2>
-                <button id="close-equivalencies-modal-btn" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="modal-description">
-                    Añade materias homologadas de otras carreras o universidades.
-                </p>
-                <form id="add-equivalence-form" class="equivalence-form">
-                    <div class="form-row">
-                        <input type="text" id="equivalence-name" placeholder="Nombre de la materia" class="modern-input flex-1">
-                        <input type="number" id="equivalence-credits" placeholder="Créditos" class="modern-input w-24" min="1" max="10" required>
-                        <button type="submit" class="modern-btn-primary px-6">Añadir</button>
-                    </div>
-                </form>
-                <div id="equivalencies-list" class="equivalencies-list">
-                    <!-- Equivalencias se muestran aquí -->
-                </div>
+            
+            <div class="equivalencies-list">
+                <h3>Equivalencias Registradas:</h3>
+                <div id="equivalencies-container"></div>
             </div>
         </div>
     </div>
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="modal-overlay hidden">
-        <div class="loading-container">
-            <div class="modern-loader"></div>
-            <p id="loading-text" class="loading-text">Cargando...</p>
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="loader"></div>
+            <p id="loading-text">Cargando...</p>
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
-    <!-- Script principal -->
     <script src="script.js"></script>
 </body>
 </html>
