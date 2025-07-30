@@ -41,6 +41,7 @@ let plannerState = {};
 let currentCareerId = null;
 let unsubscribePlanner = null;
 let draggedElementId = null;
+let isLogoClickListenerAdded = false; // Prevenir múltiples listeners
 
 // =================== SISTEMA DE NOTIFICACIONES ===================
 function showNotification(message, type = 'success') {
@@ -220,37 +221,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Panel toggle mejorado
-    setupPanelToggle();
-    
-    // Hacer logos clickeables para Instagram
-    makeLegionLogosClickable();
+    // Panel toggle SOLO PARA EL BANCO
+    setupBankToggle();
 });
 
-// =================== FUNCIÓN PARA TOGGLE DE PANEL IZQUIERDO ===================
-function setupPanelToggle() {
+// =================== FUNCIÓN PARA TOGGLE SOLO DEL BANCO ===================
+function setupBankToggle() {
     const toggleBankBtn = document.getElementById('toggle-bank-btn');
-    const leftPanel = document.getElementById('left-panel');
-    const mainContent = document.querySelector('.main-content');
+    const bankSection = document.querySelector('.bank-section');
     
-    if (toggleBankBtn && leftPanel && mainContent) {
-        toggleBankBtn.addEventListener('click', () => {
-            leftPanel.classList.toggle('collapsed');
-            mainContent.classList.toggle('left-collapsed');
+    if (toggleBankBtn && bankSection) {
+        // Remover listeners previos
+        toggleBankBtn.replaceWith(toggleBankBtn.cloneNode(true));
+        const newToggleBtn = document.getElementById('toggle-bank-btn');
+        
+        newToggleBtn.addEventListener('click', () => {
+            bankSection.classList.toggle('collapsed');
+            const icon = newToggleBtn.querySelector('.toggle-icon');
+            if (icon) {
+                icon.textContent = bankSection.classList.contains('collapsed') ? '▶' : '▼';
+            }
         });
     }
 }
 
-// =================== LOGOS CLICKEABLES ===================
+// =================== LOGOS CLICKEABLES - CORREGIDO ===================
 function makeLegionLogosClickable() {
+    if (isLogoClickListenerAdded) return; // Prevenir múltiples listeners
+    
     const logos = document.querySelectorAll('#legion-logo-career, #legion-logo-main, .logo-main-container');
     logos.forEach(logo => {
-        logo.style.cursor = 'pointer';
-        logo.addEventListener('click', () => {
+        // Limpiar listeners previos
+        const newLogo = logo.cloneNode(true);
+        logo.parentNode.replaceChild(newLogo, logo);
+        
+        newLogo.style.cursor = 'pointer';
+        newLogo.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             window.open('https://instagram.com/univallelegionestudiantil', '_blank');
-        });
-        logo.title = 'Ir a @univallelegionestudiantil';
+        }, { once: false }); // Solo una vez por click
+        newLogo.title = 'Ir a @univallelegionestudiantil';
     });
+    
+    isLogoClickListenerAdded = true;
 }
 
 // =================== SELECCIÓN DE CARRERA ===================
@@ -407,19 +421,15 @@ function initializeAppUI(user) {
         plannerState.nextSemesterId = 2;
     }
     
-    // FORZAR RENDER INMEDIATO
+    // RENDER INMEDIATO
     loadingOverlay.classList.add('hidden');
     appContainer.classList.remove('hidden');
     
-    // Render múltiple para asegurar carga
     render();
-    setTimeout(() => render(), 100);
-    setTimeout(() => render(), 500);
-    setTimeout(() => render(), 1000);
-    
     setupEventListeners();
     renderEquivalencyModal();
     setupModalTabs();
+    setupBankToggle(); // Setup del toggle del banco
     makeLegionLogosClickable();
 }
 
@@ -504,7 +514,7 @@ function renderSemesterWithControls(semester) {
     const semesterSubjects = plannerState.subjects.filter(s => s.location === `semester-${semester.id}`);
     const totalCredits = semesterSubjects.reduce((sum, s) => sum + s.credits, 0);
     
-    // SIN ANIMACIONES PROBLEMÁTICAS - renderizado directo
+    // Renderizado directo SIN animaciones problemáticas
     semesterColumn.innerHTML = `
         <div class="semester-header" style="background: ${semester.color || '#ffdd53'}; color: #000;">
             <h3>${semester.name || `Semestre ${semester.id}`}</h3>
@@ -521,7 +531,7 @@ function renderSemesterWithControls(semester) {
                 <button class="delete-semester-btn" title="Eliminar semestre">✕</button>
             </div>
         </div>
-        <div class="semester-content">
+        <div class="semester-content" style="${semester.collapsed ? 'display: none;' : ''}">
             ${semesterSubjects.length === 0 ? 
                 '<div class="drop-zone">Arrastra materias aquí</div>' : 
                 semesterSubjects.map(s => createSubjectCard(s).outerHTML).join('')
@@ -529,14 +539,13 @@ function renderSemesterWithControls(semester) {
         </div>
     `;
     
-    // Event listener para eliminar semestre
+    // Event listeners
     const deleteBtn = semesterColumn.querySelector('.delete-semester-btn');
     deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         deleteSemester(semester.id);
     });
     
-    // Event listener para color picker
     const colorPicker = semesterColumn.querySelector('.color-picker');
     colorPicker.addEventListener('change', (e) => {
         const semesterIndex = plannerState.semesters.findIndex(s => s.id === semester.id);
@@ -548,14 +557,12 @@ function renderSemesterWithControls(semester) {
         }
     });
     
-    // Event listener para marcar todas como vistas
     const markAllBtn = semesterColumn.querySelector('.mark-all-btn');
     markAllBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         markAllSubjectsInSemester(semester.id);
     });
     
-    // Toggle collapse
     const toggleBtn = semesterColumn.querySelector('.semester-toggle-btn');
     toggleBtn.addEventListener('click', () => {
         const semesterIndex = plannerState.semesters.findIndex(s => s.id === semester.id);
@@ -646,20 +653,6 @@ function createSubjectCard(subject) {
         }
     });
     
-    // Separar los eventos de drag de los de click
-    card.addEventListener('dragstart', (e) => {
-        card.classList.add('dragging');
-        // Cancelar el click durante el drag
-        card.style.pointerEvents = 'none';
-        setTimeout(() => {
-            card.style.pointerEvents = 'auto';
-        }, 100);
-    });
-    
-    card.addEventListener('dragend', (e) => {
-        card.classList.remove('dragging');
-    });
-    
     return card;
 }
 
@@ -681,7 +674,6 @@ function toggleSubjectCompleted(subjectId) {
         );
     }
 }
-
 
 // =================== FUNCIONES DE GESTIÓN ===================
 function deleteSemester(semesterId) {
@@ -707,14 +699,29 @@ function removeEquivalency(id) {
     showNotification('Equivalencia eliminada', 'success');
 }
 
-// =================== DRAG AND DROP ===================
+// =================== DRAG AND DROP CORREGIDO ===================
 function setupDragAndDrop() {
     const draggables = document.querySelectorAll('.subject-card[draggable="true"]');
     const dropZones = document.querySelectorAll('.semester-content, .subject-bank');
     
     draggables.forEach(draggable => {
-        draggable.addEventListener('dragstart', handleDragStart);
-        draggable.addEventListener('dragend', handleDragEnd);
+        // Limpiar event listeners previos
+        const newDraggable = draggable.cloneNode(true);
+        draggable.parentNode.replaceChild(newDraggable, draggable);
+        
+        newDraggable.addEventListener('dragstart', handleDragStart);
+        newDraggable.addEventListener('dragend', handleDragEnd);
+        
+        // Mantener funcionalidad de click
+        newDraggable.addEventListener('click', (e) => {
+            if (!newDraggable.classList.contains('dragging')) {
+                const subjectId = newDraggable.dataset.id;
+                const subject = plannerState.subjects.find(s => s.id === subjectId);
+                if (subject && !newDraggable.classList.contains('locked')) {
+                    toggleSubjectCompleted(subjectId);
+                }
+            }
+        });
     });
     
     dropZones.forEach(zone => {
@@ -728,6 +735,7 @@ function setupDragAndDrop() {
 function handleDragStart(e) {
     draggedElementId = e.target.dataset.id;
     e.target.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
 }
 
 function handleDragEnd(e) {
@@ -737,6 +745,7 @@ function handleDragEnd(e) {
 
 function handleDragOver(e) {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
 }
 
 function handleDragEnter(e) {
@@ -806,11 +815,11 @@ function updateStats() {
         .reduce((sum, eq) => sum + eq.credits, 0);
     
     // Total incluye pensum + equivalencias
-    updateStatCard('total-credits', pensumCredits + equivalencyCredits, 152);
-    updateStatCard('basic-cycle-credits', basicCredits, 61);
+    updateStatCard('total-credits', pensumCredits + equivalencyCredits, 140);
+    updateStatCard('basic-cycle-credits', basicCredits, 49);
     updateStatCard('professional-cycle-credits', profCredits, 57);
     updateStatCard('fg-credits', fgCredits, 17);
-    updateStatCard('prof-electives-credits', 0, 17);
+    updateStatCard('prof-electives-credits', 17);
 }
 
 function updateStatCard(id, current, total) {
@@ -827,6 +836,125 @@ function updateStatCard(id, current, total) {
     }
 }
 
+// =================== IMPORTAR SIRA TOTALMENTE CORREGIDO ===================
+function processSiraData(siraText) {
+    const lines = siraText.split('\n');
+    const processedSubjects = [];
+    const periodsFound = new Set();
+    
+    let currentPeriod = null;
+    let foundAnySubject = false;
+    let processedCount = 0;
+    
+    lines.forEach(line => {
+        const cleanLine = line.trim();
+        if (!cleanLine) return;
+        
+        // Detectar período con múltiples formatos más flexibles
+        const periodPatterns = [
+            /PERIODO:\s*(.+)/i,
+            /PERÍODO:\s*(.+)/i,
+            /Periodo:\s*(.+)/i,
+            /Período:\s*(.+)/i,
+            /^PERIODO\s+(.+)/i,
+            /^PERÍODO\s+(.+)/i,
+            /Fecha\s+Matrícula:\s*(.+)/i
+        ];
+        
+        for (const pattern of periodPatterns) {
+            const match = cleanLine.match(pattern);
+            if (match) {
+                currentPeriod = match[1].trim();
+                periodsFound.add(currentPeriod);
+                return;
+            }
+        }
+        
+        // Detectar materias con patrones basados en el formato real del SIRA
+        const subjectPatterns = [
+            // Formato tabla: CÓDIGO NÚMERO NÚMERO NOMBRE TIPO TIPO TIPO NÚMERO DECIMAL
+            /^(\d{6}C|\d{7}C)\s+\d+\s+\d+\s+(.+?)\s+[A-Z]\s+[A-Z]{2,3}\s+[A-Z]{2,4}\s+(\d+)\s+([\d.]+)$/,
+            
+            // Formato alternativo con espacios múltiples
+            /^(\d{6}C|\d{7}C)\s+(.+?)\s+[A-Z]\s+[A-Z]{2,3}\s+[A-Z]{2,4}\s+(\d+)\s+([\d.]+)$/,
+            
+            // Formato más simple con solo código y calificación
+            /^(\d{6}C|\d{7}C).*?([\d.]+)\s*$/,
+            
+            // Formato con tabulaciones
+            /^(\d{6}C|\d{7}C)[\s\t]+.*?[\s\t]+([\d.]+)[\s\t]*$/,
+            
+            // Formato línea completa flexible
+            /(\d{6}C|\d{7}C)[\s\S]*?([\d.]+)(?:\s|$)/
+        ];
+        
+        for (const pattern of subjectPatterns) {
+            const match = cleanLine.match(pattern);
+            if (match) {
+                const code = match[1];
+                let grade = 0;
+                
+                // Obtener la calificación (último número en la línea)
+                const numbers = cleanLine.match(/[\d.]+/g);
+                if (numbers && numbers.length > 0) {
+                    // Buscar el último número que parezca una calificación (entre 0.0 y 5.0)
+                    for (let i = numbers.length - 1; i >= 0; i--) {
+                        const num = parseFloat(numbers[i]);
+                        if (num >= 0.0 && num <= 5.0) {
+                            grade = num;
+                            break;
+                        }
+                    }
+                }
+                
+                // Solo procesar si la calificación es aprobatoria (>= 3.0)
+                if (grade >= 3.0) {
+                    const existingSubject = plannerState.subjects.find(s => s.id === code);
+                    
+                    if (existingSubject && !existingSubject.completed) {
+                        existingSubject.completed = true;
+                        foundAnySubject = true;
+                        processedCount++;
+                        
+                        // Crear semestre solo si hay período
+                        if (currentPeriod) {
+                            const semesterName = `${currentPeriod}`;
+                            let existingSemester = plannerState.semesters.find(s => s.name === semesterName);
+                            
+                            if (!existingSemester) {
+                                const newSemester = {
+                                    id: plannerState.nextSemesterId++,
+                                    name: semesterName,
+                                    collapsed: false,
+                                    color: '#ffdd53'
+                                };
+                                plannerState.semesters.push(newSemester);
+                                existingSemester = newSemester;
+                            }
+                            
+                            existingSubject.location = `semester-${existingSemester.id}`;
+                        }
+                        
+                        processedSubjects.push({
+                            id: code,
+                            period: currentPeriod,
+                            grade: grade
+                        });
+                    }
+                }
+                break;
+            }
+        }
+    });
+    
+    if (!foundAnySubject) {
+        showNotification('No se encontraron materias aprobadas. Verifica que el formato incluya códigos de materia (ej: 507035C) y calificaciones mayores a 3.0', 'warning');
+        return [];
+    }
+    
+    showNotification(`✅ Se procesaron ${processedCount} materias${periodsFound.size > 0 ? ` de ${periodsFound.size} períodos` : ''}`, 'success');
+    return processedSubjects;
+}
 
 // =================== MODAL DE EQUIVALENCIAS ===================
 function renderEquivalencyModal() {
@@ -875,19 +1003,24 @@ function renderEquivalencyModal() {
     }
 }
 
-// =================== EVENT LISTENERS ===================
+// =================== EVENT LISTENERS CORREGIDOS ===================
 function setupEventListeners() {
-    // Agregar semestre
+    // Agregar semestre CORREGIDO - solo crea 1
     const addSemesterBtn = document.getElementById('add-semester-btn');
     if (addSemesterBtn) {
-        addSemesterBtn.addEventListener('click', () => {
+        // Limpiar listeners previos
+        addSemesterBtn.replaceWith(addSemesterBtn.cloneNode(true));
+        const newAddBtn = document.getElementById('add-semester-btn');
+        
+        newAddBtn.addEventListener('click', () => {
             const newSemester = {
-                id: plannerState.nextSemesterId++,
-                name: `Semestre ${plannerState.nextSemesterId - 1}`,
+                id: plannerState.nextSemesterId,
+                name: `Semestre ${plannerState.nextSemesterId}`,
                 collapsed: false,
                 color: '#ffdd53'
             };
             plannerState.semesters.push(newSemester);
+            plannerState.nextSemesterId++; // Incrementar DESPUÉS de usar
             render();
             showNotification('Semestre agregado correctamente', 'success');
         });
@@ -901,7 +1034,7 @@ function setupEventListeners() {
         });
     }
     
-    // Procesar SIRA mejorado
+    // Procesar SIRA
     const processSiraBtn = document.getElementById('process-sira-btn');
     if (processSiraBtn) {
         processSiraBtn.addEventListener('click', () => {
@@ -928,11 +1061,18 @@ function setupEventListeners() {
         });
     }
     
-    // Reiniciar datos
+    // Reiniciar datos CORREGIDO - sin loop infinito
     const resetBtn = document.getElementById('reset-data-btn');
     if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            if (confirm('¿Estás seguro de reiniciar todos los datos? Esta acción no se puede deshacer.')) {
+        // Limpiar listeners previos
+        resetBtn.replaceWith(resetBtn.cloneNode(true));
+        const newResetBtn = document.getElementById('reset-data-btn');
+        
+        newResetBtn.addEventListener('click', () => {
+            // Usar una notificación personalizada en lugar de confirm
+            const shouldReset = window.confirm('¿Estás seguro de reiniciar todos los datos? Esta acción no se puede deshacer.');
+            
+            if (shouldReset) {
                 plannerState = getInitialState();
                 render();
                 showNotification('Datos reiniciados correctamente', 'success');
