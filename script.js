@@ -9,11 +9,20 @@ const firebaseConfig = {
     measurementId: "G-WQVMB3XP2W"
 };
 
+// Verificar que Firebase esté cargado
+if (typeof firebase === 'undefined') {
+    console.error('Firebase no está cargado. Verifica los scripts en el HTML.');
+    alert('Error: Firebase no pudo cargar. Revisa la conexión a internet.');
+} else {
+    console.log('Firebase cargado correctamente');
+}
+
 // =================== INICIALIZACIÓN ===================
 const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 
 // =================== ELEMENTOS DEL DOM ===================
 const authContainer = document.getElementById('auth-container');
