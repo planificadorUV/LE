@@ -11,130 +11,82 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
-<body>
+<body id="main-body">
     <!-- Auth Container -->
     <div id="auth-container" class="auth-container">
-        <div class="auth-background">
-            <div class="floating-shape shape-1"></div>
-            <div class="floating-shape shape-2"></div>
-            <div class="floating-shape shape-3"></div>
-        </div>
-        
         <div class="auth-card glassmorphism">
             <div class="auth-header">
                 <div class="logo-placeholder" title="Logo Legion Estudiantil">
-                    <img src="https://i.imgur.com/example.png" onerror="this.onerror=null;this.src='https://placehold.co/60x60/ffffff/e20511?text=LE';" alt="Legion Estudiantil">
+                    <img src="images/logole.png" alt="Legion Estudiantil">
                 </div>
                 <h1>Planificador Académico</h1>
                 <p>Universidad del Valle</p>
             </div>
-
-            <!-- Login Form -->
             <form id="login-form" class="auth-form">
-                <div class="form-group">
-                    <input type="email" id="login-email" class="form-input" placeholder="Correo electrónico" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="login-password" class="form-input" placeholder="Contraseña" required>
-                </div>
+                <div class="form-group"><input type="email" id="login-email" class="form-input" placeholder="Correo electrónico" required></div>
+                <div class="form-group"><input type="password" id="login-password" class="form-input" placeholder="Contraseña" required></div>
                 <button type="submit" class="btn-primary">Iniciar Sesión</button>
             </form>
-
-            <!-- Register Form -->
             <form id="register-form" class="auth-form hidden">
-                <div class="form-group">
-                    <input type="text" id="register-name" class="form-input" placeholder="Nombre completo" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" id="register-email" class="form-input" placeholder="Correo electrónico" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="register-password" class="form-input" placeholder="Contraseña" required>
-                </div>
+                <div class="form-group"><input type="text" id="register-name" class="form-input" placeholder="Nombre completo" required></div>
+                <div class="form-group"><input type="email" id="register-email" class="form-input" placeholder="Correo electrónico" required></div>
+                <div class="form-group"><input type="password" id="register-password" class="form-input" placeholder="Contraseña" required></div>
                 <button type="submit" class="btn-primary">Registrarse</button>
             </form>
-
             <div class="auth-divider"><span>o</span></div>
-
             <button id="google-signin-btn" class="btn-google">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                 Continuar con Google
             </button>
-
             <p class="auth-toggle"><a href="#" id="toggle-auth-mode">¿No tienes cuenta? Regístrate</a></p>
             <div id="auth-error" class="error-message"></div>
         </div>
     </div>
 
-    <!-- Career Selection Container -->
     <div id="career-selection-container" class="career-selection hidden">
         <div class="career-header">
             <div class="career-header-content">
-                <div class="logo-placeholder" title="Logo Legion Estudiantil" id="legion-logo-career">
-                    <img src="https://i.imgur.com/example.png" onerror="this.onerror=null;this.src='https://placehold.co/60x60/ffffff/e20511?text=LE';" alt="Legion Estudiantil">
-                </div>
-                <div class="career-welcome">
-                    <h2 id="welcome-message-career">¡Bienvenid@, Usuario!</h2>
-                    <p>Selecciona tu carrera para continuar</p>
-                </div>
+                <div class="logo-placeholder" title="Logo Legion Estudiantil"><img src="images/logole.png" alt="Legion Estudiantil"></div>
+                <div class="career-welcome"><h2 id="welcome-message-career">¡Bienvenid@!</h2><p>Selecciona tu carrera</p></div>
                 <button id="logout-btn-career" class="btn-secondary">Cerrar Sesión</button>
             </div>
         </div>
         <div class="career-grid">
-            <div id="career-list">
-                <button class="career-select-btn" data-career-id="diseno-industrial">
-                    <span class="career-icon">🎨</span>
-                    <div><h3>Diseño Industrial</h3><p>Planifica tu carrera profesional</p></div>
-                </button>
-            </div>
+            <div id="career-list"><button class="career-select-btn" data-career-id="diseno-industrial"><span class="career-icon">🎨</span><div><h3>Diseño Industrial</h3><p>Planifica tu carrera</p></div></button></div>
         </div>
     </div>
 
-    <!-- Main App Container -->
     <div id="app-container" class="hidden">
         <header class="app-header">
             <div class="header-content">
                 <div class="header-left">
-                    <div class="logo-main-container" title="Logo Legion Estudiantil" id="legion-logo-main">
-                         <img src="https://i.imgur.com/example.png" onerror="this.onerror=null;this.src='https://placehold.co/120x60/ffffff/e20511?text=LE';" alt="Legion Estudiantil">
-                    </div>
-                    <div class="header-info">
-                        <h1>Diseño Industrial</h1>
-                        <span class="university-name">Universidad del Valle</span>
+                    <div class="logo-main-container" title="Logo Legion Estudiantil"><img src="images/logole.png" alt="Legion Estudiantil"></div>
+                    <div class="header-info"><h1>Diseño Industrial</h1><span class="university-name">Universidad del Valle</span></div>
+                </div>
+                <div class="header-center">
+                    <div class="plan-slots-container">
+                        <div id="plan-slots-dropdown" class="plan-slots-dropdown">
+                            <button id="active-plan-button" class="btn-secondary active-plan-button">Plan Actual</button>
+                            <div id="plan-slots-list" class="plan-slots-list hidden"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="header-center"></div>
                 <div class="header-right">
-                    <div class="user-info">
-                        <span id="user-name-display"></span>
-                        <div class="user-avatar" id="user-avatar"><span class="avatar-fallback">👤</span></div>
-                    </div>
-                    <div class="theme-toggle-container">
-                        <label class="theme-switch"><input type="checkbox" id="theme-toggle"><span class="slider"></span></label>
-                    </div>
-                    <button id="logout-btn-main" class="btn-secondary btn-icon" title="Cerrar Sesión">🚪</button>
+                    <div class="user-avatar" id="user-avatar"><span class="avatar-fallback">👤</span></div>
+                    <div class="theme-toggle-container"><label class="theme-switch"><input type="checkbox" id="theme-toggle"><span class="slider"></span></label></div>
+                    <button id="logout-btn-main" class="btn-secondary">Cerrar Sesión</button>
                 </div>
             </div>
         </header>
 
         <main class="main-content">
             <aside id="left-panel" class="left-panel">
-                <div class="stats-section">
-                    <div class="section-header">
-                        <h3>📊 Progreso Académico</h3>
-                    </div>
-                    <div class="stats-board"></div>
-                </div>
-                <div class="bank-section">
-                    <div class="section-header">
-                        <h3>📚 Banco de Materias</h3>
-                    </div>
-                    <div id="subject-bank" class="subject-bank"></div>
-                </div>
+                <div class="stats-section"><div class="section-header"><h3>📊 Progreso Académico</h3></div><div class="stats-board"></div></div>
+                <div class="bank-section"><div class="section-header"><h3>📚 Banco de Materias</h3></div><div id="subject-bank" class="subject-bank"></div></div>
                 <div class="action-buttons">
                     <button id="add-semester-btn" class="btn-primary"><span>➕</span> Agregar Semestre</button>
                     <button id="import-sira-btn" class="btn-secondary"><span>📄</span> Importar SIRA</button>
-                    <button id="reset-data-btn" class="btn-danger"><span>🔄</span> Reiniciar Datos</button>
+                    <button id="reset-data-btn" class="btn-danger"><span>🔄</span> Reiniciar Plan Actual</button>
                 </div>
             </aside>
 
@@ -143,8 +95,9 @@
                     <div class="semesters-header">
                         <h2>📅 Plan de Estudios</h2>
                         <div class="semester-controls">
-                            <button id="collapse-all-btn" class="btn-secondary btn-icon" title="Contraer Todo"><span>🔼</span></button>
-                            <button id="expand-all-btn" class="btn-secondary btn-icon" title="Expandir Todo"><span>🔽</span></button>
+                            <button id="focus-mode-btn" class="btn-secondary btn-icon" title="Modo Enfoque">👁️</button>
+                            <button id="collapse-all-btn" class="btn-secondary btn-icon" title="Contraer Todo">🔼</button>
+                            <button id="expand-all-btn" class="btn-secondary btn-icon" title="Expandir Todo">🔽</button>
                         </div>
                     </div>
                     <div id="semesters-grid" class="semesters-grid-container"></div>
@@ -152,21 +105,22 @@
             </section>
 
             <aside id="right-panel" class="right-panel">
-                <div id="homologations-module" class="homologations-section">
-                    <div class="section-header">
-                        <h3>🔄 Homologaciones</h3>
-                    </div>
-                    <div id="homologations-list" class="homologations-list"></div>
-                    <button id="add-homologation-btn" class="btn-secondary"><span>✨</span> Añadir Homologación</button>
+                <div class="tools-section">
+                    <div class="section-header"><h3>🛠️ Herramientas</h3></div>
+                    <div class="tool-card"><button id="add-equivalency-btn" class="tool-btn"><span class="tool-icon">🔄</span><div class="tool-content"><h4>Equivalencias</h4><p>Gestionar materias homologadas</p></div></button></div>
+                    <div class="tool-card"><button id="add-custom-subject-btn" class="tool-btn"><span class="tool-icon">✨</span><div class="tool-content"><h4>Añadir Materia</h4><p>Crear electivas o personalizadas</p></div></button></div>
                 </div>
                 <div class="university-links-section">
-                    <div class="section-header">
-                        <h3>🏛️ Enlaces Universitarios</h3>
-                    </div>
+                    <div class="section-header"><h3>🏛️ Enlaces Universitarios</h3></div>
                     <div class="links-grid">
                         <a href="https://linktr.ee/legionestudiantil" target="_blank" class="link-card" data-color="blue"><span class="link-icon">🤝</span><div class="link-content"><h4>Legión Estudiantil</h4><p>Apoyo y dudas</p></div></a>
                         <a href="https://sira.univalle.edu.co/sra" target="_blank" class="link-card" data-color="red"><span class="link-icon">📝</span><div class="link-content"><h4>SIRA</h4><p>Matrícula y notas</p></div></a>
-                        <a href="javascript:void(0);" id="contact-program-btn" class="link-card" data-color="red"><span class="link-icon">✉️</span><div class="link-content"><h4>Dirección Programa</h4><p>Contacto oficial</p></div></a>
+                        <a href="https://proxse25.univalle.edu.co/login" target="_blank" class="link-card" data-color="blue"><span class="link-icon">💳</span><div class="link-content"><h4>Matrícula Financiera</h4><p>Recibos y pagos</p></div></a>
+                        <a href="https://registro.univalle.edu.co/estudiantes-pregrado/pregrado-programacion-academica" target="_blank" class="link-card" data-color="red"><span class="link-icon">📅</span><div class="link-content"><h4>Programación Académica</h4><p>Horarios y salones</p></div></a>
+                        <a href="https://biblioteca.univalle.edu.co/" target="_blank" class="link-card" data-color="blue"><span class="link-icon">📚</span><div class="link-content"><h4>Biblioteca</h4><p>Consulta de recursos</p></div></a>
+                        <a href="https://bienestar.univalle.edu.co/" target="_blank" class="link-card" data-color="red"><span class="link-icon">❤️</span><div class="link-content"><h4>Bienestar Universitario</h4><p>Apoyo al estudiante</p></div></a>
+                        <a href="https://diseno.univalle.edu.co/res-188" target="_blank" class="link-card" data-color="blue"><span class="link-icon">🎨</span><div class="link-content"><h4>Pensum Diseño Industrial</h4><p>Documento oficial</p></div></a>
+                        <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="link-card" data-color="red"><span class="link-icon">✉️</span><div class="link-content"><h4>Dirección Programa</h4><p>Contacto oficial</p></div></a>
                     </div>
                 </div>
             </aside>
@@ -174,30 +128,12 @@
     </div>
 
     <!-- Modals -->
-    <div id="sira-modal" class="modal-overlay hidden">
-        <div class="modal-content"><button class="modal-close-btn">&times;</button><h2>📄 Importar Datos del SIRA</h2><p>Pega el contenido de tu "Registro de Calificaciones" de SIRA. El sistema procesará automáticamente las materias aprobadas (nota >= 3.0).</p><textarea id="sira-input" class="form-textarea" rows="12" placeholder="Pega aquí TODO el contenido del SIRA..."></textarea><div class="modal-actions"><button id="process-sira-btn" class="btn-primary">Procesar</button></div></div>
-    </div>
-    
-    <div id="homologation-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <h2>✨ Añadir Homologación Externa</h2>
-            <p>Registra una materia cursada en otra carrera o universidad que te fue homologada.</p>
-            <form id="homologation-form">
-                <div class="form-group"><label for="homol-name">Nombre de la materia homologada:</label><input type="text" id="homol-name" class="form-input" required></div>
-                <div class="form-row">
-                    <div class="form-group"><label for="homol-credits">Créditos:</label><input type="number" id="homol-credits" class="form-input" min="1" max="10" required></div>
-                    <div class="form-group"><label for="homol-type">Aporta a la categoría:</label><select id="homol-type" class="form-input" required><option value="" disabled selected>Selecciona...</option><option value="AB">Área Básica (AB)</option><option value="AP">Área Profesional (AP)</option><option value="EC">Formación General (EC)</option><option value="EP">Electiva Profesional (EP)</option></select></div>
-                </div>
-                <div class="modal-actions"><button type="submit" class="btn-primary">Añadir Homologación</button></div>
-            </form>
-        </div>
-    </div>
+    <div id="sira-modal" class="modal-overlay hidden"><div class="modal-content"><button class="modal-close-btn">&times;</button><h2>📄 Importar SIRA</h2><p>Pega tu "Registro de Calificaciones". El sistema procesará materias con nota >= 3.0.</p><textarea id="sira-input" class="form-textarea" rows="12" placeholder="Pega aquí TODO el contenido del SIRA..."></textarea><div class="modal-actions"><button id="process-sira-btn" class="btn-primary">Procesar</button></div></div></div>
+    <div id="equivalency-modal" class="modal-overlay hidden"><div class="modal-content"><button class="modal-close-btn">&times;</button><h2>🔄 Gestionar Equivalencias</h2><p>Busca materias del pensum para marcarlas como vistas o añade una equivalencia externa.</p><div class="form-group"><label for="search-subject-equiv">Buscar materia del pensum:</label><input type="text" id="search-subject-equiv" class="form-input" placeholder="Buscar por nombre o código..."></div><div id="equivalencies-list-search" class="equivalencies-list"></div></div></div>
+    <div id="custom-subject-modal" class="modal-overlay hidden"><div class="modal-content"><button class="modal-close-btn">&times;</button><h2>✨ Añadir Materia Personalizada</h2><p>Crea una materia que no esté en el pensum (ej. una electiva nueva).</p><form id="custom-subject-form"><div class="form-group"><label for="custom-name">Nombre:</label><input type="text" id="custom-name" class="form-input" required></div><div class="form-row"><div class="form-group"><label for="custom-credits">Créditos:</label><input type="number" id="custom-credits" class="form-input" min="1" max="10" required></div><div class="form-group"><label for="custom-type">Tipo:</label><select id="custom-type" class="form-input" required><option value="EC">Electiva Complementaria</option><option value="EP">Electiva Profesional</option><option value="AB">Área Básica</option><option value="AP">Área Profesional</option><option value="Otro">Otro</option></select></div></div><div class="form-group"><label for="custom-code">Código (Opcional):</label><input type="text" id="custom-code" class="form-input"></div><div class="modal-actions"><button type="submit" class="btn-primary">Añadir al Banco</button></div></form></div></div>
+    <div id="loading-overlay" class="loading-overlay hidden"><div class="loading-content"><div class="loader"></div><p id="loading-text">Cargando...</p></div></div>
 
-    <div id="loading-overlay" class="loading-overlay hidden">
-        <div class="loading-content"><div class="loader"></div><p id="loading-text">Cargando...</p></div>
-    </div>
-
+    <script src="pensums/pensum-di.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
