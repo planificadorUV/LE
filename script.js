@@ -8,7 +8,7 @@ const firebaseConfig = {
     appId: "1:289578190596:web:d45140a8bd7aff44b13251"
 };
 
-// =================== INICIALIZACIÓN ===================
+// =================== VARIABLES GLOBALES ===================
 let app, auth, db, googleProvider;
 let plannerState = {};
 let currentCareerId = null;
@@ -19,6 +19,9 @@ let isSaving = false;
 let saveTimeout = null;
 let touchMoveMode = false;
 let selectedTouchElement = null;
+let processedSiraData = null;
+let currentActiveTab = 'pensum';
+let eventListenersSetup = false;
 
 // =================== SISTEMA DE NOTIFICACIONES ===================
 function showNotification(message, type = 'info', duration = 3000) {
@@ -43,10 +46,8 @@ function showNotification(message, type = 'info', duration = 3000) {
     
     document.body.appendChild(notification);
     
-    // Trigger animation
     setTimeout(() => notification.classList.add('show'), 10);
     
-    // Remove notification
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
@@ -76,36 +77,7 @@ function initializeFirebase() {
     }
 }
 
-// =================== FUNCIÓN GLOBAL PARA SELECCIONAR CARRERA ===================
-function selectCareer(careerId) {
-    console.log('=== SELECCIONANDO CARRERA ===');
-    console.log('Career ID:', careerId);
-    
-    if (!auth || !auth.currentUser) {
-        console.error('Usuario no autenticado');
-        showNotification('Error: No hay usuario autenticado', 'error');
-        return;
-    }
-
-    console.log('Usuario:', auth.currentUser.email);
-
-    // Show loading
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) {
-        loadingOverlay.classList.remove('hidden');
-    }
-
-    // Set current career
-    currentCareerId = careerId;
-    
-    // Load planner data
-    loadPlannerData(auth.currentUser.uid, careerId);
-}
-
-// Hacer la función disponible globalmente
-window.selectCareer = selectCareer;
-
-// =================== AUTENTICACIÓN ===================
+// =================== FUNCIONES DE AUTENTICACIÓN ===================
 function setupAuthStateListener() {
     if (!auth) {
         console.error('Auth no está inicializado');
@@ -199,6 +171,28 @@ function showCareerSelection(user) {
     console.log('Selección de carrera mostrada');
 }
 
+// =================== FUNCIÓN GLOBAL PARA SELECCIONAR CARRERA ===================
+function selectCareer(careerId) {
+    console.log('=== SELECCIONANDO CARRERA ===');
+    console.log('Career ID:', careerId);
+    
+    if (!auth || !auth.currentUser) {
+        console.error('Usuario no autenticado');
+        showNotification('Error: No hay usuario autenticado', 'error');
+        return;
+    }
+
+    console.log('Usuario:', auth.currentUser.email);
+
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
+    }
+
+    currentCareerId = careerId;
+    loadPlannerData(auth.currentUser.uid, careerId);
+}
+
 // =================== LÓGICA DE DATOS ===================
 function getActivePlan() {
     if (plannerState && plannerState.plans && plannerState.activePlanId) {
@@ -284,13 +278,11 @@ function loadPlannerData(userId, careerId) {
             }
         }
         
-        // Inicializar UI
         initializeAppUI(auth.currentUser);
     }, error => {
         console.error("Error cargando datos:", error);
         showNotification("Error cargando datos", 'error');
         
-        // Fallback con estado inicial
         const initialState = getInitialStateForUser();
         if (initialState) {
             plannerState = initialState;
@@ -332,14 +324,12 @@ function initializeAppUI(user) {
     console.log('Usuario:', user.email);
     console.log('Estado del planificador:', plannerState);
     
-    // Verificar que tengamos datos
     if (!plannerState || !plannerState.plans) {
         console.error('No hay datos del planificador');
         showNotification('Error: No se pudieron cargar los datos', 'error');
         return;
     }
     
-    // Ocultar pantallas de carga y selección
     const loadingOverlay = document.getElementById('loading-overlay');
     const careerContainer = document.getElementById('career-selection-container');
     const appContainer = document.getElementById('app-container');
@@ -347,13 +337,11 @@ function initializeAppUI(user) {
     if (loadingOverlay) loadingOverlay.classList.add('hidden');
     if (careerContainer) careerContainer.classList.add('hidden');
     
-    // Mostrar aplicación principal
     if (appContainer) {
         appContainer.classList.remove('hidden');
         console.log('Aplicación principal mostrada');
     }
 
-    // Configurar info de usuario
     const avatar = document.getElementById('user-avatar');
     if (avatar && user) {
         if (user.photoURL) {
@@ -364,18 +352,147 @@ function initializeAppUI(user) {
         }
     }
 
-    // Renderizar contenido
     render();
     
-    // Configurar event listeners
-    if (!window.eventListenersSetup) {
+    if (!eventListenersSetup) {
         setupEventListeners();
-        window.eventListenersSetup = true;
+        eventListenersSetup = true;
         console.log('Event listeners configurados');
     }
     
     showNotification('¡Aplicación cargada correctamente!', 'success');
     console.log('UI inicializada exitosamente');
+}
+
+// =================== CONFIGURACIÓN DE EVENT LISTENERS ===================
+function setupEventListeners() {
+    console.log('Configurando event listeners...');
+
+    // Auth listeners
+    const googleBtn = document.getElementById('google-login-btn');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', loginWithGoogle);
+    }
+
+    const emailForm = document.getElementById('email-login-form');
+    if (emailForm) {
+        emailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            loginWithEmail(email, password);
+        });
+    }
+
+    const toggleRegisterBtn = document.getElementById('toggle-register');
+    if (toggleRegisterBtn) {
+        toggleRegisterBtn.addEventListener('click', () => {
+            // Implementar toggle de registro si es necesario
+            showNotification('Función de registro por implementar', 'info');
+        });
+    }
+
+    // Logout buttons
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+    }
+
+    const logoutAppBtn = document.getElementById('logout-app-btn');
+    if (logoutAppBtn) {
+        logoutAppBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+    }
+
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    // Zen mode toggle
+    const zenToggle = document.getElementById('zen-mode-toggle');
+    if (zenToggle) {
+        zenToggle.addEventListener('click', toggleZenMode);
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('subject-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(() => {
+            render();
+        }, 300));
+    }
+
+    // Filter tabs
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active');
+            render();
+        });
+    });
+
+    // Modal functionality
+    setupModalListeners();
+
+    console.log('Event listeners configurados exitosamente');
+}
+
+function setupModalListeners() {
+    // Cerrar modales con click fuera
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    });
+
+    // Equivalency modal listeners
+    const pensumSearch = document.getElementById('pensum-search');
+    if (pensumSearch) {
+        pensumSearch.addEventListener('input', debounce(searchPensumSubjects, 300));
+    }
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function toggleTheme() {
+    const body = document.body;
+    const themeToggle = document.getElementById('theme-toggle');
+    const currentTheme = body.dataset.theme;
+    
+    if (currentTheme === 'dark') {
+        body.dataset.theme = 'light';
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        body.dataset.theme = 'dark';
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    
+    // Guardar preferencia
+    localStorage.setItem('theme', body.dataset.theme);
+}
+
+function toggleZenMode() {
+    document.body.classList.toggle('zen-mode');
+    const zenToggle = document.getElementById('zen-mode-toggle');
+    const isZen = document.body.classList.contains('zen-mode');
+    zenToggle.innerHTML = `<i class="fas fa-${isZen ? 'compress' : 'expand'}"></i>`;
 }
 
 // =================== RENDERIZADO ===================
@@ -396,7 +513,6 @@ function render() {
     }
 
     console.log('Renderizando plan:', plan.name);
-    console.log('Materias en el plan:', plan.subjects.length);
 
     try {
         renderPlanSlots();
@@ -409,18 +525,45 @@ function render() {
         showNotification('Error renderizando la aplicación', 'error');
     }
     
-    // Guardar cambios
     savePlannerData();
 }
 
 function renderPlanSlots() {
     const activeButton = document.getElementById('active-plan-button');
-    if (!activeButton) return;
+    const slotsList = document.getElementById('plan-slots-list');
+    
+    if (!activeButton || !plannerState.plans) return;
     
     const activePlan = getActivePlan();
     if (!activePlan) return;
 
     activeButton.innerHTML = `${activePlan.name} <i class="fas fa-chevron-down"></i>`;
+
+    if (slotsList) {
+        const planIds = Object.keys(plannerState.plans);
+        slotsList.innerHTML = planIds.map(planId => {
+            const plan = plannerState.plans[planId];
+            const isActive = planId === plannerState.activePlanId;
+            
+            return `
+                <div class="plan-slot-item ${isActive ? 'active' : ''}" onclick="switchToPlan('${planId}')">
+                    <span>${plan.name}</span>
+                    <div class="plan-slot-actions">
+                        <button onclick="event.stopPropagation(); renamePlan('${planId}')" title="Renombrar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${!isActive ? `<button onclick="event.stopPropagation(); deletePlan('${planId}')" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('') + (planIds.length < 3 ? `
+            <div class="plan-slot-item">
+                <input type="text" class="new-plan-input" placeholder="Nombre del nuevo plan..." onkeypress="if(event.key==='Enter') createNewPlan(this.value)">
+            </div>
+        ` : '');
+    }
 }
 
 function renderStatsBoard(plan) {
@@ -456,6 +599,16 @@ function renderStatsBoard(plan) {
         
         <div class="stat-card">
             <div class="stat-header">
+                <span class="stat-title">Inglés</span>
+                <span class="stat-value">${stats.englishCompleted}/${stats.englishTotal}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill english" style="width: ${stats.englishTotal > 0 ? (stats.englishCompleted / stats.englishTotal) * 100 : 0}%"></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
                 <span class="stat-title">Semestres</span>
                 <span class="stat-value">${plan.semesters.length}</span>
             </div>
@@ -470,12 +623,17 @@ function calculateStats(plan) {
     const totalCredits = subjects.reduce((sum, s) => sum + (s.credits || 0), 0);
     const completedCredits = completed.reduce((sum, s) => sum + (s.credits || 0), 0);
     
+    const englishSubjects = subjects.filter(s => s.category === 'english' || s.type === 'english');
+    const englishCompleted = englishSubjects.filter(s => s.completed).length;
+    
     return {
         totalSubjects: subjects.length,
         completedSubjects: completed.length,
         totalCredits,
         completedCredits,
-        completionPercentage: totalCredits > 0 ? Math.round((completedCredits / totalCredits) * 100) : 0
+        completionPercentage: totalCredits > 0 ? Math.round((completedCredits / totalCredits) * 100) : 0,
+        englishTotal: englishSubjects.length,
+        englishCompleted
     };
 }
 
@@ -486,11 +644,37 @@ function renderSubjectBank(plan) {
         return;
     }
 
-    const subjects = plan.subjects.filter(s => s.location === 'bank');
+    const searchTerm = document.getElementById('subject-search')?.value.toLowerCase() || '';
+    const activeFilter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
+    
+    let subjects = plan.subjects.filter(s => s.location === 'bank');
+    
+    if (searchTerm) {
+        subjects = subjects.filter(s => 
+            s.name.toLowerCase().includes(searchTerm) || 
+            s.id.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    if (activeFilter !== 'all') {
+        subjects = subjects.filter(s => {
+            switch (activeFilter) {
+                case 'available':
+                    return canTakeSubject(s, plan) && !s.completed;
+                case 'completed':
+                    return s.completed;
+                case 'locked':
+                    return !canTakeSubject(s, plan) && !s.completed;
+                default:
+                    return true;
+            }
+        });
+    }
+    
     console.log('Materias en el banco:', subjects.length);
     
     if (subjects.length === 0) {
-        container.innerHTML = '<div class="no-results"><i class="fas fa-graduation-cap"></i><p>No hay materias en el banco</p></div>';
+        container.innerHTML = '<div class="no-results"><i class="fas fa-graduation-cap"></i><p>No hay materias que coincidan con los filtros</p></div>';
         return;
     }
     
@@ -504,6 +688,7 @@ function createSubjectCardHTML(subject, plan) {
     if (subject.completed) cardClass += ' completed';
     if (!canTake && !subject.completed) cardClass += ' locked';
     if (canTake && !subject.completed) cardClass += ' available';
+    if (selectedSubjectId === subject.id) cardClass += ' selected';
 
     const statusIcon = subject.completed ? 
         '<i class="fas fa-check-circle subject-status completed"></i>' : 
@@ -513,7 +698,8 @@ function createSubjectCardHTML(subject, plan) {
         <div class="${cardClass}" 
              data-subject-id="${subject.id}"
              onclick="selectSubject('${subject.id}')"
-             ${canTake && !subject.completed ? 'draggable="true"' : ''}>
+             ${canTake && !subject.completed ? 'draggable="true"' : ''}
+             ondragstart="dragStart(event)">
             
             <div class="subject-header">
                 <span class="subject-code">${subject.id}</span>
@@ -542,6 +728,7 @@ function renderSemesters(plan) {
         const column = document.createElement('div');
         column.className = 'semester-column';
         column.dataset.semesterId = semester.id;
+        if (semester.collapsed) column.classList.add('collapsed');
 
         const subjects = plan.subjects.filter(s => s.location === `semester-${semester.id}`);
         const credits = subjects.reduce((sum, s) => sum + (s.credits || 0), 0);
@@ -550,10 +737,13 @@ function renderSemesters(plan) {
             <div class="semester-header" onclick="toggleSemesterCollapse(${semester.id})">
                 <h3>${semester.name}</h3>
                 <div class="semester-info">
-                    <span class="semester-credits">${credits} cr</span>
+                    <span class="semester-credits ${credits > 18 ? 'high-load' : ''}">${credits} cr</span>
                     <div class="semester-controls">
-                        <button class="semester-control-btn" onclick="event.stopPropagation(); addSemester()" title="Añadir semestre">
-                            <i class="fas fa-plus"></i>
+                        <button class="semester-control-btn" onclick="event.stopPropagation(); renameSemester(${semester.id})" title="Renombrar semestre">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="semester-control-btn" onclick="event.stopPropagation(); deleteSemester(${semester.id})" title="Eliminar semestre">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </div>
@@ -598,13 +788,37 @@ function createSemesterSubjectHTML(subject) {
     `;
 }
 
+// =================== FUNCIONES DE UTILIDAD ===================
+function canTakeSubject(subject, plan) {
+    if (!subject.prerequisites || subject.prerequisites.length === 0) {
+        return true;
+    }
+    
+    return subject.prerequisites.every(prereqId => {
+        const prereq = plan.subjects.find(s => s.id === prereqId);
+        return prereq && prereq.completed;
+    });
+}
+
+function getTypeLabel(type) {
+    const typeLabels = {
+        'AB': 'Área Básica',
+        'AP': 'Área Profesional', 
+        'EP': 'Electiva Profesional',
+        'EL': 'Electiva Libre',
+        'english': 'Inglés',
+        'practicas': 'Prácticas',
+        'proyecto': 'Proyecto de Grado'
+    };
+    return typeLabels[type] || type || 'Sin categoría';
+}
+
 // =================== FUNCIONES DE INTERACCIÓN ===================
 function selectSubject(subjectId) {
     console.log('Seleccionando materia:', subjectId);
     selectedSubjectId = subjectId;
     renderSubjectInfo(subjectId);
     
-    // Actualizar selección visual
     document.querySelectorAll('.subject-card, .semester-subject').forEach(card => {
         card.classList.remove('selected');
     });
@@ -624,6 +838,11 @@ function renderSubjectInfo(subjectId) {
         container.innerHTML = '<div class="no-selection"><i class="fas fa-hand-pointer"></i><p>Selecciona una materia para ver su información</p></div>';
         return;
     }
+
+    const prerequisites = subject.prerequisites || [];
+    const postrequisites = plan.subjects.filter(s => 
+        s.prerequisites && s.prerequisites.includes(subject.id)
+    );
 
     container.innerHTML = `
         <div class="subject-details">
@@ -649,7 +868,26 @@ function renderSubjectInfo(subjectId) {
                 <span class="detail-value">${subject.completed ? '✅ Vista' : '⏳ Pendiente'}</span>
             </div>
             
-            <div class="subject-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${prerequisites.length > 0 ? `
+                <div class="prerequisites-list">
+                    <h5>Prerrequisitos:</h5>
+                    ${prerequisites.map(prereqId => {
+                        const prereq = plan.subjects.find(s => s.id === prereqId);
+                        return prereq ? `<div class="prereq-item">${prereq.id} - ${prereq.name}</div>` : '';
+                    }).join('')}
+                </div>
+            ` : ''}
+            
+            ${postrequisites.length > 0 ? `
+                <div class="postrequisites-list">
+                    <h5>Habilita:</h5>
+                    ${postrequisites.map(postreq => 
+                        `<div class="postreq-item">${postreq.id} - ${postreq.name}</div>`
+                    ).join('')}
+                </div>
+            ` : ''}
+            
+            <div class="subject-actions">
                 <button onclick="toggleSubjectCompleted('${subject.id}')" class="btn-secondary">
                     <i class="fas fa-${subject.completed ? 'times' : 'check'}"></i>
                     ${subject.completed ? 'Desmarcar' : 'Marcar como vista'}
@@ -659,6 +897,13 @@ function renderSubjectInfo(subjectId) {
                     <button onclick="moveSubject('${subject.id}', 'bank')" class="btn-secondary">
                         <i class="fas fa-arrow-left"></i>
                         Mover al banco
+                    </button>
+                ` : ''}
+                
+                ${subject.isCustom ? `
+                    <button onclick="deleteCustomSubject('${subject.id}')" class="btn-danger">
+                        <i class="fas fa-trash"></i>
+                        Eliminar
                     </button>
                 ` : ''}
             </div>
@@ -678,7 +923,6 @@ function toggleSubjectCompleted(subjectId) {
 
     subject.completed = !subject.completed;
     
-    // Si se desmarca, mover al banco
     if (!subject.completed && subject.location !== 'bank') {
         subject.location = 'bank';
     }
@@ -702,11 +946,6 @@ function moveSubject(subjectId, newLocation) {
     render();
     showNotification(`${subject.name} movida exitosamente`, 'success');
 }
-
-// Hacer funciones disponibles globalmente
-window.selectSubject = selectSubject;
-window.toggleSubjectCompleted = toggleSubjectCompleted;
-window.moveSubject = moveSubject;
 
 // =================== DRAG AND DROP ===================
 function dragStart(e) {
@@ -733,170 +972,85 @@ function dropSubject(e, semesterId) {
     document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
 }
 
-// Hacer funciones de drag and drop globales
-window.dragStart = dragStart;
-window.allowDrop = allowDrop;
-window.dropSubject = dropSubject;
+// =================== FUNCIONES DE PLAN SLOTS ===================
+function togglePlanSlots() {
+    const slotsList = document.getElementById('plan-slots-list');
+    if (slotsList) {
+        slotsList.classList.toggle('hidden');
+    }
+}
 
-// =================== EVENT LISTENERS ===================
-function setupEventListeners() {
-    console.log('=== CONFIGURANDO EVENT LISTENERS ===');
+function switchToPlan(planId) {
+    plannerState.activePlanId = planId;
+    render();
+    togglePlanSlots();
+    showNotification(`Cambiado a ${plannerState.plans[planId].name}`, 'success');
+}
+
+function createNewPlan(name) {
+    if (!name || name.trim() === '') return;
     
-    setupAuthEventListeners();
-    setupCareerEventListeners();
-    setupAppEventListeners();
+    const planIds = Object.keys(plannerState.plans);
+    if (planIds.length >= 3) {
+        showNotification('Máximo 3 planes permitidos', 'error');
+        return;
+    }
+    
+    const newPlanId = `plan_${Date.now()}`;
+    const basePlan = getActivePlan();
+    
+    plannerState.plans[newPlanId] = {
+        name: name.trim(),
+        subjects: basePlan.subjects.map(s => ({
+            ...s,
+            completed: false,
+            location: 'bank'
+        })),
+        semesters: [
+            { id: 1, name: 'Semestre 1', collapsed: false },
+            { id: 2, name: 'Semestre 2', collapsed: false }
+        ],
+        customSubjects: []
+    };
+    
+    plannerState.activePlanId = newPlanId;
+    render();
+    togglePlanSlots();
+    showNotification(`Plan "${name}" creado exitosamente`, 'success');
 }
 
-function setupAuthEventListeners() {
-    const googleBtn = document.getElementById('google-login-btn');
-    if (googleBtn && !googleBtn.hasAttribute('data-listener')) {
-        googleBtn.addEventListener('click', loginWithGoogle);
-        googleBtn.setAttribute('data-listener', 'true');
-        console.log('Google login configurado');
-    }
-
-    const emailForm = document.getElementById('email-login-form');
-    if (emailForm && !emailForm.hasAttribute('data-listener')) {
-        emailForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            const submitBtn = emailForm.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
-            
-            loginWithEmail(email, password)
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
-                });
-        });
-        emailForm.setAttribute('data-listener', 'true');
-        console.log('Email login configurado');
-    }
-}
-
-function setupCareerEventListeners() {
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn && !logoutBtn.hasAttribute('data-listener')) {
-        logoutBtn.addEventListener('click', () => {
-            console.log('Logout desde career selection');
-            auth.signOut();
-        });
-        logoutBtn.setAttribute('data-listener', 'true');
-        console.log('Logout career configurado');
+function renamePlan(planId) {
+    const currentName = plannerState.plans[planId].name;
+    const newName = prompt('Nuevo nombre para el plan:', currentName);
+    
+    if (newName && newName.trim() !== '' && newName !== currentName) {
+        plannerState.plans[planId].name = newName.trim();
+        render();
+        showNotification('Plan renombrado exitosamente', 'success');
     }
 }
 
-function setupAppEventListeners() {
-    const logoutAppBtn = document.getElementById('logout-app-btn');
-    if (logoutAppBtn && !logoutAppBtn.hasAttribute('data-listener')) {
-        logoutAppBtn.addEventListener('click', () => {
-            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                auth.signOut();
-            }
-        });
-        logoutAppBtn.setAttribute('data-listener', 'true');
-        console.log('Logout app configurado');
+function deletePlan(planId) {
+    if (Object.keys(plannerState.plans).length <= 1) {
+        showNotification('Debe mantener al menos un plan', 'error');
+        return;
     }
-
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle && !themeToggle.hasAttribute('data-listener')) {
-        themeToggle.addEventListener('click', toggleTheme);
-        themeToggle.setAttribute('data-listener', 'true');
-        console.log('Theme toggle configurado');
-    }
-
-    const zenToggle = document.getElementById('zen-mode-toggle');
-    if (zenToggle && !zenToggle.hasAttribute('data-listener')) {
-        zenToggle.addEventListener('click', toggleZenMode);
-        zenToggle.setAttribute('data-listener', 'true');
-        console.log('Zen mode toggle configurado');
-    }
-
-    // Search functionality
-    const searchInput = document.getElementById('subject-search');
-    if (searchInput && !searchInput.hasAttribute('data-listener')) {
-        searchInput.addEventListener('input', debounce(() => {
-            render();
-        }, 300));
-        searchInput.setAttribute('data-listener', 'true');
-        console.log('Search configurado');
-    }
-
-    // Filter tabs
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-        if (!tab.hasAttribute('data-listener')) {
-            tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-                render();
-            });
-            tab.setAttribute('data-listener', 'true');
+    
+    const planName = plannerState.plans[planId].name;
+    if (confirm(`¿Estás seguro de eliminar el plan "${planName}"?`)) {
+        delete plannerState.plans[planId];
+        
+        if (plannerState.activePlanId === planId) {
+            plannerState.activePlanId = Object.keys(plannerState.plans)[0];
         }
-    });
-
-    console.log('Event listeners configurados exitosamente');
-}
-
-// =================== HELPER FUNCTIONS ===================
-function canTakeSubject(subject, plan) {
-    if (subject.completed) return true;
-    if (!subject.prerequisites || subject.prerequisites.length === 0) return true;
-    
-    return subject.prerequisites.every(prereqId => {
-        const prereq = plan.subjects.find(s => s.id === prereqId);
-        return prereq && prereq.completed;
-    });
-}
-
-function getTypeLabel(type) {
-    const labels = {
-        'AB': 'Área Básica',
-        'AP': 'Área Profesional',
-        'EP': 'Electiva Profesional',
-        'EL': 'Electiva Libre'
-    };
-    return labels[type] || type;
-}
-
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// =================== FUNCIONES BÁSICAS ===================
-function toggleTheme() {
-    const body = document.body;
-    const currentTheme = body.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    body.setAttribute('data-theme', newTheme);
-    
-    const icon = document.querySelector('#theme-toggle i');
-    if (icon) {
-        icon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        
+        render();
+        togglePlanSlots();
+        showNotification(`Plan "${planName}" eliminado`, 'success');
     }
-    console.log('Tema cambiado a:', newTheme);
 }
 
-function toggleZenMode() {
-    document.body.classList.toggle('zen-mode');
-    const icon = document.querySelector('#zen-mode-toggle i');
-    if (icon) {
-        const isZen = document.body.classList.contains('zen-mode');
-        icon.className = isZen ? 'fas fa-compress' : 'fas fa-expand';
-    }
-    console.log('Zen mode:', document.body.classList.contains('zen-mode') ? 'activado' : 'desactivado');
-}
-
+// =================== FUNCIONES DE SEMESTRES ===================
 function addSemester() {
     const plan = getActivePlan();
     if (!plan) return;
@@ -923,32 +1077,538 @@ function toggleSemesterCollapse(semesterId) {
     }
 }
 
-// Hacer funciones globales
+function renameSemester(semesterId) {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const semester = plan.semesters.find(s => s.id === semesterId);
+    if (!semester) return;
+    
+    const newName = prompt('Nuevo nombre para el semestre:', semester.name);
+    if (newName && newName.trim() !== '' && newName !== semester.name) {
+        semester.name = newName.trim();
+        render();
+        showNotification('Semestre renombrado exitosamente', 'success');
+    }
+}
+
+function deleteSemester(semesterId) {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    if (plan.semesters.length <= 1) {
+        showNotification('Debe mantener al menos un semestre', 'error');
+        return;
+    }
+    
+    const semester = plan.semesters.find(s => s.id === semesterId);
+    if (!semester) return;
+    
+    const subjectsInSemester = plan.subjects.filter(s => s.location === `semester-${semesterId}`);
+    
+    if (subjectsInSemester.length > 0) {
+        if (!confirm(`El semestre "${semester.name}" contiene ${subjectsInSemester.length} materia(s). ¿Deseas eliminar el semestre? Las materias se moverán al banco.`)) {
+            return;
+        }
+        
+        subjectsInSemester.forEach(subject => {
+            subject.location = 'bank';
+        });
+    }
+    
+    plan.semesters = plan.semesters.filter(s => s.id !== semesterId);
+    
+    render();
+    showNotification(`Semestre "${semester.name}" eliminado`, 'success');
+}
+
+function autoOrganizeSubjects() {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    if (!confirm('¿Deseas reorganizar automáticamente las materias? Esto moverá todas las materias no completadas al banco y las organizará por prerrequisitos.')) {
+        return;
+    }
+    
+    plan.subjects.forEach(subject => {
+        if (!subject.completed) {
+            subject.location = 'bank';
+        }
+    });
+    
+    if (plan.semesters.length < 2) {
+        plan.semesters = [
+            { id: 1, name: 'Semestre 1', collapsed: false },
+            { id: 2, name: 'Semestre 2', collapsed: false }
+        ];
+    }
+    
+    render();
+    showNotification('Materias reorganizadas automáticamente', 'success');
+}
+
+// =================== FUNCIONES DE MODALES ===================
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function showImportModal() {
+    showModal('import-modal');
+    document.getElementById('sira-data').value = '';
+    document.getElementById('import-preview').classList.add('hidden');
+    document.getElementById('import-confirmed-btn').classList.add('hidden');
+    processedSiraData = null;
+}
+
+function showEquivalencyModal() {
+    showModal('equivalency-modal');
+    switchEquivTab('pensum');
+    document.getElementById('pensum-search').value = '';
+    document.getElementById('pensum-results').innerHTML = '';
+    clearExternalForm();
+    populateEquivalencySelect();
+}
+
+function showCustomSubjectModal() {
+    showModal('custom-subject-modal');
+    document.getElementById('custom-code').value = '';
+    document.getElementById('custom-name').value = '';
+    document.getElementById('custom-credits').value = '3';
+    document.getElementById('custom-type').value = 'EP';
+}
+
+function switchEquivTab(tabName) {
+    currentActiveTab = tabName;
+    
+    document.querySelectorAll('.equiv-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    
+    document.getElementById('pensum-tab').classList.toggle('hidden', tabName !== 'pensum');
+    document.getElementById('external-tab').classList.toggle('hidden', tabName !== 'external');
+}
+
+// =================== FUNCIONES DE IMPORTACIÓN SIRA ===================
+function processSiraData() {
+    const textarea = document.getElementById('sira-data');
+    const data = textarea.value.trim();
+    
+    if (!data) {
+        showNotification('Por favor, pega los datos de SIRA', 'error');
+        return;
+    }
+    
+    try {
+        processedSiraData = parseSiraData(data);
+        
+        if (processedSiraData.length === 0) {
+            showNotification('No se encontraron materias válidas en los datos', 'error');
+            return;
+        }
+        
+        const previewContainer = document.getElementById('preview-content');
+        previewContainer.innerHTML = processedSiraData.map(item => `
+            <div class="preview-item">
+                <span class="preview-subject-code">${item.code}</span>
+                <span class="preview-subject-name">${item.name}</span>
+                <span class="preview-grade">${item.grade}</span>
+            </div>
+        `).join('');
+        
+        document.getElementById('import-preview').classList.remove('hidden');
+        document.getElementById('import-confirmed-btn').classList.remove('hidden');
+        
+        showNotification(`${processedSiraData.length} materias encontradas`, 'success');
+        
+    } catch (error) {
+        console.error('Error procesando datos SIRA:', error);
+        showNotification('Error procesando los datos. Verifica el formato.', 'error');
+    }
+}
+
+function parseSiraData(data) {
+    const lines = data.split('\n').filter(line => line.trim());
+    const results = [];
+    
+    for (const line of lines) {
+        const patterns = [
+            /(\w+)\s+(.+?)\s+(\d+(?:\.\d+)?)\s*$/,
+            /(\w+)\s+(.+?)\s+\d+\s+(\d+(?:\.\d+)?)\s*$/,
+        ];
+        
+        for (const pattern of patterns) {
+            const match = line.match(pattern);
+            if (match) {
+                const [, code, name, grade] = match;
+                const gradeNum = parseFloat(grade);
+                
+                if (gradeNum >= 3.0) {
+                    results.push({
+                        code: code.trim(),
+                        name: name.trim(),
+                        grade: gradeNum
+                    });
+                }
+                break;
+            }
+        }
+    }
+    
+    return results;
+}
+
+function confirmSiraImport() {
+    if (!processedSiraData || processedSiraData.length === 0) {
+        showNotification('No hay datos para importar', 'error');
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    let importedCount = 0;
+    
+    processedSiraData.forEach(siraItem => {
+        const subject = plan.subjects.find(s => 
+            s.id.toLowerCase() === siraItem.code.toLowerCase() ||
+            s.name.toLowerCase().includes(siraItem.name.toLowerCase().substring(0, 10))
+        );
+        
+        if (subject && !subject.completed) {
+            subject.completed = true;
+            subject.location = 'bank';
+            importedCount++;
+        }
+    });
+    
+    if (importedCount > 0) {
+        render();
+        hideModal('import-modal');
+        showNotification(`${importedCount} materias importadas exitosamente`, 'success');
+    } else {
+        showNotification('No se encontraron coincidencias con el pensum', 'error');
+    }
+}
+
+// =================== FUNCIONES DE EQUIVALENCIAS ===================
+function searchPensumSubjects() {
+    const searchTerm = document.getElementById('pensum-search').value.toLowerCase();
+    const resultsContainer = document.getElementById('pensum-results');
+    
+    if (searchTerm.length < 2) {
+        resultsContainer.innerHTML = '';
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const matches = plan.subjects.filter(s => 
+        s.name.toLowerCase().includes(searchTerm) ||
+        s.id.toLowerCase().includes(searchTerm)
+    ).slice(0, 10);
+    
+    if (matches.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-results"><p>No se encontraron materias</p></div>';
+        return;
+    }
+    
+    resultsContainer.innerHTML = matches.map(subject => `
+        <div class="search-result-item" onclick="selectPensumSubject('${subject.id}')">
+            <div><strong>${subject.id}</strong> - ${subject.name}</div>
+            <div style="font-size: 0.8em; color: var(--text-secondary);">${getTypeLabel(subject.type)} - ${subject.credits} créditos</div>
+        </div>
+    `).join('');
+}
+
+function selectPensumSubject(subjectId) {
+    const plan = getActivePlan();
+    const subject = plan.subjects.find(s => s.id === subjectId);
+    
+    if (!subject) return;
+    
+    if (subject.completed) {
+        showNotification('Esta materia ya está marcada como vista', 'error');
+        return;
+    }
+    
+    subject.completed = true;
+    subject.location = 'bank';
+    
+    render();
+    hideModal('equivalency-modal');
+    showNotification(`${subject.name} marcada como vista`, 'success');
+}
+
+function populateEquivalencySelect() {
+    const select = document.getElementById('ext-equivalent');
+    if (!select) return;
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const incompletedSubjects = plan.subjects.filter(s => !s.completed);
+    
+    select.innerHTML = '<option value="">Selecciona una materia del pensum...</option>' +
+        incompletedSubjects.map(s => 
+            `<option value="${s.id}">${s.id} - ${s.name}</option>`
+        ).join('');
+}
+
+function clearExternalForm() {
+    document.getElementById('ext-code').value = '';
+    document.getElementById('ext-name').value = '';
+    document.getElementById('ext-institution').value = '';
+    document.getElementById('ext-credits').value = '3';
+    document.getElementById('ext-equivalent').value = '';
+}
+
+function addEquivalency() {
+    if (currentActiveTab === 'pensum') {
+        showNotification('Selecciona una materia de los resultados de búsqueda', 'error');
+        return;
+    }
+    
+    const code = document.getElementById('ext-code').value.trim();
+    const name = document.getElementById('ext-name').value.trim();
+    const institution = document.getElementById('ext-institution').value.trim();
+    const credits = parseInt(document.getElementById('ext-credits').value) || 3;
+    const equivalentId = document.getElementById('ext-equivalent').value;
+    
+    if (!code || !name || !institution) {
+        showNotification('Por favor, completa todos los campos', 'error');
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    if (equivalentId) {
+        const equivalentSubject = plan.subjects.find(s => s.id === equivalentId);
+        if (equivalentSubject) {
+            equivalentSubject.completed = true;
+            equivalentSubject.location = 'bank';
+            equivalentSubject.equivalencies = equivalentSubject.equivalencies || [];
+            equivalentSubject.equivalencies.push({
+                code,
+                name,
+                institution,
+                credits
+            });
+        }
+    } else {
+        createCustomSubjectFromEquivalency({
+            id: code,
+            name,
+            credits,
+            type: 'EL',
+            isCustom: true,
+            institution,
+            completed: true,
+            location: 'bank',
+            equivalencies: []
+        });
+    }
+    
+    render();
+    hideModal('equivalency-modal');
+    showNotification('Equivalencia añadida exitosamente', 'success');
+}
+
+// =================== FUNCIONES DE MATERIAS PERSONALIZADAS ===================
+function createCustomSubject() {
+    const code = document.getElementById('custom-code').value.trim();
+    const name = document.getElementById('custom-name').value.trim();
+    const credits = parseInt(document.getElementById('custom-credits').value) || 3;
+    const type = document.getElementById('custom-type').value;
+    
+    if (!code || !name) {
+        showNotification('Por favor, completa el código y nombre', 'error');
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    if (plan.subjects.find(s => s.id.toLowerCase() === code.toLowerCase())) {
+        showNotification('Ya existe una materia con ese código', 'error');
+        return;
+    }
+    
+    const customSubject = {
+        id: code,
+        name,
+        credits,
+        type,
+        isCustom: true,
+        completed: false,
+        location: 'bank',
+        prerequisites: [],
+        equivalencies: []
+    };
+    
+    plan.subjects.push(customSubject);
+    
+    render();
+    hideModal('custom-subject-modal');
+    showNotification(`Materia "${name}" creada exitosamente`, 'success');
+}
+
+function createCustomSubjectFromEquivalency(subjectData) {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    plan.subjects.push(subjectData);
+}
+
+function deleteCustomSubject(subjectId) {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const subject = plan.subjects.find(s => s.id === subjectId);
+    if (!subject || !subject.isCustom) {
+        showNotification('Solo se pueden eliminar materias personalizadas', 'error');
+        return;
+    }
+    
+    if (confirm(`¿Estás seguro de eliminar "${subject.name}"?`)) {
+        plan.subjects = plan.subjects.filter(s => s.id !== subjectId);
+        
+        if (selectedSubjectId === subjectId) {
+            selectedSubjectId = null;
+            document.getElementById('subject-info').innerHTML = '<div class="no-selection"><i class="fas fa-hand-pointer"></i><p>Selecciona una materia para ver su información</p></div>';
+        }
+        
+        render();
+        showNotification(`"${subject.name}" eliminada exitosamente`, 'success');
+    }
+}
+
+// =================== FUNCIONES DE UTILIDAD ===================
+function exportPlan() {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const exportData = {
+        planName: plan.name,
+        exportDate: new Date().toISOString(),
+        semesters: plan.semesters.map(semester => ({
+            name: semester.name,
+            subjects: plan.subjects
+                .filter(s => s.location === `semester-${semester.id}`)
+                .map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    credits: s.credits,
+                    type: getTypeLabel(s.type),
+                    completed: s.completed
+                }))
+        })),
+        stats: calculateStats(plan)
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `plan-academico-${plan.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('Plan exportado exitosamente', 'success');
+}
+
+function resetPlan() {
+    if (!confirm('¿Estás seguro de resetear el plan? Esto moverá todas las materias al banco y eliminará los semestres adicionales.')) {
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    plan.subjects.forEach(subject => {
+        if (!subject.isCustom) {
+            subject.completed = false;
+        }
+        subject.location = 'bank';
+    });
+    
+    plan.semesters = [
+        { id: 1, name: 'Semestre 1', collapsed: false },
+        { id: 2, name: 'Semestre 2', collapsed: false }
+    ];
+    
+    selectedSubjectId = null;
+    
+    render();
+    showNotification('Plan reseteado exitosamente', 'success');
+}
+
+// =================== FUNCIONES GLOBALES PARA HTML ===================
+window.selectCareer = selectCareer;
+window.selectSubject = selectSubject;
+window.toggleSubjectCompleted = toggleSubjectCompleted;
+window.moveSubject = moveSubject;
+window.dragStart = dragStart;
+window.allowDrop = allowDrop;
+window.dropSubject = dropSubject;
+window.togglePlanSlots = togglePlanSlots;
+window.switchToPlan = switchToPlan;
+window.createNewPlan = createNewPlan;
+window.renamePlan = renamePlan;
+window.deletePlan = deletePlan;
 window.addSemester = addSemester;
 window.toggleSemesterCollapse = toggleSemesterCollapse;
-window.toggleTheme = toggleTheme;
-window.toggleZenMode = toggleZenMode;
+window.renameSemester = renameSemester;
+window.deleteSemester = deleteSemester;
+window.autoOrganizeSubjects = autoOrganizeSubjects;
+window.showModal = showModal;
+window.hideModal = hideModal;
+window.showImportModal = showImportModal;
+window.showEquivalencyModal = showEquivalencyModal;
+window.showCustomSubjectModal = showCustomSubjectModal;
+window.switchEquivTab = switchEquivTab;
+window.processSiraData = processSiraData;
+window.confirmSiraImport = confirmSiraImport;
+window.searchPensumSubjects = searchPensumSubjects;
+window.selectPensumSubject = selectPensumSubject;
+window.addEquivalency = addEquivalency;
+window.createCustomSubject = createCustomSubject;
+window.deleteCustomSubject = deleteCustomSubject;
+window.exportPlan = exportPlan;
+window.resetPlan = resetPlan;
 
-// =================== INICIALIZACIÓN PRINCIPAL ===================
+// =================== INICIALIZACIÓN ===================
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO APLICACIÓN ===');
     
+    // Cargar tema guardado
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.body.dataset.theme = savedTheme;
+    
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.innerHTML = `<i class="fas fa-${savedTheme === 'dark' ? 'moon' : 'sun'}"></i>`;
+    }
+    
     // Inicializar Firebase
-    if (!initializeFirebase()) {
-        return;
+    if (initializeFirebase()) {
+        setupAuthStateListener();
+        console.log('Aplicación inicializada correctamente');
+    } else {
+        showNotification('Error inicializando la aplicación', 'error');
     }
-    
-    // Verificar pensum
-    if (typeof PENSUM_DI === 'undefined') {
-        console.error('PENSUM_DI no disponible');
-        showNotification('Error: Pensum no se pudo cargar. Verifica pensums/pensum-di.js', 'error');
-        return;
-    }
-    
-    console.log('PENSUM_DI cargado:', PENSUM_DI.length, 'materias');
-    
-    // Configurar autenticación
-    setupAuthStateListener();
-    
-    console.log('=== APLICACIÓN INICIALIZADA ===');
 });
