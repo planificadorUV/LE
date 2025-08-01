@@ -33,11 +33,32 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: v
 /* Auth & Career */
 .auth-container, .career-selection { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-red), #8b1538); padding: 1rem; }
 .auth-card { max-width: 420px; width: 100%; padding: 2.5rem; border-radius: var(--border-radius); background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+.career-select-btn {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px; /* Borde más redondeado */
+    padding: 30px;
+    color: white;
+    cursor: pointer;
+    transition: all var(--animation-speed) ease;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 300px;
+}
+.career-select-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+.career-icon { font-size: 48px; }
 
 /* App Header */
 .app-header { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; height: var(--header-height); }
 .header-content { display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; max-width: 100%; margin: 0 auto; height: 100%; }
 .header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
+.logo-main-container img { height: 45px; width: auto; } /* Tamaño del logo corregido */
 .header-center { flex-grow: 1; display: flex; justify-content: center; }
 .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; font-weight: 600; overflow: hidden; }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
