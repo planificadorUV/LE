@@ -171,7 +171,9 @@ function renderStatsBoard(plan) {
     
     allCompleted.forEach(s => {
         const category = s.category || s.type;
-        if (categories[category]) categories[category].current += s.credits;
+        if (categories[category]) {
+            categories[category].current += s.credits;
+        }
     });
 
     let totalCredits = allCompleted.reduce((sum, s) => sum + s.credits, 0);
@@ -250,6 +252,8 @@ function createSubjectCard(subject, isLocked) {
 // =================== MANEJO DE EVENTOS ===================
 function setupAllEventListeners() {
     if (!window.listenersAttached) {
+        document.getElementById('login-form').addEventListener('submit', handleLogin);
+        document.getElementById('register-form').addEventListener('submit', handleRegister);
         document.getElementById('google-signin-btn').addEventListener('click', signInWithGoogle);
         document.getElementById('logout-btn-main').addEventListener('click', () => auth.signOut());
         document.getElementById('logout-btn-career').addEventListener('click', () => auth.signOut());
@@ -419,7 +423,6 @@ function handleAddCustomSubject(e) {
 }
 
 function openEquivalencyModal() {
-    // Implement logic for equivalency modal
     openModal('equivalency-modal');
 }
 
@@ -498,6 +501,31 @@ function moveSubject(subject, newLocation) {
     }
 }
 
+// =================== MANEJO DE FORMULARIOS DE AUTENTICACIÓN ===================
+function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    auth.signInWithEmailAndPassword(email, password)
+        .catch(error => {
+            document.getElementById('auth-error').textContent = error.message;
+        });
+}
+
+function handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+            return userCredential.user.updateProfile({ displayName: name });
+        })
+        .catch(error => {
+            document.getElementById('auth-error').textContent = error.message;
+        });
+}
+
 // DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
@@ -511,4 +539,10 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('theme', newTheme);
         });
     }
+    
+    document.getElementById('toggle-auth-mode').addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById('login-form').classList.toggle('hidden');
+        document.getElementById('register-form').classList.toggle('hidden');
+    });
 });
