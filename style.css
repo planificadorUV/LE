@@ -12,6 +12,8 @@
     --english-blue: #5e81ac;
     --prereq-color: #a855f7;
     --postreq-color: #f59e0b;
+    --legion-orange: #ff6b35;
+    --legion-orange-hover: #e55a2d;
     
     /* Tema Oscuro (Default) */
     --bg-primary: #111827;
@@ -61,6 +63,59 @@ body {
 
 .hidden {
     display: none !important;
+}
+
+/* Notificaciones */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 10000;
+    min-width: 300px;
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all var(--animation-speed) ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification.success {
+    border-left: 4px solid var(--success-green);
+}
+
+.notification.error {
+    border-left: 4px solid var(--primary-red);
+}
+
+.notification.info {
+    border-left: 4px solid var(--info-blue);
+}
+
+.notification i {
+    font-size: 1.25rem;
+}
+
+.notification.success i {
+    color: var(--success-green);
+}
+
+.notification.error i {
+    color: var(--primary-red);
+}
+
+.notification.info i {
+    color: var(--info-blue);
 }
 
 /* Loading Overlay */
@@ -1000,7 +1055,7 @@ body.zen-mode .right-panel {
 
 /* Subject Info Panel */
 .subject-info-section {
-    flex: 1;
+    flex-shrink: 0;
 }
 
 .subject-info-content {
@@ -1054,6 +1109,13 @@ body.zen-mode .right-panel {
     font-weight: 600;
 }
 
+.subject-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
 .prerequisites-list,
 .postrequisites-list {
     margin-top: 1rem;
@@ -1083,6 +1145,70 @@ body.zen-mode .right-panel {
 
 .postreq-item {
     border-left: 3px solid var(--postreq-color);
+}
+
+/* Support Links */
+.support-links-section {
+    flex-shrink: 0;
+    margin-top: 1rem;
+}
+
+.support-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.support-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all var(--animation-speed) ease;
+    font-size: 0.875rem;
+}
+
+.support-link:hover {
+    background: var(--bg-primary);
+    border-color: var(--career-yellow);
+    transform: translateY(-1px);
+}
+
+.support-link.legion {
+    border-left: 3px solid var(--legion-orange);
+}
+
+.support-link.legion:hover {
+    border-color: var(--legion-orange);
+    background: rgba(255, 107, 53, 0.1);
+}
+
+.support-link.email:hover {
+    border-color: var(--info-blue);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.support-link i:first-child {
+    color: var(--career-yellow);
+    margin-right: 0.75rem;
+}
+
+.support-link.legion i:first-child {
+    color: var(--legion-orange);
+}
+
+.support-link.email i:first-child {
+    color: var(--info-blue);
+}
+
+.support-link i:last-child {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
 }
 
 /* Botones */
@@ -1146,8 +1272,7 @@ body.zen-mode .right-panel {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    margin-top: auto;
-    padding-top: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 /* Modales */
@@ -1175,6 +1300,7 @@ body.zen-mode .right-panel {
 
 .modal-content {
     background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 2rem;
     width: 90%;
@@ -1253,6 +1379,19 @@ body.zen-mode .right-panel {
     gap: 1rem;
 }
 
+/* Modal Form Styling */
+.modal-overlay .form-group input,
+.modal-overlay .form-group select,
+.modal-overlay .form-group textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.modal-overlay .form-group label {
+    color: var(--text-primary);
+}
+
 /* Tabs */
 .equivalency-tabs,
 .equiv-tabs {
@@ -1297,7 +1436,7 @@ body.zen-mode .right-panel {
     overflow-y: auto;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    margin-top: 1rem;
+    background: var(--bg-primary);
 }
 
 .search-result-item {
@@ -1320,4 +1459,295 @@ body.zen-mode .right-panel {
     border-color: var(--info-blue);
 }
 
-/* Equival
+.no-results {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem 1rem;
+}
+
+.no-results i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* Preview Content */
+.preview-content {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.preview-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
+}
+
+.preview-item:last-child {
+    border-bottom: none;
+}
+
+.preview-subject-code {
+    font-weight: 600;
+    color: var(--career-yellow);
+}
+
+.preview-subject-name {
+    flex-grow: 1;
+    margin-left: 1rem;
+}
+
+.preview-grade {
+    color: var(--success-green);
+    font-weight: 600;
+}
+
+/* Touch/Mobile Enhancements */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+    }
+    
+    .left-panel,
+    .right-panel {
+        display: none;
+    }
+    
+    body.mobile-panel-left .left-panel {
+        display: flex;
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: 100%;
+        height: calc(100vh - var(--header-height));
+        z-index: 200;
+        background: var(--bg-secondary);
+    }
+    
+    body.mobile-panel-right .right-panel {
+        display: flex;
+        position: fixed;
+        top: var(--header-height);
+        right: 0;
+        width: 100%;
+        height: calc(100vh - var(--header-height));
+        z-index: 200;
+        background: var(--bg-secondary);
+    }
+    
+    .header-left,
+    .header-right {
+        gap: 0.5rem;
+    }
+    
+    .header-center {
+        display: none;
+    }
+    
+    .semesters-grid-container {
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    
+    .semester-column {
+        min-width: auto;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    
+    .auth-card {
+        margin: 1rem;
+        width: calc(100% - 2rem);
+        padding: 2rem;
+    }
+    
+    .career-select-btn {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .career-icon {
+        min-width: auto;
+    }
+}
+
+/* Dark/Light theme specific adjustments */
+[data-theme="light"] .notification {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .modal-content {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .support-link:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #000000;
+        --text-secondary: #333333;
+    }
+    
+    [data-theme="light"] {
+        --border-color: #000000;
+        --text-secondary: #333333;
+    }
+}
+
+/* Focus indicators for keyboard navigation */
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-danger:focus,
+.btn-icon:focus {
+    outline: 2px solid var(--career-yellow);
+    outline-offset: 2px;
+}
+
+.subject-card:focus,
+.semester-subject:focus {
+    outline: 2px solid var(--info-blue);
+    outline-offset: 2px;
+}
+
+.search-input:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 199, 44, 0.3);
+}
+
+/* Custom scrollbars for better UX */
+.modal-content::-webkit-scrollbar,
+.search-results::-webkit-scrollbar,
+.preview-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+.search-results::-webkit-scrollbar-track,
+.preview-content::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.search-results::-webkit-scrollbar-thumb,
+.preview-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.search-results::-webkit-scrollbar-thumb:hover,
+.preview-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Animation classes for better UX */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--career-yellow);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Print styles */
+@media print {
+    .app-header,
+    .left-panel,
+    .right-panel,
+    .modal-overlay {
+        display: none !important;
+    }
+    
+    .main-content {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .center-panel {
+        padding: 0 !important;
+    }
+    
+    .semester-column {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
