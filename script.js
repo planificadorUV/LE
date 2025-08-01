@@ -27,6 +27,8 @@ let selectedTouchElement = null;
 
 // =================== SISTEMA DE NOTIFICACIONES ===================
 function showNotification(message, type = 'info', duration = 3000) {
+    console.log(`Notificación ${type}: ${message}`);
+    
     const existing = document.querySelector('.notification');
     if (existing) existing.remove();
 
@@ -56,8 +58,32 @@ function showNotification(message, type = 'info', duration = 3000) {
     }, duration);
 }
 
+// =================== FUNCIÓN GLOBAL PARA SELECCIONAR CARRERA ===================
+window.selectCareer = function(careerId) {
+    console.log('Seleccionando carrera:', careerId);
+    
+    if (!auth.currentUser) {
+        console.error('No hay usuario autenticado');
+        showNotification('Error: No hay usuario autenticado', 'error');
+        return;
+    }
+
+    // Show loading
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
+        console.log('Mostrando overlay de carga');
+    }
+
+    // Set current career
+    currentCareerId = careerId;
+    console.log('Career ID establecido:', currentCareerId);
+    
+    // Load planner data
+    loadPlannerData(auth.currentUser.uid, careerId);
+};
+
 // =================== AUTENTICACIÓN ===================
-// Corregido: Estado de autenticación más robusto
 auth.onAuthStateChanged(user => {
     console.log('Estado de autenticación cambiado:', user ? user.email : 'No logueado');
     
@@ -90,8 +116,8 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// Corregido: Login con Google más robusto
 function loginWithGoogle() {
+    console.log('Iniciando login con Google');
     const button = document.getElementById('google-login-btn');
     if (button) {
         button.disabled = true;
@@ -123,8 +149,8 @@ function loginWithGoogle() {
         });
 }
 
-// Corregido: Login con email más robusto
 function loginWithEmail(email, password) {
+    console.log('Iniciando login con email:', email);
     return auth.signInWithEmailAndPassword(email, password)
         .then((result) => {
             console.log('Login con email exitoso:', result.user.email);
@@ -149,7 +175,6 @@ function loginWithEmail(email, password) {
         });
 }
 
-// Corregido: Selección de carrera más clara
 function showCareerSelection(user) {
     console.log('Mostrando selección de carrera para:', user.email);
     
@@ -171,26 +196,6 @@ function showCareerSelection(user) {
     console.log('UI de selección de carrera mostrada');
 }
 
-// Corregido: Carga de carrera más robusta
-function loadCareer(careerId) {
-    console.log('Cargando carrera:', careerId);
-    
-    if (!auth.currentUser) {
-        console.error('No hay usuario autenticado');
-        showNotification('Error: No hay usuario autenticado', 'error');
-        return;
-    }
-
-    currentCareerId = careerId;
-    
-    // Show loading
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) loadingOverlay.classList.remove('hidden');
-
-    // Load planner data
-    loadPlannerData(auth.currentUser.uid, careerId);
-}
-
 // =================== LÓGICA DE DATOS Y PLANES ===================
 function getActivePlan() {
     if (plannerState && plannerState.plans && plannerState.activePlanId) {
@@ -200,8 +205,17 @@ function getActivePlan() {
 }
 
 function getInitialStateForUser() {
+    console.log('Creando estado inicial para usuario');
+    
+    // Verificar que PENSUM_DI esté disponible
+    if (typeof PENSUM_DI === 'undefined') {
+        console.error('PENSUM_DI no está definido. Verificar que pensum-di.js se cargue correctamente.');
+        showNotification('Error: No se pudo cargar el pensum', 'error');
+        return null;
+    }
+    
     const initialPlanId = 'plan_1';
-    return {
+    const initialState = {
         activePlanId: initialPlanId,
         plans: {
             [initialPlanId]: {
@@ -220,6 +234,9 @@ function getInitialStateForUser() {
             }
         }
     };
+    
+    console.log('Estado inicial creado:', initialState);
+    return initialState;
 }
 
 function loadPlannerData(userId, careerId) {
@@ -228,26 +245,37 @@ function loadPlannerData(userId, careerId) {
     const docRef = db.collection('users').doc(userId).collection('planners').doc(careerId);
     
     unsubscribePlanner = docRef.onSnapshot(doc => {
-        console.log('Snapshot recibido:', doc.exists);
+        console.log('Snapshot recibido. Documento existe:', doc.exists);
         
         if (doc.exists && doc.data().plans) {
             plannerState = doc.data();
-            console.log('Estado cargado:', plannerState);
+            console.log('Estado cargado desde Firestore:', plannerState);
         } else {
             console.log('Creando estado inicial');
-            plannerState = getInitialStateForUser();
+            const initialState = getInitialStateForUser();
+            
+            if (!initialState) {
+                console.error('No se pudo crear el estado inicial');
+                return;
+            }
+            
+            plannerState = initialState;
             // Save initial state
             savePlannerData();
         }
         
+        // Inicializar la UI
         initializeAppUI(auth.currentUser);
     }, error => {
         console.error("Error al cargar datos:", error);
         showNotification("No se pudieron cargar tus datos.", 'error');
         
         // Initialize with default state on error
-        plannerState = getInitialStateForUser();
-        initializeAppUI(auth.currentUser);
+        const initialState = getInitialStateForUser();
+        if (initialState) {
+            plannerState = initialState;
+            initializeAppUI(auth.currentUser);
+        }
     });
 }
 
@@ -283,13 +311,24 @@ function initializeAppUI(user) {
     console.log('Inicializando UI para:', user.email);
     
     // Hide loading and career selection
-    document.getElementById('loading-overlay')?.classList.add('hidden');
-    document.getElementById('career-selection-container')?.classList.add('hidden');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const careerContainer = document.getElementById('career-selection-container');
+    const appContainer = document.getElementById('app-container');
+    
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('hidden');
+        console.log('Ocultando overlay de carga');
+    }
+    
+    if (careerContainer) {
+        careerContainer.classList.add('hidden');
+        console.log('Ocultando selección de carrera');
+    }
     
     // Show main app
-    const appContainer = document.getElementById('app-container');
     if (appContainer) {
         appContainer.classList.remove('hidden');
+        console.log('Mostrando aplicación principal');
     }
 
     // Set user info
@@ -314,7 +353,11 @@ function initializeAppUI(user) {
 }
 
 function render() {
-    if (document.getElementById('app-container')?.classList.contains('hidden')) return;
+    const appContainer = document.getElementById('app-container');
+    if (!appContainer || appContainer.classList.contains('hidden')) {
+        console.log('App container oculto, no renderizando');
+        return;
+    }
 
     const plan = getActivePlan();
     if (!plan) {
@@ -612,6 +655,8 @@ function createSemesterSubjectHTML(subject) {
 
 // =================== EVENT LISTENERS ===================
 function setupEventListeners() {
+    console.log('Configurando event listeners');
+    
     // Auth event listeners
     setupAuthEventListeners();
     
@@ -633,6 +678,7 @@ function setupAuthEventListeners() {
     const googleBtn = document.getElementById('google-login-btn');
     if (googleBtn) {
         googleBtn.addEventListener('click', loginWithGoogle);
+        console.log('Event listener configurado para Google login');
     }
 
     // Email form
@@ -653,6 +699,7 @@ function setupAuthEventListeners() {
                     submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
                 });
         });
+        console.log('Event listener configurado para email login');
     }
 
     // Toggle register (placeholder for future)
@@ -665,22 +712,13 @@ function setupAuthEventListeners() {
 }
 
 function setupCareerEventListeners() {
-    // Career selection buttons
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('.career-select-btn')) {
-            const careerId = e.target.closest('.career-select-btn').dataset.career;
-            if (careerId) {
-                loadCareer(careerId);
-            }
-        }
-    });
-
     // Logout from career selection
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             auth.signOut();
         });
+        console.log('Event listener configurado para logout desde career selection');
     }
 }
 
@@ -1023,7 +1061,7 @@ function moveSubject(subjectId, newLocation) {
     showNotification(`${subject.name} movida exitosamente`, 'success');
 }
 
-function toggleSubjectCompleted(subjectId) {
+window.toggleSubjectCompleted = function(subjectId) {
     const plan = getActivePlan();
     const subject = plan.subjects.find(s => s.id === subjectId);
     
@@ -1042,7 +1080,7 @@ function toggleSubjectCompleted(subjectId) {
         `${subject.name} ${subject.completed ? 'marcada como vista' : 'desmarcada'}`, 
         'success'
     );
-}
+};
 
 // =================== HELPER FUNCTIONS ===================
 function canTakeSubject(subject, plan) {
@@ -1056,7 +1094,7 @@ function canTakeSubject(subject, plan) {
 }
 
 function getSubjectPrerequisites(subject) {
-    if (!subject.prerequisites) return [];
+    if (!subject.prerequisites || typeof PENSUM_DI === 'undefined') return [];
     
     return subject.prerequisites.map(prereqId => {
         return PENSUM_DI.find(s => s.id === prereqId);
@@ -1119,4 +1157,132 @@ function getSemesterName(location, plan) {
     return semester ? semester.name : location;
 }
 
-//
+// =================== FUNCIONES AUXILIARES ===================
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// =================== FUNCIONES PLACEHOLDER ===================
+function toggleTheme() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', newTheme);
+    
+    const icon = document.querySelector('#theme-toggle i');
+    if (icon) {
+        icon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+    }
+}
+
+function toggleZenMode() {
+    document.body.classList.toggle('zen-mode');
+    const icon = document.querySelector('#zen-mode-toggle i');
+    if (icon) {
+        const isZen = document.body.classList.contains('zen-mode');
+        icon.className = isZen ? 'fas fa-compress' : 'fas fa-expand';
+    }
+}
+
+function addSemester() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function autoOrganize() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function exportPlan() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function resetPlan() {
+    if (confirm('¿Estás seguro de que quieres resetear el plan? Esta acción no se puede deshacer.')) {
+        showNotification('Función próximamente disponible', 'info');
+    }
+}
+
+function contactDirection() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function processSiraData() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function confirmSiraImport() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function switchEquivalencyTab(tabId) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+    document.querySelectorAll('.equiv-tab').forEach(tab => tab.classList.remove('active'));
+    
+    // Show selected tab
+    document.getElementById(`${tabId}-tab`)?.classList.remove('hidden');
+    document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
+}
+
+function addEquivalency() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function searchPensumSubjects() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function createCustomSubject() {
+    showNotification('Función próximamente disponible', 'info');
+}
+
+function switchToPlan(planId) {
+    if (plannerState.plans[planId]) {
+        plannerState.activePlanId = planId;
+        render();
+        showNotification(`Cambiado a ${plannerState.plans[planId].name}`, 'success');
+    }
+}
+
+// =================== INICIALIZACIÓN ===================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado, inicializando aplicación...');
+    
+    // Verificar que Firebase esté disponible
+    if (typeof firebase === 'undefined') {
+        console.error('Firebase no está disponible');
+        showNotification('Error: Firebase no se pudo cargar', 'error');
+        return;
+    }
+    
+    // Verificar que el pensum esté disponible
+    if (typeof PENSUM_DI === 'undefined') {
+        console.error('PENSUM_DI no está disponible');
+        showNotification('Error: Pensum no se pudo cargar', 'error');
+        return;
+    }
+    
+    console.log('Todo inicializado correctamente');
+});
