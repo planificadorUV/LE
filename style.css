@@ -357,7 +357,6 @@ body {
     gap: 1rem;
 }
 
-/* CORRECCIÓN DEL LOGO - Tamaño fijo y responsivo */
 .logo-main-container {
     display: flex;
     align-items: center;
