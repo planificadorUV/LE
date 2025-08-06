@@ -7,18 +7,17 @@
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
-    <script src="pensums/pensum-di.js"></script>
-    <script src="script.js"></script>
+    <!-- Firebase v8 - Versión estable que funcionaba -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body data-theme="dark">
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
-            <p>Cargando...</p>
+            <p>Cargando aplicación...</p>
         </div>
     </div>
 
@@ -87,8 +86,7 @@
                         <img src="images/logole.png" alt="Logo UV">
                     </div>
                     <div class="plan-slots-container">
-                        <button id="active-plan-button" class="btn-secondary active-plan-button"></button>
-                        <div id="plan-slots-list" class="plan-slots-list hidden"></div>
+                        <button id="active-plan-button" class="btn-secondary active-plan-button">Plan Principal</button>
                     </div>
                 </div>
                 <div class="header-center">
@@ -97,7 +95,7 @@
                 <div class="header-right">
                     <button id="theme-toggle" class="btn-icon"><i class="fas fa-moon"></i></button>
                     <button id="zen-mode-toggle" class="btn-icon"><i class="fas fa-expand"></i></button>
-                    <div id="user-avatar" class="user-avatar"></div>
+                    <div id="user-avatar" class="user-avatar">U</div>
                     <button id="logout-app-btn" class="btn-icon"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
@@ -106,7 +104,18 @@
         <main class="main-content">
             <aside class="left-panel">
                 <div class="stats-board">
-                    <!-- Stats cards will be rendered here -->
+                    <div class="stat-card">
+                        <div class="stat-value">0%</div>
+                        <div class="stat-label">Progreso</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Completadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Créditos</div>
+                    </div>
                 </div>
                 <div class="bank-section">
                     <h3 class="section-header">Banco de Materias <i class="fas fa-book"></i></h3>
@@ -119,7 +128,9 @@
                         <button class="filter-tab" data-filter="available">Disponibles</button>
                         <button class="filter-tab" data-filter="completed">Completadas</button>
                     </div>
-                    <div id="subject-bank" class="subject-bank"></div>
+                    <div id="subject-bank" class="subject-bank">
+                        <p class="loading-text">Cargando materias...</p>
+                    </div>
                 </div>
             </aside>
 
@@ -128,47 +139,51 @@
                     <div class="semesters-header">
                         <h3>Semestres</h3>
                         <div class="semesters-controls">
-                            <button id="add-semester-btn" class="btn-primary btn-icon"><i class="fas fa-plus"></i></button>
-                            <button id="reset-plan-btn" class="btn-danger btn-icon"><i class="fas fa-undo"></i></button>
+                            <button id="add-semester-btn" class="btn-primary btn-icon" title="Agregar semestre">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button id="reset-plan-btn" class="btn-danger btn-icon" title="Reiniciar plan">
+                                <i class="fas fa-undo"></i>
+                            </button>
                         </div>
                     </div>
-                    <div id="semesters-grid" class="semesters-grid-container"></div>
+                    <div id="semesters-grid" class="semesters-grid-container">
+                        <p class="loading-text">Cargando semestres...</p>
+                    </div>
                 </div>
             </section>
 
             <aside class="right-panel">
                 <div class="subject-info-section">
                     <h3 class="section-header">Información de Materia <i class="fas fa-info-circle"></i></h3>
-                    <div id="subject-info-content" class="subject-info-content"></div>
+                    <div id="subject-info-content" class="subject-info-content">
+                        <div class="placeholder-text">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <p>Selecciona una materia para ver su información detallada</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="support-links-section">
                     <h3 class="section-header">Soporte <i class="fas fa-life-ring"></i></h3>
                     <div class="support-links">
-                        <a href="#" class="support-link legion"><i class="fas fa-users"></i> Legión Industrial <i class="fas fa-external-link-alt"></i></a>
-                        <a href="mailto:soporte@uv.edu" class="support-link email"><i class="fas fa-envelope"></i> Contactar Soporte <i class="fas fa-external-link-alt"></i></a>
+                        <a href="#" class="support-link legion">
+                            <i class="fas fa-users"></i> 
+                            Legión Industrial 
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <a href="mailto:soporte@planificadoruv.com" class="support-link email">
+                            <i class="fas fa-envelope"></i> 
+                            Contactar Soporte 
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
                     </div>
                 </div>
             </aside>
         </main>
     </div>
 
-    <!-- Modals -->
-    <div id="equivalency-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <button class="modal-close-btn"><i class="fas fa-times"></i></button>
-            <div class="modal-header">
-                <h2>Equivalencia de Materia</h2>
-                <p>Selecciona una materia para equivalencia</p>
-            </div>
-            <div class="modal-body">
-                <!-- Modal content will be rendered here -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary modal-close">Cancelar</button>
-                <button class="btn-primary">Aplicar</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Scripts en orden correcto -->
+    <script src="pensums/pensum-di.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
