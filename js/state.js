@@ -1,97 +1,91 @@
 // js/state.js
 
-const App = window.App |
-
-| {};
+const App = window.App || {};
 
 App.state = (() => {
     let currentUser = null;
-    let pensum =;
-    let userPlan = {
-        semesters: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] // 10 semestres por defecto
+    let currentCareerId = 'DI-188';
+    let pensumData = [];
+    let plannerState = {
+        semesters: [],
+        completedSubjects: []
     };
+    let unsubscribePlanner = null; // Para la escucha en tiempo real
+    let isSaving = false;
+    let saveTimeout = null;
 
-    function init() {
-        // Cargar el pensum desde el archivo global
-        if (window.PENSUM_DI && window.PENSUM_DI.materias) {
-            pensum = window.PENSUM_DI.materias;
+    function init(pensum) {
+        pensumData = pensum;
+    }
+
+    // --- Getters ---
+    const getCurrentUser = () => currentUser;
+    const getCurrentCareerId = () => currentCareerId;
+    const getPensumData = () => pensumData;
+    const getPlannerState = () => plannerState;
+    const getUnsubscribePlanner = () => unsubscribePlanner;
+
+    // --- Setters ---
+    const setCurrentUser = (user) => { currentUser = user; };
+    const setPlannerState = (newState) => {
+        if (newState) {
+            plannerState = {
+                semesters: newState.semesters || [],
+                completedSubjects: newState.completedSubjects || []
+            };
         } else {
-            console.error("El pensum no se pudo cargar.");
+            initializeDefaultPlan();
         }
-    }
+    };
+    const setUnsubscribePlanner = (unsub) => { unsubscribePlanner = unsub; };
 
-    function setCurrentUser(user) {
-        currentUser = user;
-    }
-
-    function getCurrentUser() {
-        return currentUser;
-    }
-
-    function getPensum() {
-        return pensum;
-    }
-
-    function getPlan() {
-        return userPlan;
-    }
-
-    function setPlan(plan) {
-        if (plan && plan.semesters) {
-            userPlan = plan;
-        } else {
-            // Si no hay plan, se resetea al por defecto
-            userPlan = { semesters: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] };
-        }
+    function initializeDefaultPlan() {
+        plannerState = {
+            semesters: Array.from({ length: 10 }, (_, i) => ({
+                id: `sem-${i + 1}`,
+                name: `Semestre ${i + 1}`,
+                subjects: []
+            })),
+            completedSubjects: []
+        };
+        saveState();
     }
     
-    function addSemester() {
-        userPlan.semesters.push({});
-        // Guardar el plan después de añadir un semestre
-        if (currentUser) {
-            App.firebase.saveUserPlan(currentUser.uid, userPlan);
-        }
+    function findSubjectById(id) {
+        return pensumData.find(s => s.id === id);
     }
 
-    function moveSubject(subjectId, fromSemester, toSemester) {
-        // Mover del banco de materias (fromSemester = 'bank')
-        if (fromSemester === 'bank') {
-            if (!userPlan.semesters) {
-                userPlan.semesters = {};
-            }
-            userPlan.semesters[subjectId] = true;
-        } 
-        // Mover al banco de materias (toSemester = 'bank')
-        else if (toSemester === 'bank') {
-            if (userPlan.semesters) {
-                delete userPlan.semesters[subjectId];
-            }
-        } 
-        // Mover entre semestres
-        else {
-            if (userPlan.semesters) {
-                delete userPlan.semesters[subjectId];
-            }
-            if (!userPlan.semesters) {
-                userPlan.semesters = {};
-            }
-            userPlan.semesters[subjectId] = true;
-        }
+    function saveState() {
+        if (!currentUser || isSaving) return;
 
-        // Guardar el plan después de cada movimiento
-        if (currentUser) {
-            App.firebase.saveUserPlan(currentUser.uid, userPlan);
-        }
+        clearTimeout(saveTimeout);
+        isSaving = true;
+
+        saveTimeout = setTimeout(async () => {
+            try {
+                await App.firebase.saveUserPlan(currentUser.uid, currentCareerId, plannerState);
+                console.log("Plan guardado.");
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                App.ui.showNotification("Error al guardar el progreso.", "error");
+            } finally {
+                isSaving = false;
+            }
+        }, 1500); // Debounce de 1.5s
     }
 
     return {
         init,
-        setCurrentUser,
         getCurrentUser,
-        getPensum,
-        getPlan,
-        setPlan,
-        addSemester,
-        moveSubject
+        getCurrentCareerId,
+        getPensumData,
+        getPlannerState,
+        getUnsubscribePlanner,
+        setCurrentUser,
+        setPlannerState,
+        setUnsubscribePlanner,
+        initializeDefaultPlan,
+        findSubjectById,
+        saveState
     };
 })();
