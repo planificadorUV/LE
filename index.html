@@ -36,6 +36,7 @@
     </div>
 
     <div id="main-content" class="hidden">
+        <!-- Contenido principal de la app (navbar, paneles, etc.) -->
         <nav class="navbar">
             <div class="navbar-left">
                 <h1 class="app-title">Planificador de Carrera</h1>
@@ -50,25 +51,14 @@
                 <button id="logout-btn" class="btn-icon"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </nav>
-
         <div class="main-container">
             <aside class="left-panel">
-                <div class="panel-header">
-                    <h2>Banco de Materias</h2>
-                </div>
-                <div class="search-container">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="search-bar" placeholder="Buscar materia...">
-                </div>
+                <div class="panel-header"><h2>Banco de Materias</h2></div>
+                <div class="search-container"><i class="fas fa-search"></i><input type="text" id="search-bar" placeholder="Buscar materia..."></div>
                 <div class="progress-section">
                     <h4>Progreso de Carrera</h4>
-                    <div class="progress-bar-container">
-                        <div id="progress-bar" class="progress-bar"></div>
-                    </div>
-                    <div id="credit-counter" class="credit-counter">
-                        <span>Créditos Aprobados: <b id="completed-credits">0</b></span>
-                        <span>/ <b id="total-credits">0</b></span>
-                    </div>
+                    <div class="progress-bar-container"><div id="progress-bar" class="progress-bar"></div></div>
+                    <div id="credit-counter" class="credit-counter"><span>Créditos Aprobados: <b id="completed-credits">0</b></span><span>/ <b id="total-credits">0</b></span></div>
                 </div>
                 <div id="pensum-container" class="pensum-container"></div>
                 <div class="support-section">
@@ -78,7 +68,6 @@
                     <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="support-link"><i class="fas fa-envelope"></i> Dirección de Programa</a>
                 </div>
             </aside>
-
             <main class="right-panel">
                 <div class="panel-header">
                     <h2>Mi Plan de Estudios</h2>
@@ -89,7 +78,7 @@
                     </div>
                 </div>
                 <div id="semester-grid" class="semester-grid"></div>
-                 <div class="action-buttons-footer">
+                <div class="action-buttons-footer">
                     <button id="export-plan-btn" class="btn-secondary"><i class="fas fa-file-pdf"></i> Exportar a PDF</button>
                     <button id="reset-plan-btn" class="btn-danger"><i class="fas fa-trash-alt"></i> Reiniciar Plan</button>
                 </div>
@@ -97,40 +86,20 @@
         </div>
     </div>
 
+    <!-- Modales -->
     <div id="notification-container"></div>
-    
-    <div id="subject-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Detalles de la Materia</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body"></div>
-        </div>
-    </div>
-    
-    <div id="sira-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Importar Historial de SIRA</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Copia y pega aquí el contenido de tu historial académico de SIRA.</p>
-                <textarea id="sira-input" placeholder="Pega aquí el texto de SIRA..."></textarea>
-                <button id="process-sira-btn" class="btn-primary">Procesar Historial</button>
-            </div>
-        </div>
-    </div>
+    <div id="subject-modal" class="modal-overlay hidden"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Detalles de la Materia</h3><button class="modal-close">&times;</button></div><div class="modal-body"></div></div></div>
+    <div id="sira-modal" class="modal-overlay hidden"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Importar Historial de SIRA</h3><button class="modal-close">&times;</button></div><div class="modal-body"><p>Copia y pega aquí el contenido de tu historial académico de SIRA.</p><textarea id="sira-input" placeholder="Pega aquí el texto de SIRA..."></textarea><button id="process-sira-btn" class="btn-primary">Procesar Historial</button></div></div></div>
 
-    <!-- Scripts Modulares -->
+    <!-- Scripts Modulares en el Orden Correcto -->
     <script src="pensums/pensum-di.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/firebase.js"></script>
-    <script src="js/state.js"></script>
-    <script src="js/validation.js"></script>
-    <script src="js/organizer.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/dragDrop.js"></script>
+    <script src="js/main.js"></script>          <!-- 1. Crea el objeto App -->
+    <script src="js/firebase.js"></script>      <!-- 2. Añade App.firebase -->
+    <script src="js/state.js"></script>         <!-- 3. Añade App.state -->
+    <script src="js/validation.js"></script>   <!-- 4. Añade App.validation -->
+    <script src="js/organizer.js"></script>    <!-- 5. Añade App.organizer -->
+    <script src="js/ui.js"></script>           <!-- 6. Añade App.ui -->
+    <script src="js/dragDrop.js"></script>     <!-- 7. Añade App.dragDrop -->
+    <script src="js/init.js"></script>          <!-- 8. Inicia la aplicación -->
 </body>
 </html>
