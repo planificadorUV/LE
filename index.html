@@ -3,72 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificador de Carrera - Diseño Industrial</title>
+    <title>Planificador Académico - Universidad del Valle</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    
+    <!-- SDKs de Firebase y otras librerías -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
-<body>
-    <header>
-        <div class="logo-container">
-            <img src="assets/logo.png" alt="Logo Universidad del Valle" id="logo">
-            <h1>Planificador de Carrera</h1>
-        </div>
-        <div id="auth-container">
-            </div>
-    </header>
+<body data-theme="dark">
+    
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Cargando...</p>
+    </div>
 
-    <main id="app-container" class="hidden">
-        <aside id="subject-bank-container">
-            <h2>Banco de Materias</h2>
-            <div class="search-container">
-                <input type="text" id="search-box" placeholder="Buscar por nombre o código...">
-            </div>
-            <div id="subject-bank" class="drop-zone">
-                </div>
-        </aside>
-
-        <section id="career-plan-container">
-            <div class="plan-header">
-                <h2>Mi Plan de Carrera</h2>
-                <button id="add-semester-button" class="button-primary">+ Añadir Semestre</button>
-            </div>
-            <div id="semesters-grid">
-                </div>
-        </section>
-    </main>
-
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <h2>Bienvenido al Planificador de Carrera</h2>
-            <p>Inicia sesión con tu cuenta de Google para guardar y cargar tu progreso de forma segura.</p>
-            <button id="login-button">
-                <img src="assets/google-icon.svg" alt="Icono de Google">
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <img src="images/logole.png" alt="Logo Legión" class="login-logo">
+            <h1 class="login-title">Planificador de Carrera</h1>
+            <p class="login-subtitle">Diseño Industrial - Universidad del Valle</p>
+            <!-- Texto original restaurado -->
+            <p class="login-description">Una herramienta para visualizar y organizar tu ruta académica de forma flexible e interactiva.</p>
+            <button id="login-btn" class="btn-google">
+                <svg viewBox="0 0 48 48" width="24px" height="24px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.089,5.571l6.19,5.238C42.021,35.596,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
                 <span>Iniciar Sesión con Google</span>
             </button>
         </div>
     </div>
-    
-    <template id="subject-card-template">
-        <div class="subject-card" draggable="true" tabindex="0">
-            <div class="card-header">
-                <span class="subject-code"></span>
-                <div class="status-icons">
-                    </div>
+
+    <div id="main-content" class="hidden">
+        <nav class="navbar">
+            <div class="navbar-left">
+                <h1 class="app-title">Planificador de Carrera</h1>
+                <span id="career-name" class="career-badge">Diseño Industrial</span>
             </div>
-            <p class="subject-name"></p>
-            <div class="card-footer">
-                <span class="subject-credits"></span>
-                <button class="move-button" aria-label="Mover materia">⋮</button>
+            <div class="navbar-right">
+                <div id="user-info" class="user-info">
+                    <img id="user-photo" src="" alt="User" class="user-photo">
+                    <span id="user-name"></span>
+                </div>
+                <button id="theme-toggle" class="btn-icon"><i class="fas fa-moon"></i></button>
+                <button id="logout-btn" class="btn-icon"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </nav>
+
+        <div class="main-container">
+            <aside class="left-panel">
+                <div class="panel-header">
+                    <h2>Banco de Materias</h2>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-bar" placeholder="Buscar materia...">
+                    </div>
+                </div>
+                <!-- Barra de Progreso -->
+                <div class="progress-section">
+                    <h4>Progreso de Carrera</h4>
+                    <div class="progress-bar-container">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                    <div id="credit-counter" class="credit-counter">
+                        <span>Créditos Aprobados: <b id="completed-credits">0</b></span>
+                        <span>/ <b id="total-credits">0</b></span>
+                    </div>
+                </div>
+                <div id="pensum-container" class="pensum-container"></div>
+                <!-- Sección de Apoyo y Recursos -->
+                <div class="support-section">
+                    <h4>Apoyo y Recursos</h4>
+                    <a href="https://sira.univalle.edu.co/" target="_blank" class="support-link"><i class="fas fa-graduation-cap"></i> SIRA</a>
+                    <a href="https://registro.univalle.edu.co/" target="_blank" class="support-link"><i class="fas fa-calendar-alt"></i> Registro Académico</a>
+                    <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="support-link"><i class="fas fa-envelope"></i> Dirección de Programa</a>
+                </div>
+            </aside>
+
+            <main class="right-panel">
+                <div class="panel-header">
+                    <h2>Mi Plan de Estudios</h2>
+                    <div class="plan-controls">
+                        <button id="sira-import-btn" class="btn-secondary"><i class="fas fa-file-import"></i> Importar de SIRA</button>
+                        <button id="auto-organize-btn" class="btn-secondary"><i class="fas fa-magic"></i> Organizar Plan</button>
+                        <button id="add-semester-btn" class="btn-primary"><i class="fas fa-plus"></i> Añadir Semestre</button>
+                    </div>
+                </div>
+                <div id="semester-grid" class="semester-grid"></div>
+                 <div class="action-buttons-footer">
+                    <button id="export-plan-btn" class="btn-secondary"><i class="fas fa-file-pdf"></i> Exportar a PDF</button>
+                    <button id="reset-plan-btn" class="btn-danger"><i class="fas fa-trash-alt"></i> Reiniciar Plan</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="notification-container"></div>
+    
+    <div id="subject-modal" class="modal-overlay hidden">
+        <div class="modal-content"></div>
+    </div>
+    
+    <!-- Modal para importar desde SIRA -->
+    <div id="sira-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Importar Historial de SIRA</h3>
+                <button class="modal-close" onclick="App.ui.closeModal('sira-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Copia y pega aquí el contenido de tu historial académico de SIRA.</p>
+                <textarea id="sira-input" placeholder="Pega aquí el texto de SIRA..."></textarea>
+                <button id="process-sira-btn" class="btn-primary">Procesar Historial</button>
             </div>
         </div>
-    </template>
+    </div>
 
+    <!-- Scripts Modulares -->
     <script src="pensums/pensum-di.js"></script>
     <script src="js/firebase.js"></script>
     <script src="js/state.js"></script>
     <script src="js/validation.js"></script>
+    <script src="js/organizer.js"></script> <!-- Nuevo módulo -->
     <script src="js/ui.js"></script>
     <script src="js/dragDrop.js"></script>
     <script src="js/main.js"></script>
