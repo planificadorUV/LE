@@ -4,22 +4,29 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM cargado. Inicializando aplicación...');
+    const loadingOverlay = document.getElementById('loading-overlay');
 
-    // Inicializar los módulos en el orden correcto y garantizando dependencias
-    // 1. El estado se inicializa primero para que los datos estén disponibles.
+    // ========================================================================
+    // VERIFICACIÓN CRÍTICA: Asegurarse de que los datos del pensum existen
+    // ========================================================================
+    if (typeof window.PENSUM_DI === 'undefined' || !window.PENSUM_DI) {
+        console.error("ERROR FATAL: La variable PENSUM_DI no está definida. Revisa que el archivo 'pensums/pensum-di.js' se esté cargando correctamente en index.html y no tenga errores.");
+        App.ui.init(); // Inicializar solo la UI para poder mostrar notificaciones.
+        App.ui.showNotification("Error Crítico: No se pudieron cargar los datos de la carrera.", "error", 20000);
+        loadingOverlay.classList.add('hidden');
+        return; // Detener la ejecución para prevenir más errores.
+    }
+
+    // Si la verificación pasa, proceder con la inicialización normal.
     App.state.init(window.PENSUM_DI); 
-    
-    // 2. Los demás módulos ahora pueden usar los datos del estado de forma segura.
     App.firebase.init();
-    App.validation.init(); // Ya no necesita recibir el pensum directamente
+    App.validation.init();
     App.organizer.init();
     App.ui.init();
     App.dragDrop.init();
 
-    // Configurar el observador de autenticación, que controla el flujo principal
+    // Configurar el observador de autenticación
     App.firebase.onAuthStateChanged(user => {
-        const loadingOverlay = document.getElementById('loading-overlay');
-        
         if (user) {
             console.log('Usuario autenticado:', user.uid);
             loadingOverlay.classList.remove('hidden');
@@ -28,13 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
             App.ui.showAppUI();
             App.ui.updateUserInfo(user);
 
-            // Escuchar cambios en el plan del usuario en tiempo real
             App.firebase.listenToUserPlan(user.uid, App.state.getCurrentCareerId());
         } else {
             console.log('No hay usuario autenticado.');
             App.state.setCurrentUser(null);
             App.ui.showLoginUI();
-            // Detener la escucha de datos si el usuario cierra sesión
+            
             if (App.state.getUnsubscribePlanner()) {
                 App.state.getUnsubscribePlanner()();
             }
