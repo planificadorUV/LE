@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificador UV - Diseño Industrial</title>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Planificador Académico - Universidad del Valle</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Firebase v8 - Versión estable que funcionaba -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Font Awesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body data-theme="dark">
+    
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
-            <p>Cargando aplicación...</p>
+            <p>Cargando...</p>
         </div>
     </div>
 
@@ -25,27 +29,41 @@
     <div id="auth-container" class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <img src="images/logole.png" alt="Logo UV" class="auth-logo">
-                <h1>Bienvenido al Planificador UV</h1>
-                <p>Organiza tu carrera en Diseño Industrial</p>
+                <img src="images/logole.png" alt="Legión Estudiantil" class="auth-logo">
+                <h1>Planificador Académico</h1>
+                <p>Universidad del Valle - Diseño Industrial</p>
             </div>
-            <button id="google-login-btn" class="auth-btn btn-primary">
-                <i class="fab fa-google"></i> Iniciar sesión con Google
-            </button>
-            <div class="auth-divider"><span>o</span></div>
-            <form id="email-login-form" class="auth-form">
-                <div class="form-group">
-                    <label for="email">Correo electrónico</label>
-                    <input type="email" id="email" required>
+            
+            <div class="auth-content">
+                <button id="google-login-btn" class="btn-primary auth-btn">
+                    <i class="fab fa-google"></i>
+                    Iniciar sesión con Google
+                </button>
+                
+                <div class="auth-divider">
+                    <span>o</span>
                 </div>
-                <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" required>
+                
+                <form id="email-login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Correo electrónico</label>
+                        <input type="email" id="email" required placeholder="tu@correounivalle.edu.co">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Iniciar sesión
+                    </button>
+                </form>
+                
+                <div class="auth-toggle">
+                    <p>¿No tienes cuenta? <button id="toggle-register" class="link-button">Regístrate</button></p>
                 </div>
-                <button type="submit" class="btn-primary">Iniciar sesión</button>
-            </form>
-            <div class="auth-toggle">
-                <p>¿No tienes cuenta? <button id="toggle-register" class="link-button">Regístrate</button></p>
             </div>
         </div>
     </div>
@@ -54,135 +72,375 @@
     <div id="career-selection-container" class="career-selection hidden">
         <div class="career-selection-content">
             <div class="career-header">
-                <img src="images/logole.png" alt="Logo UV" class="career-logo">
-                <h1>Selecciona tu Carrera</h1>
+                <img src="images/logole.png" alt="Legión Estudiantil" class="career-logo">
+                <h1>Selecciona tu carrera</h1>
                 <p>Elige el programa académico que estudias</p>
             </div>
+            
             <div class="career-options">
-                <div class="career-select-btn" onclick="selectCareer('di')">
-                    <i class="fas fa-palette career-icon"></i>
+                <button class="career-select-btn" data-career="diseno-industrial" onclick="selectCareer('diseno-industrial')">
+                    <div class="career-icon">🎨</div>
                     <div class="career-info">
                         <h3>Diseño Industrial</h3>
-                        <p>Planifica tu malla curricular</p>
+                        <p>Programa de pregrado</p>
                     </div>
-                    <i class="fas fa-chevron-right career-arrow"></i>
-                </div>
+                    <div class="career-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </button>
+                
+                <!-- Placeholder para futuras carreras -->
                 <div class="career-coming-soon">
-                    <p>Más carreras próximamente</p>
+                    <p><i class="fas fa-clock"></i> Más carreras próximamente</p>
                 </div>
             </div>
+            
             <div class="career-footer">
-                <button id="logout-btn" class="btn-secondary">Cerrar sesión</button>
+                <button id="logout-btn" class="btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Cerrar sesión
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- App Container -->
-    <div id="app-container" class="hidden">
+    <!-- Main App Container -->
+    <div id="app-container" class="app-container hidden">
+        
+        <!-- Header -->
         <header class="app-header">
             <div class="header-content">
                 <div class="header-left">
                     <div class="logo-main-container">
-                        <img src="images/logole.png" alt="Logo UV">
+                        <img src="images/logole.png" alt="Legión Estudiantil">
                     </div>
+                    
                     <div class="plan-slots-container">
-                        <button id="active-plan-button" class="btn-secondary active-plan-button">Plan Principal</button>
+                        <button id="active-plan-button" class="btn-secondary active-plan-button" onclick="togglePlanSlots()">
+                            Plan Principal
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div id="plan-slots-list" class="plan-slots-list hidden">
+                            <!-- Plan slots se generan dinámicamente -->
+                        </div>
                     </div>
                 </div>
+                
                 <div class="header-center">
-                    <h2 class="app-title">Planificador UV - Diseño Industrial</h2>
+                    <h1 class="app-title">Planificador Académico</h1>
                 </div>
+                
                 <div class="header-right">
-                    <button id="theme-toggle" class="btn-icon"><i class="fas fa-moon"></i></button>
-                    <button id="zen-mode-toggle" class="btn-icon"><i class="fas fa-expand"></i></button>
-                    <div id="user-avatar" class="user-avatar">U</div>
-                    <button id="logout-app-btn" class="btn-icon"><i class="fas fa-sign-out-alt"></i></button>
+                    <button id="theme-toggle" class="btn-icon" title="Cambiar tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    
+                    <button id="zen-mode-toggle" class="btn-icon" title="Modo enfoque">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    
+                    <div class="user-avatar" id="user-avatar">
+                        U
+                    </div>
+                    
+                    <button id="logout-app-btn" class="btn-icon" title="Cerrar sesión">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
             </div>
         </header>
 
-        <main class="main-content">
-            <aside class="left-panel">
-                <div class="stats-board">
-                    <div class="stat-card">
-                        <div class="stat-value">0%</div>
-                        <div class="stat-label">Progreso</div>
+        <!-- Main Content -->
+        <div class="main-content">
+            
+            <!-- Left Panel -->
+            <div class="left-panel">
+                
+                <!-- Stats Board -->
+                <section class="stats-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-chart-pie"></i> Progreso</h3>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value">0</div>
-                        <div class="stat-label">Completadas</div>
+                    <div id="stats-board" class="stats-board">
+                        <!-- Stats cards se generan dinámicamente -->
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value">0</div>
-                        <div class="stat-label">Créditos</div>
+                </section>
+                
+                <!-- Subject Bank -->
+                <section class="bank-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-books"></i> Banco de Materias</h3>
+                        <div class="bank-controls">
+                            <button id="import-sira-btn" class="btn-icon" title="Importar desde SIRA" onclick="showImportModal()">
+                                <i class="fas fa-file-import"></i>
+                            </button>
+                            <button id="add-equivalency-btn" class="btn-icon" title="Añadir equivalencia" onclick="showEquivalencyModal()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button id="add-custom-btn" class="btn-icon" title="Añadir materia personalizada" onclick="showCustomSubjectModal()">
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div class="bank-section">
-                    <h3 class="section-header">Banco de Materias <i class="fas fa-book"></i></h3>
+                    
                     <div class="search-container">
-                        <input type="text" id="subject-search" class="search-input" placeholder="Buscar materia...">
+                        <input type="text" id="subject-search" placeholder="Buscar materias..." class="search-input">
                         <i class="fas fa-search search-icon"></i>
                     </div>
+                    
                     <div class="filter-tabs">
                         <button class="filter-tab active" data-filter="all">Todas</button>
                         <button class="filter-tab" data-filter="available">Disponibles</button>
-                        <button class="filter-tab" data-filter="completed">Completadas</button>
+                        <button class="filter-tab" data-filter="completed">Vistas</button>
+                        <button class="filter-tab" data-filter="locked">Bloqueadas</button>
                     </div>
+                    
                     <div id="subject-bank" class="subject-bank">
-                        <p class="loading-text">Cargando materias...</p>
+                        <!-- Subject cards se generan dinámicamente -->
                     </div>
-                </div>
-            </aside>
+                </section>
+            </div>
 
-            <section class="center-panel">
+            <!-- Center Panel -->
+            <div class="center-panel">
                 <div class="semesters-container">
                     <div class="semesters-header">
-                        <h3>Semestres</h3>
                         <div class="semesters-controls">
-                            <button id="add-semester-btn" class="btn-primary btn-icon" title="Agregar semestre">
+                            <button id="add-semester-btn" class="btn-secondary" onclick="addSemester()">
                                 <i class="fas fa-plus"></i>
+                                Añadir Semestre
                             </button>
-                            <button id="reset-plan-btn" class="btn-danger btn-icon" title="Reiniciar plan">
-                                <i class="fas fa-undo"></i>
+                            
+                            <button id="auto-organize-btn" class="btn-secondary" onclick="autoOrganizeSubjects()">
+                                <i class="fas fa-magic"></i>
+                                Auto-organizar
                             </button>
                         </div>
                     </div>
+                    
                     <div id="semesters-grid" class="semesters-grid-container">
-                        <p class="loading-text">Cargando semestres...</p>
+                        <!-- Semester columns se generan dinámicamente -->
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <aside class="right-panel">
-                <div class="subject-info-section">
-                    <h3 class="section-header">Información de Materia <i class="fas fa-info-circle"></i></h3>
-                    <div id="subject-info-content" class="subject-info-content">
-                        <div class="placeholder-text">
-                            <i class="fas fa-mouse-pointer"></i>
-                            <p>Selecciona una materia para ver su información detallada</p>
+            <!-- Right Panel -->
+            <div class="right-panel">
+                
+                <!-- Subject Info -->
+                <section class="subject-info-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-info-circle"></i> Información</h3>
+                    </div>
+                    <div id="subject-info" class="subject-info-content">
+                        <div class="no-selection">
+                            <i class="fas fa-hand-pointer"></i>
+                            <p>Selecciona una materia para ver su información</p>
                         </div>
                     </div>
-                </div>
-                <div class="support-links-section">
-                    <h3 class="section-header">Soporte <i class="fas fa-life-ring"></i></h3>
+                </section>
+
+                <!-- Enlaces de Apoyo -->
+                <section class="support-links-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-link"></i> Enlaces de Apoyo</h3>
+                    </div>
                     <div class="support-links">
-                        <a href="#" class="support-link legion">
-                            <i class="fas fa-users"></i> 
-                            Legión Industrial 
+                        <a href="https://linktr.ee/legionestudiantil" target="_blank" class="support-link legion">
+                            <i class="fas fa-users"></i>
+                            <span>Legión Estudiantil</span>
                             <i class="fas fa-external-link-alt"></i>
                         </a>
-                        <a href="mailto:soporte@planificadoruv.com" class="support-link email">
-                            <i class="fas fa-envelope"></i> 
-                            Contactar Soporte 
+                        
+                        <a href="https://sira.uv.edu.co/" target="_blank" class="support-link">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>SIRA - Sistema Académico</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        
+                        <a href="https://matriculafinanciera.uv.edu.co/" target="_blank" class="support-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Matrícula Financiera</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        
+                        <a href="https://www.uv.edu.co/programacion-academica" target="_blank" class="support-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Programación Académica</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        
+                        <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="support-link email">
+                            <i class="fas fa-envelope"></i>
+                            <span>Dirección del Programa</span>
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
+                </section>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="export-plan-btn" class="btn-secondary" onclick="exportPlan()">
+                        <i class="fas fa-download"></i>
+                        Exportar Plan
+                    </button>
+                    
+                    <button id="reset-plan-btn" class="btn-danger" onclick="resetPlan()">
+                        <i class="fas fa-trash"></i>
+                        Resetear Plan
+                    </button>
                 </div>
-            </aside>
-        </main>
+            </div>
+        </div>
     </div>
 
-    <!-- Scripts en orden correcto -->
+    <!-- Modales -->
+    
+    <!-- Import SIRA Modal -->
+    <div id="import-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('import-modal')">&times;</button>
+            <div class="modal-header">
+                <h2><i class="fas fa-file-import"></i> Importar desde SIRA</h2>
+                <p>Pega tu "Registro de Calificaciones" de SIRA. El sistema procesará materias con nota >= 3.0.</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="sira-data">Datos de SIRA:</label>
+                    <textarea id="sira-data" placeholder="Pega aquí los datos copiados desde tu registro de calificaciones en SIRA..." rows="8"></textarea>
+                </div>
+                
+                <div class="import-preview hidden" id="import-preview">
+                    <h4>Vista previa de importación:</h4>
+                    <div id="preview-content" class="preview-content"></div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="process-sira-btn" class="btn-primary" onclick="processSiraData()">
+                    <i class="fas fa-cog"></i>
+                    Procesar Datos
+                </button>
+                <button id="import-confirmed-btn" class="btn-primary hidden" onclick="confirmSiraImport()">
+                    <i class="fas fa-check"></i>
+                    Confirmar Importación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Equivalency Modal -->
+    <div id="equivalency-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('equivalency-modal')">&times;</button>
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Añadir Equivalencia</h2>
+                <p>Busca materias del pensum para marcarlas como vistas o añade una equivalencia externa.</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="equivalency-tabs">
+                    <button class="equiv-tab active" data-tab="pensum" onclick="switchEquivTab('pensum')">Materia del Pensum</button>
+                    <button class="equiv-tab" data-tab="external" onclick="switchEquivTab('external')">Materia Externa</button>
+                </div>
+                
+                <div id="pensum-tab" class="tab-content">
+                    <div class="form-group">
+                        <label for="pensum-search">Buscar materia:</label>
+                        <input type="text" id="pensum-search" placeholder="Escribe el nombre o código de la materia" oninput="searchPensumSubjects()">
+                    </div>
+                    
+                    <div id="pensum-results" class="search-results"></div>
+                </div>
+                
+                <div id="external-tab" class="tab-content hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ext-code">Código:</label>
+                            <input type="text" id="ext-code" placeholder="Ej: EXT001">
+                        </div>
+                        <div class="form-group">
+                            <label for="ext-credits">Créditos:</label>
+                            <input type="number" id="ext-credits" min="1" max="10" value="3">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ext-name">Nombre de la materia:</label>
+                        <input type="text" id="ext-name" placeholder="Nombre completo de la materia">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ext-institution">Institución:</label>
+                        <input type="text" id="ext-institution" placeholder="Universidad o institución donde la cursaste">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ext-equivalent">Equivalente a:</label>
+                        <select id="ext-equivalent">
+                            <option value="">Selecciona una materia del pensum...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="add-equivalency-confirmed-btn" class="btn-primary" onclick="addEquivalency()">
+                    <i class="fas fa-plus"></i>
+                    Añadir Equivalencia
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Subject Modal -->
+    <div id="custom-subject-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('custom-subject-modal')">&times;</button>
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> Crear Materia Personalizada</h2>
+                <p>Crea una materia que no esté en el pensum (ej. una electiva nueva).</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="custom-code">Código:</label>
+                        <input type="text" id="custom-code" placeholder="Ej: ELEC001">
+                    </div>
+                    <div class="form-group">
+                        <label for="custom-credits">Créditos:</label>
+                        <input type="number" id="custom-credits" min="1" max="10" value="3">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="custom-name">Nombre:</label>
+                    <input type="text" id="custom-name" placeholder="Nombre de la materia">
+                </div>
+                
+                <div class="form-group">
+                    <label for="custom-type">Tipo:</label>
+                    <select id="custom-type">
+                        <option value="EP">Electiva Profesional</option>
+                        <option value="EL">Electiva Libre</option>
+                        <option value="AP">Área Profesional</option>
+                        <option value="AB">Área Básica</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="create-custom-subject-btn" class="btn-primary" onclick="createCustomSubject()">
+                    <i class="fas fa-plus"></i>
+                    Crear Materia
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="pensums/pensum-di.js"></script>
     <script src="script.js"></script>
 </body>
