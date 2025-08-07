@@ -1,43 +1,40 @@
 // js/firebase.js
 
-const App = window.App |
-
-| {};
+const App = window.App || {};
 
 App.firebase = (() => {
-  const firebaseConfig = {
-    apiKey: "AIzaSyDnGsR3zwxDS22OFBoyR0FPntSRnDTXkno",
-    authDomain: "planificadoruv.firebaseapp.com",
-    projectId: "planificadoruv",
-    storageBucket: "planificadoruv.appspot.com",
-    messagingSenderId: "289578190596",
-    appId: "1:289578190596:web:d45140a8bd7aff44b13251"
+    const firebaseConfig = {
+        apiKey: "AIzaSyDnGsR3zwxDS22OFBoyR0FPntSRnDTXkno",
+        authDomain: "planificadoruv.firebaseapp.com",
+        projectId: "planificadoruv",
+        storageBucket: "planificadoruv.appspot.com",
+        messagingSenderId: "289578190596",
+        appId: "1:289578190596:web:d45140a8bd7aff44b13251"
     };
 
-    let app;
-    let auth;
-    let database;
+    let app, auth, db, googleProvider;
 
     function init() {
-        // Inicializar Firebase si aún no se ha hecho
-        if (!firebase.apps.length) {
+        try {
             app = firebase.initializeApp(firebaseConfig);
-        } else {
-            app = firebase.app();
+            auth = firebase.auth();
+            db = firebase.firestore();
+            googleProvider = new firebase.auth.GoogleAuthProvider();
+            console.log("Firebase inicializado correctamente.");
+        } catch (error) {
+            console.error("Error inicializando Firebase:", error);
+            App.ui.showNotification("Error crítico al conectar con el servidor.", "error");
         }
-        auth = firebase.auth();
-        database = firebase.database();
     }
 
     function onAuthStateChanged(callback) {
         auth.onAuthStateChanged(callback);
     }
 
-    function signIn() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(error => {
-            console.error("Error durante el inicio de sesión con Google:", error);
-            alert("Hubo un problema al iniciar sesión. Por favor, inténtelo de nuevo.");
+    function signInWithGoogle() {
+        auth.signInWithPopup(googleProvider).catch(error => {
+            console.error("Error en el inicio de sesión con Google:", error);
+            App.ui.showNotification(`Error de autenticación: ${error.message}`, 'error');
         });
     }
 
@@ -47,33 +44,43 @@ App.firebase = (() => {
         });
     }
 
-    function saveUserPlan(userId, plan) {
-        if (!userId) {
-            console.error("No se puede guardar el plan: ID de usuario no válido.");
-            return Promise.reject("ID de usuario no válido.");
-        }
-        // Guarda el plan del usuario en la ruta /users/{userId}/plan
-        return database.ref(`users/${userId}/plan`).set(plan);
+    function saveUserPlan(userId, careerId, planState) {
+        if (!userId) return Promise.reject("ID de usuario no válido.");
+        const planDocRef = db.collection('users').doc(userId).collection('plans').doc(careerId);
+        return planDocRef.set(planState, { merge: true });
     }
 
-    function loadUserPlan(userId) {
-        if (!userId) {
-            console.error("No se puede cargar el plan: ID de usuario no válido.");
-            return Promise.resolve(null);
+    function loadUserPlan(userId, careerId) {
+        const planDocRef = db.collection('users').doc(userId).collection('plans').doc(careerId);
+        
+        // Detener cualquier escucha anterior
+        if (App.state.getUnsubscribePlanner()) {
+            App.state.getUnsubscribePlanner()();
         }
-        // Carga el plan del usuario desde la ruta /users/{userId}/plan
-        return database.ref(`users/${userId}/plan`).get()
-           .then(snapshot => snapshot.exists()? snapshot.val() : null)
-           .catch(error => {
-                console.error("Error al cargar el plan del usuario:", error);
-                return null;
-            });
+
+        // Crear una nueva escucha en tiempo real
+        const unsubscribe = planDocRef.onSnapshot(doc => {
+            if (doc.exists) {
+                App.state.setPlannerState(doc.data());
+            } else {
+                App.state.initializeDefaultPlan();
+            }
+            App.ui.renderFullUI();
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }, error => {
+            console.error("Error al cargar el plan:", error);
+            App.ui.showNotification("Error de conexión con la base de datos.", "error");
+        });
+        
+        App.state.setUnsubscribePlanner(unsubscribe);
+        // Devolvemos una promesa que se resuelve para la carga inicial
+        return planDocRef.get().then(doc => doc.exists ? doc.data() : null);
     }
 
     return {
         init,
         onAuthStateChanged,
-        signIn,
+        signInWithGoogle,
         signOut,
         saveUserPlan,
         loadUserPlan
