@@ -4,8 +4,15 @@
     let allSubjectsMap = new Map();
 
     App.validation = {
-        init(subjects) {
-            subjects.forEach(subject => allSubjectsMap.set(subject.id, subject));
+        // La función init ahora toma los datos directamente del estado,
+        // que ya ha sido inicializado.
+        init() {
+            const subjects = App.state.getPensumData();
+            if (subjects && Array.isArray(subjects)) {
+                subjects.forEach(subject => allSubjectsMap.set(subject.id, subject));
+            } else {
+                console.error("Validation Error: El pensum no está disponible o no es un array.");
+            }
         },
 
         getSubjectStatus(subjectId) {
