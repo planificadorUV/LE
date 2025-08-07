@@ -1,107 +1,125 @@
 // js/dragDrop.js
 
-const App = window.App |
-
-| {};
+const App = window.App || {};
 
 App.dragDrop = (() => {
-    let draggedElement = null;
+    let draggedElementId = null;
 
-    function initDragAndDrop() {
-        const draggableCards = document.querySelectorAll('.subject-card');
-        const dropZones = document.querySelectorAll('.drop-zone');
+    function init() {
+        // Los listeners se añadirán dinámicamente a los elementos cuando se rendericen,
+        // pero podemos configurar listeners en los contenedores estáticos.
+        const mainContainer = document.getElementById('main-content');
+        mainContainer.addEventListener('dragstart', handleDragStart);
+        
+        const semesterGrid = document.getElementById('semester-grid');
+        semesterGrid.addEventListener('dragover', handleDragOver);
+        semesterGrid.addEventListener('dragleave', handleDragLeave);
+        semesterGrid.addEventListener('drop', handleDrop);
 
-        draggableCards.forEach(card => {
-            card.addEventListener('dragstart', handleDragStart);
-            card.addEventListener('dragend', handleDragEnd);
-        });
-
-        dropZones.forEach(zone => {
-            zone.addEventListener('dragover', handleDragOver);
-            zone.addEventListener('dragleave', handleDragLeave);
-            zone.addEventListener('drop', handleDrop);
-        });
+        const pensumContainer = document.getElementById('pensum-container');
+        pensumContainer.addEventListener('dragover', handleDragOver);
+        pensumContainer.addEventListener('dragleave', handleDragLeave);
+        pensumContainer.addEventListener('drop', handleDrop);
     }
 
     function handleDragStart(e) {
-        // Solo permitir arrastrar si no está bloqueada
-        if (e.target.dataset.status === 'locked') {
-            e.preventDefault();
-            return;
+        if (e.target.classList.contains('subject-card')) {
+            // No permitir arrastrar materias bloqueadas
+            if (e.target.classList.contains('locked')) {
+                e.preventDefault();
+                return;
+            }
+            draggedElementId = e.target.id;
+            e.dataTransfer.setData('text/plain', draggedElementId);
+            setTimeout(() => e.target.classList.add('dragging'), 0);
         }
-        draggedElement = e.target;
-        setTimeout(() => e.target.classList.add('dragging'), 0);
-        e.dataTransfer.setData('text/plain', e.target.dataset.subjectId);
-    }
-
-    function handleDragEnd(e) {
-        e.target.classList.remove('dragging');
-        draggedElement = null;
-        // Limpiar todos los highlights de las zonas de dropeo
-        document.querySelectorAll('.drop-zone').forEach(zone => {
-            zone.classList.remove('drag-over-valid', 'drag-over-invalid');
-        });
     }
 
     function handleDragOver(e) {
         e.preventDefault();
-        const dropZone = e.currentTarget;
-        const subjectId = draggedElement.dataset.subjectId;
-        const targetSemesterIndex = dropZone.dataset.semesterIndex;
+        const dropZone = e.target.closest('.semester-body, .pensum-container');
+        if (!dropZone) return;
 
-        // No se valida si se mueve al banco de materias
-        if (dropZone.id === 'subject-bank') {
+        const subjectId = document.getElementById(draggedElementId)?.dataset.subjectId;
+        if (!subjectId) return;
+        
+        // Si se mueve al banco, siempre es válido
+        if (dropZone.id === 'pensum-container') {
             dropZone.classList.add('drag-over-valid');
             return;
         }
-        
-        const validationResult = App.validation.validateMove(subjectId, parseInt(targetSemesterIndex), App.state.getPlan());
 
-        if (validationResult.isValid) {
-            dropZone.classList.add('drag-over-valid');
-            dropZone.classList.remove('drag-over-invalid');
-        } else {
-            dropZone.classList.add('drag-over-invalid');
-            dropZone.classList.remove('drag-over-valid');
+        const targetSemesterId = dropZone.closest('.semester-column')?.id;
+        if (targetSemesterId) {
+            const validation = App.validation.canMoveToSemester(subjectId, targetSemesterId);
+            if (validation.isValid) {
+                dropZone.classList.add('drag-over-valid');
+                dropZone.classList.remove('drag-over-invalid');
+            } else {
+                dropZone.classList.add('drag-over-invalid');
+                dropZone.classList.remove('drag-over-valid');
+            }
         }
     }
-
+    
     function handleDragLeave(e) {
-        e.currentTarget.classList.remove('drag-over-valid', 'drag-over-invalid');
+        const dropZone = e.target.closest('.semester-body, .pensum-container');
+        if (dropZone) {
+            dropZone.classList.remove('drag-over-valid', 'drag-over-invalid');
+        }
     }
 
     function handleDrop(e) {
         e.preventDefault();
-        const dropZone = e.currentTarget;
+        const draggedId = e.dataTransfer.getData('text/plain');
+        const draggedElement = document.getElementById(draggedId);
+        if (!draggedElement) return;
+
+        draggedElement.classList.remove('dragging');
+        const dropZone = e.target.closest('.semester-body, .pensum-container');
+        if (!dropZone) return;
+        
         dropZone.classList.remove('drag-over-valid', 'drag-over-invalid');
 
-        const subjectId = e.dataTransfer.getData('text/plain');
-        const fromSemester = draggedElement.closest('.semester-column') 
-           ? draggedElement.closest('.semester-column').dataset.semesterIndex 
-            : 'bank';
-        
-        const toSemester = dropZone.id === 'subject-bank'? 'bank' : dropZone.dataset.semesterIndex;
+        const subjectId = draggedElement.dataset.subjectId;
+        const sourceId = draggedElement.closest('.semester-column')?.id || 'bank';
+        const targetId = dropZone.closest('.semester-column')?.id || 'bank';
 
-        // Si el destino es el mismo que el origen, no hacer nada
-        if (fromSemester === toSemester) return;
+        if (sourceId === targetId) return;
 
         // Validar de nuevo antes de soltar
-        if (toSemester!== 'bank') {
-            const validationResult = App.validation.validateMove(subjectId, parseInt(toSemester), App.state.getPlan());
-            if (!validationResult.isValid) {
-                alert(`No se puede mover la materia. Razón: ${validationResult.details}`);
+        if (targetId !== 'bank') {
+            const validation = App.validation.canMoveToSemester(subjectId, targetId);
+            if (!validation.isValid) {
+                App.ui.showNotification(validation.reason, 'error');
                 return;
             }
         }
-
-        // Actualizar el estado
-        App.state.moveSubject(subjectId, fromSemester, toSemester);
-
-        // Re-renderizar la UI para reflejar el cambio
+        
+        moveSubjectInState(subjectId, sourceId, targetId);
+        App.state.saveState();
         App.ui.renderFullUI();
     }
 
-    return {
-        initDragAndDrop
-    };
+    function moveSubjectInState(subjectId, sourceId, targetId) {
+        const { semesters } = App.state.getPlannerState();
+
+        // Quitar de la fuente
+        if (sourceId !== 'bank') {
+            const sourceSemester = semesters.find(s => s.id === sourceId);
+            if (sourceSemester) {
+                sourceSemester.subjects = sourceSemester.subjects.filter(id => id !== subjectId);
+            }
+        }
+
+        // Añadir al destino
+        if (targetId !== 'bank') {
+            const targetSemester = semesters.find(s => s.id === targetId);
+            if (targetSemester && !targetSemester.subjects.includes(subjectId)) {
+                targetSemester.subjects.push(subjectId);
+            }
+        }
+    }
+
+    return { init };
 })();
