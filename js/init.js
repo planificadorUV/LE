@@ -6,26 +6,23 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM cargado. Inicializando aplicación...');
     const loadingOverlay = document.getElementById('loading-overlay');
 
-    // ========================================================================
-    // VERIFICACIÓN CRÍTICA: Asegurarse de que los datos del pensum existen
-    // ========================================================================
-    if (typeof window.PENSUM_DI === 'undefined' || !window.PENSUM_DI) {
-        console.error("ERROR FATAL: La variable PENSUM_DI no está definida. Revisa que el archivo 'pensums/pensum-di.js' se esté cargando correctamente en index.html y no tenga errores.");
-        App.ui.init(); // Inicializar solo la UI para poder mostrar notificaciones.
-        App.ui.showNotification("Error Crítico: No se pudieron cargar los datos de la carrera.", "error", 20000);
-        loadingOverlay.classList.add('hidden');
-        return; // Detener la ejecución para prevenir más errores.
-    }
-
-    // Si la verificación pasa, proceder con la inicialización normal.
-    App.state.init(window.PENSUM_DI); 
+    // La inicialización ahora es más limpia. Cada módulo se encarga de sí mismo.
+    // El orden es importante: los módulos de datos primero.
+    App.state.init(); 
     App.firebase.init();
     App.validation.init();
     App.organizer.init();
-    App.ui.init();
+    App.ui.init(); // La UI se inicializa para poder mostrar notificaciones si algo falla.
     App.dragDrop.init();
 
-    // Configurar el observador de autenticación
+    // Si la inicialización del estado falló (no encontró el pensum), ui.init ya habrá
+    // mostrado un error y no debemos continuar.
+    if (!App.state.isReady()) {
+        loadingOverlay.classList.add('hidden');
+        return;
+    }
+
+    // Configurar el observador de autenticación, que controla el flujo principal
     App.firebase.onAuthStateChanged(user => {
         if (user) {
             console.log('Usuario autenticado:', user.uid);
@@ -35,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             App.ui.showAppUI();
             App.ui.updateUserInfo(user);
 
+            // Escuchar cambios en el plan del usuario en tiempo real
             App.firebase.listenToUserPlan(user.uid, App.state.getCurrentCareerId());
         } else {
             console.log('No hay usuario autenticado.');
