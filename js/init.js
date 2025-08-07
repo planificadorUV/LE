@@ -5,10 +5,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM cargado. Inicializando aplicación...');
 
-    // Inicializar todos los módulos en el orden correcto
+    // Inicializar los módulos en el orden correcto y garantizando dependencias
+    // 1. El estado se inicializa primero para que los datos estén disponibles.
+    App.state.init(window.PENSUM_DI); 
+    
+    // 2. Los demás módulos ahora pueden usar los datos del estado de forma segura.
     App.firebase.init();
-    App.state.init(window.PENSUM_DI);
-    App.validation.init(App.state.getPensumData());
+    App.validation.init(); // Ya no necesita recibir el pensum directamente
     App.organizer.init();
     App.ui.init();
     App.dragDrop.init();
