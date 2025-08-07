@@ -7,11 +7,25 @@
     let plannerState = { semesters: [], completedSubjects: [] };
     let unsubscribePlanner = null;
     let saveTimeout = null;
+    let isReady = false; // Nueva bandera para saber si el estado está listo.
 
     App.state = {
-        init(pensum) {
-            pensumData = pensum;
+        // init ahora es responsable de obtener sus propios datos.
+        init() {
+            // VERIFICACIÓN CRÍTICA: Obtener los datos del pensum desde el scope global.
+            if (typeof window.PENSUM_DI !== 'undefined' && Array.isArray(window.PENSUM_DI)) {
+                pensumData = window.PENSUM_DI;
+                isReady = true; // El estado está listo para ser usado.
+                console.log(`State inicializado con ${pensumData.length} materias.`);
+            } else {
+                // Esto es un error fatal para la aplicación.
+                console.error("FATAL STATE ERROR: window.PENSUM_DI no es un array válido. La aplicación no puede funcionar.");
+                isReady = false;
+                // La notificación de error se manejará en init.js
+            }
         },
+
+        isReady: () => isReady, // Función para que otros módulos pregunten si pueden continuar.
 
         getCurrentUser: () => currentUser,
         getCurrentCareerId: () => currentCareerId,
@@ -43,7 +57,7 @@
         findSubjectById: (id) => pensumData.find(s => s.id === id),
 
         saveState() {
-            if (!currentUser) return;
+            if (!currentUser || !isReady) return;
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
                 try {
