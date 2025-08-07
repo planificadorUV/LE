@@ -4,14 +4,14 @@
     let allSubjectsMap = new Map();
 
     App.validation = {
-        // La función init ahora toma los datos directamente del estado,
-        // que ya ha sido inicializado.
         init() {
             const subjects = App.state.getPensumData();
-            if (subjects && Array.isArray(subjects)) {
+
+            // La barrera de seguridad ahora es más robusta.
+            if (subjects && Array.isArray(subjects) && subjects.length > 0) {
                 subjects.forEach(subject => allSubjectsMap.set(subject.id, subject));
             } else {
-                console.error("Validation Error: El pensum no está disponible o no es un array.");
+                console.warn("Advertencia de Validación: No se inicializó el mapa de materias porque el pensum está vacío o no es válido.");
             }
         },
 
