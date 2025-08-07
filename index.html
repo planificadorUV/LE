@@ -14,24 +14,27 @@
     
     <!-- Font Awesome para íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- jsPDF para exportación PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body data-theme="dark">
     
-    <!-- Loading Overlay -->
+ 
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
-            <p>Cargando...</p>
+            <p>¡Lo bueno está llegando!</p>
         </div>
     </div>
 
-    <!-- Auth Container -->
     <div id="auth-container" class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
                 <img src="images/logole.png" alt="Legión Estudiantil" class="auth-logo">
                 <h1>Planificador Académico</h1>
-                <p>Universidad del Valle - Diseño Industrial</p>
+                <p>Hecho por Legión Estudiantil, de estudiantes para estudiantes 💙❤️</p>
             </div>
             
             <div class="auth-content">
@@ -47,7 +50,7 @@
                 <form id="email-login-form" class="auth-form">
                     <div class="form-group">
                         <label for="email">Correo electrónico</label>
-                        <input type="email" id="email" required placeholder="tu@correounivalle.edu.co">
+                        <input type="email" id="email" required placeholder="estudiante.apellido@correounivalle.edu.co">
                     </div>
                     
                     <div class="form-group">
@@ -74,7 +77,7 @@
             <div class="career-header">
                 <img src="images/logole.png" alt="Legión Estudiantil" class="career-logo">
                 <h1>Selecciona tu carrera</h1>
-                <p>Elige el programa académico que estudias</p>
+                <p>Elige el programa académico que quieres planificar</p>
             </div>
             
             <div class="career-options">
@@ -82,7 +85,7 @@
                     <div class="career-icon">🎨</div>
                     <div class="career-info">
                         <h3>Diseño Industrial</h3>
-                        <p>Programa de pregrado</p>
+                        <p>Programa de pregrado - Facultad de Artes Integradas </p>
                     </div>
                     <div class="career-arrow">
                         <i class="fas fa-arrow-right"></i>
@@ -159,7 +162,7 @@
                 <!-- Stats Board -->
                 <section class="stats-section">
                     <div class="section-header">
-                        <h3><i class="fas fa-chart-pie"></i> Progreso</h3>
+                        <h3><i class="fas fa-chart-pie"></i> Progreso por Áreas</h3>
                     </div>
                     <div id="stats-board" class="stats-board">
                         <!-- Stats cards se generan dinámicamente -->
@@ -171,20 +174,22 @@
                     <div class="section-header">
                         <h3><i class="fas fa-books"></i> Banco de Materias</h3>
                         <div class="bank-controls">
-                            <button id="import-sira-btn" class="btn-icon" title="Importar desde SIRA" onclick="showImportModal()">
-                                <i class="fas fa-file-import"></i>
-                            </button>
                             <button id="add-equivalency-btn" class="btn-icon" title="Añadir equivalencia" onclick="showEquivalencyModal()">
                                 <i class="fas fa-plus"></i>
-                            </button>
-                            <button id="add-custom-btn" class="btn-icon" title="Añadir materia personalizada" onclick="showCustomSubjectModal()">
-                                <i class="fas fa-plus-circle"></i>
                             </button>
                         </div>
                     </div>
                     
+                    <div class="area-tabs">
+                        <button class="area-tab active" data-area="all">Todas</button>
+                        <button class="area-tab" data-area="FG">Formación General</button>
+                        <button class="area-tab" data-area="AB">Área Básica</button>
+                        <button class="area-tab" data-area="AP">Área Profesional</button>
+                        <button class="area-tab" data-area="ES">Electivas</button>
+                    </div>
+                    
                     <div class="search-container">
-                        <input type="text" id="subject-search" placeholder="Buscar materias..." class="search-input">
+                        <input type="text" id="subject-search" placeholder="Buscar electivas..." class="search-input">
                         <i class="fas fa-search search-icon"></i>
                     </div>
                     
@@ -219,15 +224,25 @@
                     </div>
                     
                     <div id="semesters-grid" class="semesters-grid-container">
-                        <!-- Semester columns se generan dinámicamente -->
+                      
+                    </div>
+                    
+                
+                    <div class="equivalency-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-exchange-alt"></i> Equivalencias</h3>
+                        </div>
+                        <div id="equivalency-container" class="equivalency-container">
+                          
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Panel -->
+       
             <div class="right-panel">
                 
-                <!-- Subject Info -->
+      
                 <section class="subject-info-section">
                     <div class="section-header">
                         <h3><i class="fas fa-info-circle"></i> Información</h3>
@@ -240,37 +255,37 @@
                     </div>
                 </section>
 
-                <!-- Enlaces de Apoyo -->
+              
                 <section class="support-links-section">
                     <div class="section-header">
                         <h3><i class="fas fa-link"></i> Enlaces de Apoyo</h3>
                     </div>
                     <div class="support-links">
-                        <a href="https://linktr.ee/legionestudiantil" target="_blank" class="support-link legion">
+                        <a href="https://linktr.ee/legionestudiantil" target="_blank" class="support-link">
                             <i class="fas fa-users"></i>
                             <span>Legión Estudiantil</span>
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                         
-                        <a href="https://sira.uv.edu.co/" target="_blank" class="support-link">
+                        <a href="https://sira.univalle.edu.co/sra" target="_blank" class="support-link">
                             <i class="fas fa-graduation-cap"></i>
                             <span>SIRA - Sistema Académico</span>
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                         
-                        <a href="https://matriculafinanciera.uv.edu.co/" target="_blank" class="support-link">
+                        <a href="https://proxse25.univalle.edu.co/login" target="_blank" class="support-link">
                             <i class="fas fa-credit-card"></i>
                             <span>Matrícula Financiera</span>
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                         
-                        <a href="https://www.uv.edu.co/programacion-academica" target="_blank" class="support-link">
+                        <a href="https://registro.univalle.edu.co/estudiantes-pregrado/pregrado-programacion-academica" target="_blank" class="support-link">
                             <i class="fas fa-calendar-alt"></i>
                             <span>Programación Académica</span>
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                         
-                        <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="support-link email">
+                        <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="support-link">
                             <i class="fas fa-envelope"></i>
                             <span>Dirección del Programa</span>
                             <i class="fas fa-external-link-alt"></i>
@@ -280,167 +295,20 @@
                 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
-                    <button id="export-plan-btn" class="btn-secondary" onclick="exportPlan()">
-                        <i class="fas fa-download"></i>
-                        Exportar Plan
+                    <button id="export-plan-btn" class="btn-secondary" onclick="exportPlanToPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        Exportar a PDF
                     </button>
                     
                     <button id="reset-plan-btn" class="btn-danger" onclick="resetPlan()">
                         <i class="fas fa-trash"></i>
-                        Resetear Plan
+                        Reiniciar Plan
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modales -->
-    
-    <!-- Import SIRA Modal -->
-    <div id="import-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <button class="modal-close-btn" onclick="hideModal('import-modal')">&times;</button>
-            <div class="modal-header">
-                <h2><i class="fas fa-file-import"></i> Importar desde SIRA</h2>
-                <p>Pega tu "Registro de Calificaciones" de SIRA. El sistema procesará materias con nota >= 3.0.</p>
-            </div>
-            
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="sira-data">Datos de SIRA:</label>
-                    <textarea id="sira-data" placeholder="Pega aquí los datos copiados desde tu registro de calificaciones en SIRA..." rows="8"></textarea>
-                </div>
-                
-                <div class="import-preview hidden" id="import-preview">
-                    <h4>Vista previa de importación:</h4>
-                    <div id="preview-content" class="preview-content"></div>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button id="process-sira-btn" class="btn-primary" onclick="processSiraData()">
-                    <i class="fas fa-cog"></i>
-                    Procesar Datos
-                </button>
-                <button id="import-confirmed-btn" class="btn-primary hidden" onclick="confirmSiraImport()">
-                    <i class="fas fa-check"></i>
-                    Confirmar Importación
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Equivalency Modal -->
-    <div id="equivalency-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <button class="modal-close-btn" onclick="hideModal('equivalency-modal')">&times;</button>
-            <div class="modal-header">
-                <h2><i class="fas fa-plus"></i> Añadir Equivalencia</h2>
-                <p>Busca materias del pensum para marcarlas como vistas o añade una equivalencia externa.</p>
-            </div>
-            
-            <div class="modal-body">
-                <div class="equivalency-tabs">
-                    <button class="equiv-tab active" data-tab="pensum" onclick="switchEquivTab('pensum')">Materia del Pensum</button>
-                    <button class="equiv-tab" data-tab="external" onclick="switchEquivTab('external')">Materia Externa</button>
-                </div>
-                
-                <div id="pensum-tab" class="tab-content">
-                    <div class="form-group">
-                        <label for="pensum-search">Buscar materia:</label>
-                        <input type="text" id="pensum-search" placeholder="Escribe el nombre o código de la materia" oninput="searchPensumSubjects()">
-                    </div>
-                    
-                    <div id="pensum-results" class="search-results"></div>
-                </div>
-                
-                <div id="external-tab" class="tab-content hidden">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="ext-code">Código:</label>
-                            <input type="text" id="ext-code" placeholder="Ej: EXT001">
-                        </div>
-                        <div class="form-group">
-                            <label for="ext-credits">Créditos:</label>
-                            <input type="number" id="ext-credits" min="1" max="10" value="3">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="ext-name">Nombre de la materia:</label>
-                        <input type="text" id="ext-name" placeholder="Nombre completo de la materia">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="ext-institution">Institución:</label>
-                        <input type="text" id="ext-institution" placeholder="Universidad o institución donde la cursaste">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="ext-equivalent">Equivalente a:</label>
-                        <select id="ext-equivalent">
-                            <option value="">Selecciona una materia del pensum...</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button id="add-equivalency-confirmed-btn" class="btn-primary" onclick="addEquivalency()">
-                    <i class="fas fa-plus"></i>
-                    Añadir Equivalencia
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Custom Subject Modal -->
-    <div id="custom-subject-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <button class="modal-close-btn" onclick="hideModal('custom-subject-modal')">&times;</button>
-            <div class="modal-header">
-                <h2><i class="fas fa-plus-circle"></i> Crear Materia Personalizada</h2>
-                <p>Crea una materia que no esté en el pensum (ej. una electiva nueva).</p>
-            </div>
-            
-            <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="custom-code">Código:</label>
-                        <input type="text" id="custom-code" placeholder="Ej: ELEC001">
-                    </div>
-                    <div class="form-group">
-                        <label for="custom-credits">Créditos:</label>
-                        <input type="number" id="custom-credits" min="1" max="10" value="3">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="custom-name">Nombre:</label>
-                    <input type="text" id="custom-name" placeholder="Nombre de la materia">
-                </div>
-                
-                <div class="form-group">
-                    <label for="custom-type">Tipo:</label>
-                    <select id="custom-type">
-                        <option value="EP">Electiva Profesional</option>
-                        <option value="EL">Electiva Libre</option>
-                        <option value="AP">Área Profesional</option>
-                        <option value="AB">Área Básica</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button id="create-custom-subject-btn" class="btn-primary" onclick="createCustomSubject()">
-                    <i class="fas fa-plus"></i>
-                    Crear Materia
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
     <script src="pensums/pensum-di.js"></script>
     <script src="script.js"></script>
 </body>
