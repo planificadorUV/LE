@@ -3,7 +3,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyDnGsR3zwxDS22OFBoyR0FPntSRnDTXkno",
     authDomain: "planificadoruv.firebaseapp.com",
     projectId: "planificadoruv",
-    storageBucket: "planificadoruv.appspot.com",
+    storageBucket: "planificadoruv.firebasestorage.app",
     messagingSenderId: "289578190596",
     appId: "1:289578190596:web:d45140a8bd7aff44b13251"
 };
@@ -17,17 +17,11 @@ let draggedElementId = null;
 let selectedSubjectId = null;
 let isSaving = false;
 let saveTimeout = null;
+let touchMoveMode = false;
+let selectedTouchElement = null;
+let processedSiraData = null;
 let currentActiveTab = 'pensum';
 let eventListenersSetup = false;
-
-// Áreas académicas
-const ACADEMIC_AREAS = {
-    FG: { name: "Formación General", color: "#5e81ac" },
-    AB: { name: "Área Básica", color: "#8b5cf6" },
-    AP: { name: "Área Profesional", color: "#0ea5e9" },
-    ES: { name: "Electivas Complementarias", color: "#ec4899" },
-    EP: { name: "Electivas Profesionales", color: "#f59e0b" }
-};
 
 // =================== SISTEMA DE NOTIFICACIONES ===================
 function showNotification(message, type = 'info', duration = 3000) {
@@ -42,8 +36,7 @@ function showNotification(message, type = 'info', duration = 3000) {
     const icons = {
         success: 'fas fa-check-circle',
         error: 'fas fa-exclamation-circle',
-        info: 'fas fa-info-circle',
-        warning: 'fas fa-exclamation-triangle'
+        info: 'fas fa-info-circle'
     };
     
     notification.innerHTML = `
@@ -57,9 +50,7 @@ function showNotification(message, type = 'info', duration = 3000) {
     
     setTimeout(() => {
         notification.classList.remove('show');
-        setTimeout(() => {
-            if (notification.parentNode) notification.remove();
-        }, 300);
+        setTimeout(() => notification.remove(), 300);
     }, duration);
 }
 
@@ -77,7 +68,7 @@ function initializeFirebase() {
         db = firebase.firestore();
         googleProvider = new firebase.auth.GoogleAuthProvider();
         
-        console.log('✓ Firebase inicializado correctamente');
+        console.log('Firebase inicializado correctamente');
         return true;
     } catch (error) {
         console.error('Error inicializando Firebase:', error);
@@ -108,28 +99,24 @@ function setupAuthStateListener() {
 
         if (user) {
             console.log('Usuario autenticado:', user.email);
-            if (ui.auth) ui.auth.classList.add('hidden');
+            ui.auth?.classList.add('hidden');
             showCareerSelection(user);
         } else {
             console.log('Usuario no autenticado - mostrando login');
-            if (unsubscribePlanner) {
-                unsubscribePlanner();
-                unsubscribePlanner = null;
-            }
+            if (unsubscribePlanner) unsubscribePlanner();
             
             plannerState = {};
             currentCareerId = null;
-            selectedSubjectId = null;
             
-            if (ui.auth) ui.auth.classList.remove('hidden');
-            if (ui.app) ui.app.classList.add('hidden');
-            if (ui.career) ui.career.classList.add('hidden');
+            ui.auth?.classList.remove('hidden');
+            ui.app?.classList.add('hidden');
+            ui.career?.classList.add('hidden');
         }
     });
 }
 
 function loginWithGoogle() {
-    console.log('Iniciando login con Google');
+    console.log('Login con Google');
     const button = document.getElementById('google-login-btn');
     if (button) {
         button.disabled = true;
@@ -138,20 +125,12 @@ function loginWithGoogle() {
 
     auth.signInWithPopup(googleProvider)
         .then((result) => {
-            console.log('✓ Login exitoso:', result.user.email);
+            console.log('Login exitoso:', result.user.email);
             showNotification('¡Bienvenido!', 'success');
         })
         .catch((error) => {
             console.error('Error en login:', error);
-            let errorMessage = 'Error al iniciar sesión';
-            
-            if (error.code === 'auth/popup-closed-by-user') {
-                errorMessage = 'Ventana cerrada por el usuario';
-            } else if (error.code === 'auth/popup-blocked') {
-                errorMessage = 'Popup bloqueado por el navegador';
-            }
-            
-            showNotification(errorMessage, 'error');
+            showNotification('Error al iniciar sesión', 'error');
         })
         .finally(() => {
             if (button) {
@@ -164,22 +143,12 @@ function loginWithGoogle() {
 function loginWithEmail(email, password) {
     return auth.signInWithEmailAndPassword(email, password)
         .then((result) => {
-            console.log('✓ Login con email exitoso:', result.user.email);
+            console.log('Login con email exitoso:', result.user.email);
             showNotification('¡Bienvenido!', 'success');
         })
         .catch((error) => {
             console.error('Error en login con email:', error);
-            let errorMessage = 'Error al iniciar sesión';
-            
-            if (error.code === 'auth/user-not-found') {
-                errorMessage = 'Usuario no encontrado';
-            } else if (error.code === 'auth/wrong-password') {
-                errorMessage = 'Contraseña incorrecta';
-            } else if (error.code === 'auth/invalid-email') {
-                errorMessage = 'Correo electrónico inválido';
-            }
-            
-            showNotification(errorMessage, 'error');
+            showNotification('Error al iniciar sesión', 'error');
             throw error;
         });
 }
@@ -194,12 +163,12 @@ function showCareerSelection(user) {
         loading: document.getElementById('loading-overlay')
     };
 
-    if (ui.auth) ui.auth.classList.add('hidden');
-    if (ui.app) ui.app.classList.add('hidden');
-    if (ui.loading) ui.loading.classList.add('hidden');
-    if (ui.career) ui.career.classList.remove('hidden');
+    ui.auth?.classList.add('hidden');
+    ui.app?.classList.add('hidden');
+    ui.loading?.classList.add('hidden');
+    ui.career?.classList.remove('hidden');
 
-    console.log('✓ Selección de carrera mostrada');
+    console.log('Selección de carrera mostrada');
 }
 
 // =================== FUNCIÓN GLOBAL PARA SELECCIONAR CARRERA ===================
@@ -243,35 +212,18 @@ function getInitialStateForUser() {
     
     console.log('PENSUM_DI tiene', PENSUM_DI.length, 'materias');
     
-    // Clasificar materias por áreas
-    const classifiedSubjects = PENSUM_DI.map(subject => {
-        let area = 'AB'; // Por defecto Área Básica
-        
-        // Clasificación mejorada basada en el tipo de materia
-        if (subject.type === 'EP' || subject.type === 'EL') {
-            area = 'ES'; // Electivas
-        } else if (subject.type === 'FG' || subject.category === 'formacion-general') {
-            area = 'FG'; // Formación General
-        } else if (subject.type === 'AP' || subject.category === 'profesional') {
-            area = 'AP'; // Área Profesional
-        }
-        
-        return {
-            ...subject,
-            area: area,
-            completed: false,
-            location: 'bank',
-            equivalencies: []
-        };
-    });
-    
     const initialPlanId = 'plan_1';
     const initialState = {
         activePlanId: initialPlanId,
         plans: {
             [initialPlanId]: {
                 name: 'Plan Principal',
-                subjects: classifiedSubjects,
+                subjects: PENSUM_DI.map(subject => ({
+                    ...subject,
+                    completed: false,
+                    location: 'bank',
+                    equivalencies: []
+                })),
                 semesters: [
                     { id: 1, name: 'Semestre 1', collapsed: false },
                     { id: 2, name: 'Semestre 2', collapsed: false }
@@ -281,7 +233,7 @@ function getInitialStateForUser() {
         }
     };
     
-    console.log('✓ Estado inicial creado con', classifiedSubjects.length, 'materias');
+    console.log('Estado inicial creado');
     return initialState;
 }
 
@@ -304,11 +256,11 @@ function loadPlannerData(userId, careerId) {
         
         if (doc.exists) {
             const data = doc.data();
-            console.log('Datos cargados desde Firebase');
+            console.log('Datos cargados desde Firebase:', data);
             
             if (data && data.plans) {
                 plannerState = data;
-                console.log('✓ Estado establecido desde Firebase');
+                console.log('Estado establecido desde Firebase');
             } else {
                 console.log('Datos en formato incorrecto, creando estado inicial');
                 const initialState = getInitialStateForUser();
@@ -326,9 +278,7 @@ function loadPlannerData(userId, careerId) {
             }
         }
         
-        if (plannerState && Object.keys(plannerState).length > 0) {
-            initializeAppUI(auth.currentUser);
-        }
+        initializeAppUI(auth.currentUser);
     }, error => {
         console.error("Error cargando datos:", error);
         showNotification("Error cargando datos", 'error');
@@ -342,7 +292,7 @@ function loadPlannerData(userId, careerId) {
 }
 
 function savePlannerData() {
-    if (!auth.currentUser || !currentCareerId || isSaving || !plannerState) return;
+    if (!auth.currentUser || !currentCareerId || isSaving) return;
 
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
@@ -356,7 +306,7 @@ function savePlannerData() {
 
         docRef.set(plannerState)
             .then(() => {
-                console.log('✓ Datos guardados en Firebase');
+                console.log('Datos guardados en Firebase');
             })
             .catch(error => {
                 console.error("Error guardando:", error);
@@ -389,10 +339,9 @@ function initializeAppUI(user) {
     
     if (appContainer) {
         appContainer.classList.remove('hidden');
-        console.log('✓ Aplicación principal mostrada');
+        console.log('Aplicación principal mostrada');
     }
 
-    // Configurar avatar del usuario
     const avatar = document.getElementById('user-avatar');
     if (avatar && user) {
         if (user.photoURL) {
@@ -403,18 +352,16 @@ function initializeAppUI(user) {
         }
     }
 
-    // Renderizar aplicación
     render();
     
-    // Configurar event listeners solo una vez
     if (!eventListenersSetup) {
         setupEventListeners();
         eventListenersSetup = true;
-        console.log('✓ Event listeners configurados');
+        console.log('Event listeners configurados');
     }
     
     showNotification('¡Aplicación cargada correctamente!', 'success');
-    console.log('✓ UI inicializada exitosamente');
+    console.log('UI inicializada exitosamente');
 }
 
 // =================== CONFIGURACIÓN DE EVENT LISTENERS ===================
@@ -424,10 +371,7 @@ function setupEventListeners() {
     // Auth listeners
     const googleBtn = document.getElementById('google-login-btn');
     if (googleBtn) {
-        googleBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginWithGoogle();
-        });
+        googleBtn.addEventListener('click', loginWithGoogle);
     }
 
     const emailForm = document.getElementById('email-login-form');
@@ -436,17 +380,14 @@ function setupEventListeners() {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            
-            if (email && password) {
-                loginWithEmail(email, password);
-            }
+            loginWithEmail(email, password);
         });
     }
 
     const toggleRegisterBtn = document.getElementById('toggle-register');
     if (toggleRegisterBtn) {
-        toggleRegisterBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        toggleRegisterBtn.addEventListener('click', () => {
+            // Implementar toggle de registro si es necesario
             showNotification('Función de registro por implementar', 'info');
         });
     }
@@ -454,16 +395,14 @@ function setupEventListeners() {
     // Logout buttons
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        logoutBtn.addEventListener('click', () => {
             auth.signOut();
         });
     }
 
     const logoutAppBtn = document.getElementById('logout-app-btn');
     if (logoutAppBtn) {
-        logoutAppBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        logoutAppBtn.addEventListener('click', () => {
             auth.signOut();
         });
     }
@@ -491,52 +430,33 @@ function setupEventListeners() {
     // Filter tabs
     document.querySelectorAll('.filter-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
-            e.preventDefault();
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
             e.target.classList.add('active');
             render();
         });
     });
 
-    // Area tabs
-    document.querySelectorAll('.area-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.querySelectorAll('.area-tab').forEach(t => t.classList.remove('active'));
-            e.target.classList.add('active');
-            render();
+    // Modal functionality
+    setupModalListeners();
+
+    console.log('Event listeners configurados exitosamente');
+}
+
+function setupModalListeners() {
+    // Cerrar modales con click fuera
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
         });
     });
 
-    // Plan slots toggle
-    const activePlanButton = document.getElementById('active-plan-button');
-    if (activePlanButton) {
-        activePlanButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            togglePlanSlots();
-        });
+    // Equivalency modal listeners
+    const pensumSearch = document.getElementById('pensum-search');
+    if (pensumSearch) {
+        pensumSearch.addEventListener('input', debounce(searchPensumSubjects, 300));
     }
-
-    // Close plan slots when clicking outside
-    document.addEventListener('click', (e) => {
-        const planContainer = document.querySelector('.plan-slots-container');
-        const planList = document.getElementById('plan-slots-list');
-        
-        if (planContainer && !planContainer.contains(e.target) && planList && !planList.classList.contains('hidden')) {
-            planList.classList.add('hidden');
-        }
-    });
-
-    // Add equivalency button
-    const addEquivBtn = document.getElementById('add-equivalency-btn');
-    if (addEquivBtn) {
-        addEquivBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            showNotification('Función de equivalencias por implementar', 'info');
-        });
-    }
-
-    console.log('✓ Event listeners configurados exitosamente');
 }
 
 function debounce(func, wait) {
@@ -558,10 +478,10 @@ function toggleTheme() {
     
     if (currentTheme === 'dark') {
         body.dataset.theme = 'light';
-        if (themeToggle) themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
     } else {
         body.dataset.theme = 'dark';
-        if (themeToggle) themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
     }
     
     // Guardar preferencia
@@ -572,9 +492,7 @@ function toggleZenMode() {
     document.body.classList.toggle('zen-mode');
     const zenToggle = document.getElementById('zen-mode-toggle');
     const isZen = document.body.classList.contains('zen-mode');
-    if (zenToggle) {
-        zenToggle.innerHTML = `<i class="fas fa-${isZen ? 'compress' : 'expand'}"></i>`;
-    }
+    zenToggle.innerHTML = `<i class="fas fa-${isZen ? 'compress' : 'expand'}"></i>`;
 }
 
 // =================== RENDERIZADO ===================
@@ -601,8 +519,7 @@ function render() {
         renderStatsBoard(plan);
         renderSubjectBank(plan);
         renderSemesters(plan);
-        renderEquivalencies(plan);
-        console.log('✓ Renderizado completado exitosamente');
+        console.log('Renderizado completado exitosamente');
     } catch (error) {
         console.error('Error durante el renderizado:', error);
         showNotification('Error renderizando la aplicación', 'error');
@@ -660,47 +577,40 @@ function renderStatsBoard(plan) {
     console.log('Stats calculadas:', stats);
     
     container.innerHTML = `
-        <div class="stat-card fg">
+        <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">FG <i class="fas fa-graduation-cap"></i></span>
-                <span class="stat-value">${stats.fg.completed}/${stats.fg.total}</span>
+                <span class="stat-title">Progreso Total</span>
+                <span class="stat-value">${stats.completedCredits}/${stats.totalCredits}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.fg.percentage}%"></div>
-                <div class="progress-label">Formación General</div>
+                <div class="progress-bar-fill completed" style="width: ${stats.completionPercentage}%"></div>
             </div>
         </div>
         
-        <div class="stat-card ab">
+        <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">AB <i class="fas fa-cube"></i></span>
-                <span class="stat-value">${stats.ab.completed}/${stats.ab.total}</span>
+                <span class="stat-title">Materias Vistas</span>
+                <span class="stat-value">${stats.completedSubjects}/${stats.totalSubjects}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.ab.percentage}%"></div>
-                <div class="progress-label">Área Básica</div>
+                <div class="progress-bar-fill" style="width: ${(stats.completedSubjects / stats.totalSubjects) * 100}%"></div>
             </div>
         </div>
         
-        <div class="stat-card ap">
+        <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">AP <i class="fas fa-briefcase"></i></span>
-                <span class="stat-value">${stats.ap.completed}/${stats.ap.total}</span>
+                <span class="stat-title">Inglés</span>
+                <span class="stat-value">${stats.englishCompleted}/${stats.englishTotal}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.ap.percentage}%"></div>
-                <div class="progress-label">Área Profesional</div>
+                <div class="progress-bar-fill english" style="width: ${stats.englishTotal > 0 ? (stats.englishCompleted / stats.englishTotal) * 100 : 0}%"></div>
             </div>
         </div>
         
-        <div class="stat-card es">
+        <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">ES <i class="fas fa-list"></i></span>
-                <span class="stat-value">${stats.es.completed}/${stats.es.total}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.es.percentage}%"></div>
-                <div class="progress-label">Electivas</div>
+                <span class="stat-title">Semestres</span>
+                <span class="stat-value">${plan.semesters.length}</span>
             </div>
         </div>
     `;
@@ -708,36 +618,23 @@ function renderStatsBoard(plan) {
 
 function calculateStats(plan) {
     const subjects = plan.subjects || [];
+    const completed = subjects.filter(s => s.completed);
     
-    // Inicializar estadísticas por área
-    const stats = {
-        fg: { completed: 0, total: 0, percentage: 0 },
-        ab: { completed: 0, total: 0, percentage: 0 },
-        ap: { completed: 0, total: 0, percentage: 0 },
-        es: { completed: 0, total: 0, percentage: 0 }
+    const totalCredits = subjects.reduce((sum, s) => sum + (s.credits || 0), 0);
+    const completedCredits = completed.reduce((sum, s) => sum + (s.credits || 0), 0);
+    
+    const englishSubjects = subjects.filter(s => s.category === 'english' || s.type === 'english');
+    const englishCompleted = englishSubjects.filter(s => s.completed).length;
+    
+    return {
+        totalSubjects: subjects.length,
+        completedSubjects: completed.length,
+        totalCredits,
+        completedCredits,
+        completionPercentage: totalCredits > 0 ? Math.round((completedCredits / totalCredits) * 100) : 0,
+        englishTotal: englishSubjects.length,
+        englishCompleted
     };
-    
-    // Calcular créditos por área
-    subjects.forEach(subject => {
-        const credits = subject.credits || 0;
-        const area = (subject.area || 'ab').toLowerCase();
-        
-        if (stats[area]) {
-            stats[area].total += credits;
-            if (subject.completed) {
-                stats[area].completed += credits;
-            }
-        }
-    });
-    
-    // Calcular porcentajes
-    Object.keys(stats).forEach(area => {
-        if (stats[area].total > 0) {
-            stats[area].percentage = Math.round((stats[area].completed / stats[area].total) * 100);
-        }
-    });
-    
-    return stats;
 }
 
 function renderSubjectBank(plan) {
@@ -749,16 +646,9 @@ function renderSubjectBank(plan) {
 
     const searchTerm = document.getElementById('subject-search')?.value.toLowerCase() || '';
     const activeFilter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
-    const activeArea = document.querySelector('.area-tab.active')?.dataset.area || 'all';
     
     let subjects = plan.subjects.filter(s => s.location === 'bank');
     
-    // Filtrar por área
-    if (activeArea !== 'all') {
-        subjects = subjects.filter(s => s.area === activeArea);
-    }
-    
-    // Filtrar por búsqueda
     if (searchTerm) {
         subjects = subjects.filter(s => 
             s.name.toLowerCase().includes(searchTerm) || 
@@ -766,7 +656,6 @@ function renderSubjectBank(plan) {
         );
     }
     
-    // Filtrar por estado
     if (activeFilter !== 'all') {
         subjects = subjects.filter(s => {
             switch (activeFilter) {
@@ -789,7 +678,6 @@ function renderSubjectBank(plan) {
         return;
     }
     
-    // Generar HTML
     container.innerHTML = subjects.map(subject => createSubjectCardHTML(subject, plan)).join('');
 }
 
@@ -822,13 +710,7 @@ function createSubjectCardHTML(subject, plan) {
             
             <div class="subject-type">${getTypeLabel(subject.type)}</div>
             
-            <span class="subject-area ${subject.area}">${subject.area}</span>
-            
             ${statusIcon}
-            
-            <div class="quick-complete" onclick="event.stopPropagation(); toggleSubjectCompleted('${subject.id}')">
-                <i class="fas fa-${subject.completed ? 'undo' : 'check'}"></i>
-            </div>
         </div>
     `;
 }
@@ -871,7 +753,6 @@ function renderSemesters(plan) {
                 <div class="drop-zone ${subjects.length ? 'has-subjects' : ''}" 
                      ondrop="dropSubject(event, ${semester.id})" 
                      ondragover="allowDrop(event)"
-                     ondragleave="dragLeave(event)"
                      data-semester-id="${semester.id}">
                     ${subjects.length ? 
                         subjects.map(s => createSemesterSubjectHTML(s)).join('') : 
@@ -883,32 +764,6 @@ function renderSemesters(plan) {
 
         container.appendChild(column);
     });
-}
-
-function renderEquivalencies(plan) {
-    const container = document.getElementById('equivalency-container');
-    if (!container) return;
-    
-    const equivalencies = plan.subjects.filter(s => s.equivalencies && s.equivalencies.length > 0);
-    
-    if (equivalencies.length === 0) {
-        container.innerHTML = '<p class="no-equivalencies">No hay equivalencias registradas</p>';
-        return;
-    }
-    
-    container.innerHTML = equivalencies.map(subject => {
-        return subject.equivalencies.map(equiv => `
-            <div class="equivalency-item">
-                <div class="subject-header">
-                    <span class="subject-code">${equiv.code}</span>
-                    <span class="subject-credits">${equiv.credits} cr</span>
-                </div>
-                <div class="subject-name">${equiv.name}</div>
-                <div class="subject-type">${equiv.institution}</div>
-                <span class="equivalency-badge">Equivalencia</span>
-            </div>
-        `).join('');
-    }).join('');
 }
 
 function createSemesterSubjectHTML(subject) {
@@ -927,8 +782,6 @@ function createSemesterSubjectHTML(subject) {
             <div class="subject-name">${subject.name}</div>
             
             <div class="subject-type">${getTypeLabel(subject.type)}</div>
-            
-            <span class="subject-area ${subject.area}">${subject.area}</span>
             
             ${subject.completed ? '<i class="fas fa-check-circle subject-status completed"></i>' : ''}
         </div>
@@ -953,9 +806,7 @@ function getTypeLabel(type) {
         'AP': 'Área Profesional', 
         'EP': 'Electiva Profesional',
         'EL': 'Electiva Libre',
-        'FG': 'Formación General',
         'english': 'Inglés',
-        'deporte': 'Deporte Formativo',
         'practicas': 'Prácticas',
         'proyecto': 'Proyecto de Grado'
     };
@@ -968,7 +819,6 @@ function selectSubject(subjectId) {
     selectedSubjectId = subjectId;
     renderSubjectInfo(subjectId);
     
-    // Actualizar estilos visuales
     document.querySelectorAll('.subject-card, .semester-subject').forEach(card => {
         card.classList.remove('selected');
     });
@@ -1006,11 +856,6 @@ function renderSubjectInfo(subjectId) {
             <div class="detail-row">
                 <span class="detail-label">Créditos:</span>
                 <span class="detail-value">${subject.credits || 0}</span>
-            </div>
-            
-            <div class="detail-row">
-                <span class="detail-label">Área:</span>
-                <span class="detail-value">${ACADEMIC_AREAS[subject.area]?.name || 'Sin área'}</span>
             </div>
             
             <div class="detail-row">
@@ -1078,15 +923,12 @@ function toggleSubjectCompleted(subjectId) {
 
     subject.completed = !subject.completed;
     
-    // Si se desmarca, mover al banco
     if (!subject.completed && subject.location !== 'bank') {
         subject.location = 'bank';
     }
     
     render();
-    if (selectedSubjectId === subjectId) {
-        renderSubjectInfo(subjectId);
-    }
+    renderSubjectInfo(subjectId);
     showNotification(
         `${subject.name} ${subject.completed ? 'marcada como vista' : 'desmarcada'}`, 
         'success'
@@ -1117,13 +959,6 @@ function allowDrop(e) {
     e.currentTarget.classList.add('drag-over');
 }
 
-function dragLeave(e) {
-    // Solo remover si realmente salimos del elemento
-    if (!e.currentTarget.contains(e.relatedTarget)) {
-        e.currentTarget.classList.remove('drag-over');
-    }
-}
-
 function dropSubject(e, semesterId) {
     e.preventDefault();
     e.currentTarget.classList.remove('drag-over');
@@ -1131,18 +966,6 @@ function dropSubject(e, semesterId) {
     if (!draggedElementId) return;
     
     console.log('Dropping subject:', draggedElementId, 'in semester:', semesterId);
-    
-    // Verificar prerrequisitos antes de mover
-    const plan = getActivePlan();
-    const subject = plan.subjects.find(s => s.id === draggedElementId);
-    
-    if (subject && !canTakeSubject(subject, plan) && !subject.completed) {
-        showNotification('No puedes programar esta materia sin completar sus prerrequisitos', 'warning');
-        document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-        draggedElementId = null;
-        return;
-    }
-    
     moveSubject(draggedElementId, `semester-${semesterId}`);
     draggedElementId = null;
     
@@ -1159,17 +982,13 @@ function togglePlanSlots() {
 
 function switchToPlan(planId) {
     plannerState.activePlanId = planId;
-    selectedSubjectId = null; // Reset subject selection
     render();
     togglePlanSlots();
     showNotification(`Cambiado a ${plannerState.plans[planId].name}`, 'success');
 }
 
 function createNewPlan(name) {
-    if (!name || name.trim() === '') {
-        showNotification('Por favor ingresa un nombre para el plan', 'warning');
-        return;
-    }
+    if (!name || name.trim() === '') return;
     
     const planIds = Object.keys(plannerState.plans);
     if (planIds.length >= 3) {
@@ -1195,7 +1014,6 @@ function createNewPlan(name) {
     };
     
     plannerState.activePlanId = newPlanId;
-    selectedSubjectId = null;
     render();
     togglePlanSlots();
     showNotification(`Plan "${name}" creado exitosamente`, 'success');
@@ -1226,7 +1044,6 @@ function deletePlan(planId) {
             plannerState.activePlanId = Object.keys(plannerState.plans)[0];
         }
         
-        selectedSubjectId = null;
         render();
         togglePlanSlots();
         showNotification(`Plan "${planName}" eliminado`, 'success');
@@ -1256,18 +1073,7 @@ function toggleSemesterCollapse(semesterId) {
     const semester = plan.semesters.find(s => s.id === semesterId);
     if (semester) {
         semester.collapsed = !semester.collapsed;
-        
-        // Solo re-renderizar los semestres para mejor performance
-        const column = document.querySelector(`[data-semester-id="${semesterId}"]`);
-        if (column) {
-            if (semester.collapsed) {
-                column.classList.add('collapsed');
-            } else {
-                column.classList.remove('collapsed');
-            }
-        }
-        
-        savePlannerData();
+        render();
     }
 }
 
@@ -1324,14 +1130,12 @@ function autoOrganizeSubjects() {
         return;
     }
     
-    // Mover todas las materias no completadas al banco
     plan.subjects.forEach(subject => {
         if (!subject.completed) {
             subject.location = 'bank';
         }
     });
     
-    // Asegurar que hay suficientes semestres
     if (plan.semesters.length < 2) {
         plan.semesters = [
             { id: 1, name: 'Semestre 1', collapsed: false },
@@ -1343,275 +1147,423 @@ function autoOrganizeSubjects() {
     showNotification('Materias reorganizadas automáticamente', 'success');
 }
 
-// =================== IMPORTAR DESDE SIRA ===================
-function showImportModal() {
-    const modal = document.getElementById('import-modal');
+// =================== FUNCIONES DE MODALES ===================
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
     }
 }
 
-function hideImportModal() {
-    const modal = document.getElementById('import-modal');
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('hidden');
-        document.body.style.overflow = '';
-        
-        // Limpiar textarea
-        const textarea = document.getElementById('sira-data');
-        if (textarea) textarea.value = '';
     }
 }
 
+function showImportModal() {
+    showModal('import-modal');
+    document.getElementById('sira-data').value = '';
+    document.getElementById('import-preview').classList.add('hidden');
+    document.getElementById('import-confirmed-btn').classList.add('hidden');
+    processedSiraData = null;
+}
+
+function showEquivalencyModal() {
+    showModal('equivalency-modal');
+    switchEquivTab('pensum');
+    document.getElementById('pensum-search').value = '';
+    document.getElementById('pensum-results').innerHTML = '';
+    clearExternalForm();
+    populateEquivalencySelect();
+}
+
+function showCustomSubjectModal() {
+    showModal('custom-subject-modal');
+    document.getElementById('custom-code').value = '';
+    document.getElementById('custom-name').value = '';
+    document.getElementById('custom-credits').value = '3';
+    document.getElementById('custom-type').value = 'EP';
+}
+
+function switchEquivTab(tabName) {
+    currentActiveTab = tabName;
+    
+    document.querySelectorAll('.equiv-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    
+    document.getElementById('pensum-tab').classList.toggle('hidden', tabName !== 'pensum');
+    document.getElementById('external-tab').classList.toggle('hidden', tabName !== 'external');
+}
+
+// =================== FUNCIONES DE IMPORTACIÓN SIRA ===================
 function processSiraData() {
     const textarea = document.getElementById('sira-data');
-    const data = textarea?.value.trim();
+    const data = textarea.value.trim();
     
     if (!data) {
-        showNotification('Por favor pega los datos de SIRA', 'warning');
+        showNotification('Por favor, pega los datos de SIRA', 'error');
         return;
     }
     
     try {
-        const plan = getActivePlan();
-        if (!plan) return;
+        processedSiraData = parseSiraData(data);
         
-        // Procesar datos de SIRA (formato básico)
-        const lines = data.split('\n').filter(line => line.trim());
-        let processedCount = 0;
-        
-        lines.forEach(line => {
-            // Buscar códigos de materias en el formato típico de SIRA
-            const codeMatch = line.match(/\b([A-Z]{2,4}\d{3,4})\b/);
-            if (codeMatch) {
-                const code = codeMatch[1];
-                const subject = plan.subjects.find(s => s.id === code);
-                
-                if (subject && !subject.completed) {
-                    // Verificar si la línea indica que la materia fue aprobada
-                    if (line.toLowerCase().includes('aprobad') || 
-                        line.includes('3.0') || line.includes('4.0') || line.includes('5.0') ||
-                        /\b[3-5]\.\d+\b/.test(line)) {
-                        subject.completed = true;
-                        processedCount++;
-                    }
-                }
-            }
-        });
-        
-        if (processedCount > 0) {
-            render();
-            hideImportModal();
-            showNotification(`${processedCount} materias marcadas como completadas`, 'success');
-        } else {
-            showNotification('No se encontraron materias válidas en los datos', 'warning');
+        if (processedSiraData.length === 0) {
+            showNotification('No se encontraron materias válidas en los datos', 'error');
+            return;
         }
+        
+        const previewContainer = document.getElementById('preview-content');
+        previewContainer.innerHTML = processedSiraData.map(item => `
+            <div class="preview-item">
+                <span class="preview-subject-code">${item.code}</span>
+                <span class="preview-subject-name">${item.name}</span>
+                <span class="preview-grade">${item.grade}</span>
+            </div>
+        `).join('');
+        
+        document.getElementById('import-preview').classList.remove('hidden');
+        document.getElementById('import-confirmed-btn').classList.remove('hidden');
+        
+        showNotification(`${processedSiraData.length} materias encontradas`, 'success');
         
     } catch (error) {
         console.error('Error procesando datos SIRA:', error);
-        showNotification('Error procesando los datos de SIRA', 'error');
+        showNotification('Error procesando los datos. Verifica el formato.', 'error');
     }
 }
 
-// =================== EXPORTACIÓN A PDF ===================
-function exportPlanToPDF() {
-    const plan = getActivePlan();
-    if (!plan) return;
+function parseSiraData(data) {
+    const lines = data.split('\n').filter(line => line.trim());
+    const results = [];
     
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
-        const title = `Plan Académico - ${plan.name}`;
+    for (const line of lines) {
+        const patterns = [
+            /(\w+)\s+(.+?)\s+(\d+(?:\.\d+)?)\s*$/,
+            /(\w+)\s+(.+?)\s+\d+\s+(\d+(?:\.\d+)?)\s*$/,
+        ];
         
-        // Título
-        doc.setFontSize(20);
-        doc.setFont(undefined, 'bold');
-        doc.text(title, 105, 20, { align: 'center' });
-        
-        // Fecha de exportación
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        const exportDate = new Date().toLocaleDateString('es-CO', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        doc.text(`Exportado: ${exportDate}`, 105, 30, { align: 'center' });
-        
-        // Estadísticas generales
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text('Progreso Académico', 20, 45);
-        
-        const stats = calculateStats(plan);
-        let yPos = 55;
-        
-        // Estadísticas por área
-        Object.keys(stats).forEach(areaKey => {
-            const areaData = ACADEMIC_AREAS[areaKey.toUpperCase()];
-            if (areaData) {
-                const stat = stats[areaKey];
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'normal');
-                doc.text(`${areaData.name}: ${stat.completed}/${stat.total} créditos (${stat.percentage}%)`, 20, yPos);
-                yPos += 8;
-            }
-        });
-        
-        // Semestres planificados
-        yPos += 10;
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text('Distribución por Semestres', 20, yPos);
-        yPos += 10;
-        
-        plan.semesters.forEach((semester, index) => {
-            const subjects = plan.subjects.filter(s => s.location === `semester-${semester.id}`);
-            const credits = subjects.reduce((sum, s) => sum + (s.credits || 0), 0);
-            
-            if (yPos > 250) {
-                doc.addPage();
-                yPos = 20;
-            }
-            
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text(`${semester.name} - ${credits} créditos`, 20, yPos);
-            doc.setFont(undefined, 'normal');
-            
-            yPos += 7;
-            
-            if (subjects.length === 0) {
-                doc.text('No hay materias programadas', 25, yPos);
-                yPos += 7;
-            } else {
-                subjects.forEach(subject => {
-                    if (yPos > 280) {
-                        doc.addPage();
-                        yPos = 20;
-                    }
-                    
-                    const status = subject.completed ? '✓' : '○';
-                    const text = `${status} ${subject.id} - ${subject.name} (${subject.credits} cr)`;
-                    doc.text(text, 25, yPos);
-                    yPos += 7;
-                });
-            }
-            
-            yPos += 5;
-        });
-        
-        // Materias completadas
-        const completedSubjects = plan.subjects.filter(s => s.completed);
-        if (completedSubjects.length > 0) {
-            if (yPos > 240) {
-                doc.addPage();
-                yPos = 20;
-            }
-            
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text('Materias Completadas', 20, yPos);
-            yPos += 10;
-            
-            completedSubjects.forEach(subject => {
-                if (yPos > 280) {
-                    doc.addPage();
-                    yPos = 20;
-                }
+        for (const pattern of patterns) {
+            const match = line.match(pattern);
+            if (match) {
+                const [, code, name, grade] = match;
+                const gradeNum = parseFloat(grade);
                 
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
-                doc.text(`✓ ${subject.id} - ${subject.name} (${subject.credits} cr)`, 20, yPos);
-                yPos += 6;
-            });
-        }
-        
-        // Equivalencias
-        const equivalencies = plan.subjects.filter(s => s.equivalencies && s.equivalencies.length > 0);
-        if (equivalencies.length > 0) {
-            if (yPos > 250) {
-                doc.addPage();
-                yPos = 20;
+                if (gradeNum >= 3.0) {
+                    results.push({
+                        code: code.trim(),
+                        name: name.trim(),
+                        grade: gradeNum
+                    });
+                }
+                break;
             }
-            
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text('Equivalencias Registradas', 20, yPos);
-            yPos += 10;
-            
-            equivalencies.forEach(subject => {
-                subject.equivalencies.forEach(equiv => {
-                    if (yPos > 280) {
-                        doc.addPage();
-                        yPos = 20;
-                    }
-                    
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'normal');
-                    doc.text(`≡ ${equiv.code} - ${equiv.name} (${equiv.institution})`, 20, yPos);
-                    yPos += 6;
-                });
-            });
         }
-        
-        // Pie de página
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
-            doc.setFont(undefined, 'normal');
-            doc.text('Generado por Planificador Académico - Legión Estudiantil', 105, 290, { align: 'center' });
-            doc.text(`Página ${i} de ${pageCount}`, 200, 290, { align: 'right' });
-        }
-        
-        // Guardar PDF
-        const filename = `plan-academico-${plan.name.toLowerCase().replace(/\s+/g, '-')}.pdf`;
-        doc.save(filename);
-        showNotification('Plan exportado a PDF exitosamente', 'success');
-        
-    } catch (error) {
-        console.error('Error exportando PDF:', error);
-        showNotification('Error al exportar PDF. Verifica que jsPDF esté disponible.', 'error');
     }
+    
+    return results;
 }
 
-// =================== RESET DEL PLAN ===================
-function resetPlan() {
-    const plan = getActivePlan();
-    if (!plan) return;
-    
-    if (!confirm('¿Estás seguro de que quieres reiniciar el plan? Esto moverá todas las materias al banco y las marcará como no completadas.')) {
+function confirmSiraImport() {
+    if (!processedSiraData || processedSiraData.length === 0) {
+        showNotification('No hay datos para importar', 'error');
         return;
     }
     
-    // Reset subjects
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    let importedCount = 0;
+    
+    processedSiraData.forEach(siraItem => {
+        const subject = plan.subjects.find(s => 
+            s.id.toLowerCase() === siraItem.code.toLowerCase() ||
+            s.name.toLowerCase().includes(siraItem.name.toLowerCase().substring(0, 10))
+        );
+        
+        if (subject && !subject.completed) {
+            subject.completed = true;
+            subject.location = 'bank';
+            importedCount++;
+        }
+    });
+    
+    if (importedCount > 0) {
+        render();
+        hideModal('import-modal');
+        showNotification(`${importedCount} materias importadas exitosamente`, 'success');
+    } else {
+        showNotification('No se encontraron coincidencias con el pensum', 'error');
+    }
+}
+
+// =================== FUNCIONES DE EQUIVALENCIAS ===================
+function searchPensumSubjects() {
+    const searchTerm = document.getElementById('pensum-search').value.toLowerCase();
+    const resultsContainer = document.getElementById('pensum-results');
+    
+    if (searchTerm.length < 2) {
+        resultsContainer.innerHTML = '';
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const matches = plan.subjects.filter(s => 
+        s.name.toLowerCase().includes(searchTerm) ||
+        s.id.toLowerCase().includes(searchTerm)
+    ).slice(0, 10);
+    
+    if (matches.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-results"><p>No se encontraron materias</p></div>';
+        return;
+    }
+    
+    resultsContainer.innerHTML = matches.map(subject => `
+        <div class="search-result-item" onclick="selectPensumSubject('${subject.id}')">
+            <div><strong>${subject.id}</strong> - ${subject.name}</div>
+            <div style="font-size: 0.8em; color: var(--text-secondary);">${getTypeLabel(subject.type)} - ${subject.credits} créditos</div>
+        </div>
+    `).join('');
+}
+
+function selectPensumSubject(subjectId) {
+    const plan = getActivePlan();
+    const subject = plan.subjects.find(s => s.id === subjectId);
+    
+    if (!subject) return;
+    
+    if (subject.completed) {
+        showNotification('Esta materia ya está marcada como vista', 'error');
+        return;
+    }
+    
+    subject.completed = true;
+    subject.location = 'bank';
+    
+    render();
+    hideModal('equivalency-modal');
+    showNotification(`${subject.name} marcada como vista`, 'success');
+}
+
+function populateEquivalencySelect() {
+    const select = document.getElementById('ext-equivalent');
+    if (!select) return;
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const incompletedSubjects = plan.subjects.filter(s => !s.completed);
+    
+    select.innerHTML = '<option value="">Selecciona una materia del pensum...</option>' +
+        incompletedSubjects.map(s => 
+            `<option value="${s.id}">${s.id} - ${s.name}</option>`
+        ).join('');
+}
+
+function clearExternalForm() {
+    document.getElementById('ext-code').value = '';
+    document.getElementById('ext-name').value = '';
+    document.getElementById('ext-institution').value = '';
+    document.getElementById('ext-credits').value = '3';
+    document.getElementById('ext-equivalent').value = '';
+}
+
+function addEquivalency() {
+    if (currentActiveTab === 'pensum') {
+        showNotification('Selecciona una materia de los resultados de búsqueda', 'error');
+        return;
+    }
+    
+    const code = document.getElementById('ext-code').value.trim();
+    const name = document.getElementById('ext-name').value.trim();
+    const institution = document.getElementById('ext-institution').value.trim();
+    const credits = parseInt(document.getElementById('ext-credits').value) || 3;
+    const equivalentId = document.getElementById('ext-equivalent').value;
+    
+    if (!code || !name || !institution) {
+        showNotification('Por favor, completa todos los campos', 'error');
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    if (equivalentId) {
+        const equivalentSubject = plan.subjects.find(s => s.id === equivalentId);
+        if (equivalentSubject) {
+            equivalentSubject.completed = true;
+            equivalentSubject.location = 'bank';
+            equivalentSubject.equivalencies = equivalentSubject.equivalencies || [];
+            equivalentSubject.equivalencies.push({
+                code,
+                name,
+                institution,
+                credits
+            });
+        }
+    } else {
+        createCustomSubjectFromEquivalency({
+            id: code,
+            name,
+            credits,
+            type: 'EL',
+            isCustom: true,
+            institution,
+            completed: true,
+            location: 'bank',
+            equivalencies: []
+        });
+    }
+    
+    render();
+    hideModal('equivalency-modal');
+    showNotification('Equivalencia añadida exitosamente', 'success');
+}
+
+// =================== FUNCIONES DE MATERIAS PERSONALIZADAS ===================
+function createCustomSubject() {
+    const code = document.getElementById('custom-code').value.trim();
+    const name = document.getElementById('custom-name').value.trim();
+    const credits = parseInt(document.getElementById('custom-credits').value) || 3;
+    const type = document.getElementById('custom-type').value;
+    
+    if (!code || !name) {
+        showNotification('Por favor, completa el código y nombre', 'error');
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    if (plan.subjects.find(s => s.id.toLowerCase() === code.toLowerCase())) {
+        showNotification('Ya existe una materia con ese código', 'error');
+        return;
+    }
+    
+    const customSubject = {
+        id: code,
+        name,
+        credits,
+        type,
+        isCustom: true,
+        completed: false,
+        location: 'bank',
+        prerequisites: [],
+        equivalencies: []
+    };
+    
+    plan.subjects.push(customSubject);
+    
+    render();
+    hideModal('custom-subject-modal');
+    showNotification(`Materia "${name}" creada exitosamente`, 'success');
+}
+
+function createCustomSubjectFromEquivalency(subjectData) {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    plan.subjects.push(subjectData);
+}
+
+function deleteCustomSubject(subjectId) {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const subject = plan.subjects.find(s => s.id === subjectId);
+    if (!subject || !subject.isCustom) {
+        showNotification('Solo se pueden eliminar materias personalizadas', 'error');
+        return;
+    }
+    
+    if (confirm(`¿Estás seguro de eliminar "${subject.name}"?`)) {
+        plan.subjects = plan.subjects.filter(s => s.id !== subjectId);
+        
+        if (selectedSubjectId === subjectId) {
+            selectedSubjectId = null;
+            document.getElementById('subject-info').innerHTML = '<div class="no-selection"><i class="fas fa-hand-pointer"></i><p>Selecciona una materia para ver su información</p></div>';
+        }
+        
+        render();
+        showNotification(`"${subject.name}" eliminada exitosamente`, 'success');
+    }
+}
+
+// =================== FUNCIONES DE UTILIDAD ===================
+function exportPlan() {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const exportData = {
+        planName: plan.name,
+        exportDate: new Date().toISOString(),
+        semesters: plan.semesters.map(semester => ({
+            name: semester.name,
+            subjects: plan.subjects
+                .filter(s => s.location === `semester-${semester.id}`)
+                .map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    credits: s.credits,
+                    type: getTypeLabel(s.type),
+                    completed: s.completed
+                }))
+        })),
+        stats: calculateStats(plan)
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `plan-academico-${plan.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('Plan exportado exitosamente', 'success');
+}
+
+function resetPlan() {
+    if (!confirm('¿Estás seguro de resetear el plan? Esto moverá todas las materias al banco y eliminará los semestres adicionales.')) {
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
     plan.subjects.forEach(subject => {
-        subject.completed = false;
+        if (!subject.isCustom) {
+            subject.completed = false;
+        }
         subject.location = 'bank';
     });
     
-    // Reset semesters to default
     plan.semesters = [
         { id: 1, name: 'Semestre 1', collapsed: false },
         { id: 2, name: 'Semestre 2', collapsed: false }
     ];
     
     selectedSubjectId = null;
+    
     render();
-    showNotification('Plan reiniciado exitosamente', 'success');
+    showNotification('Plan reseteado exitosamente', 'success');
 }
 
 // =================== FUNCIONES GLOBALES PARA HTML ===================
-// Hacer funciones disponibles globalmente para onclick en HTML
 window.selectCareer = selectCareer;
 window.selectSubject = selectSubject;
 window.toggleSubjectCompleted = toggleSubjectCompleted;
 window.moveSubject = moveSubject;
 window.dragStart = dragStart;
 window.allowDrop = allowDrop;
-window.dragLeave = dragLeave;
 window.dropSubject = dropSubject;
 window.togglePlanSlots = togglePlanSlots;
 window.switchToPlan = switchToPlan;
@@ -1623,28 +1575,25 @@ window.toggleSemesterCollapse = toggleSemesterCollapse;
 window.renameSemester = renameSemester;
 window.deleteSemester = deleteSemester;
 window.autoOrganizeSubjects = autoOrganizeSubjects;
+window.showModal = showModal;
+window.hideModal = hideModal;
 window.showImportModal = showImportModal;
-window.hideImportModal = hideImportModal;
+window.showEquivalencyModal = showEquivalencyModal;
+window.showCustomSubjectModal = showCustomSubjectModal;
+window.switchEquivTab = switchEquivTab;
 window.processSiraData = processSiraData;
-window.exportPlanToPDF = exportPlanToPDF;
+window.confirmSiraImport = confirmSiraImport;
+window.searchPensumSubjects = searchPensumSubjects;
+window.selectPensumSubject = selectPensumSubject;
+window.addEquivalency = addEquivalency;
+window.createCustomSubject = createCustomSubject;
+window.deleteCustomSubject = deleteCustomSubject;
+window.exportPlan = exportPlan;
 window.resetPlan = resetPlan;
 
-// =================== INICIALIZACIÓN PRINCIPAL ===================
+// =================== INICIALIZACIÓN ===================
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO APLICACIÓN ===');
-    
-    // Verificar dependencias críticas
-    if (typeof PENSUM_DI === 'undefined') {
-        console.error('PENSUM_DI no está disponible');
-        showNotification('Error crítico: No se pudo cargar el pensum', 'error');
-        return;
-    }
-    
-    if (typeof firebase === 'undefined') {
-        console.error('Firebase no está disponible');
-        showNotification('Error crítico: Firebase no está disponible', 'error');
-        return;
-    }
     
     // Cargar tema guardado
     const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -1655,30 +1604,11 @@ document.addEventListener('DOMContentLoaded', function() {
         themeToggle.innerHTML = `<i class="fas fa-${savedTheme === 'dark' ? 'moon' : 'sun'}"></i>`;
     }
     
-    // Inicializar Firebase y configurar listeners
+    // Inicializar Firebase
     if (initializeFirebase()) {
         setupAuthStateListener();
-        console.log('✓ Aplicación inicializada correctamente');
+        console.log('Aplicación inicializada correctamente');
     } else {
         showNotification('Error inicializando la aplicación', 'error');
     }
-    
-    // Cerrar modales con Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            const modals = document.querySelectorAll('.modal-overlay:not(.hidden)');
-            modals.forEach(modal => {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
-            });
-            
-            // Cerrar plan slots también
-            const planSlots = document.getElementById('plan-slots-list');
-            if (planSlots && !planSlots.classList.contains('hidden')) {
-                planSlots.classList.add('hidden');
-            }
-        }
-    });
-    
-    console.log('✓ Event listeners de la aplicación configurados');
 });
