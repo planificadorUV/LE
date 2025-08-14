@@ -156,12 +156,14 @@ body {
     justify-content: center;
     background: 
         linear-gradient(135deg, rgba(17, 24, 39, 0.85), rgba(139, 21, 56, 0.85)),
-        url('images/FAI.jpg');
+        url('./images/FAI.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
     padding: 1rem;
+    /* Fallback si la imagen no carga */
+    background-color: var(--primary-red);
 }
 
 .auth-card {
