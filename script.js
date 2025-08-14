@@ -111,12 +111,52 @@ function setupLoginEventListeners() {
         console.log('Email login form listener configurado');
     }
 
+    // Registro con email
+    const registerForm = document.getElementById('email-register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const studentId = document.getElementById('register-student-id').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            if (!name || !studentId || !email || !password || !confirmPassword) {
+                showNotification('Por favor, completa todos los campos', 'error');
+                return;
+            }
+            
+            if (!email.endsWith('@correounivalle.edu.co')) {
+                showNotification('Debes usar tu correo institucional (@correounivalle.edu.co)', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showNotification('La contraseña debe tener al menos 8 caracteres', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (!/^\d{10}$/.test(studentId)) {
+                showNotification('El código estudiantil debe tener 10 dígitos', 'error');
+                return;
+            }
+            
+            registerWithEmail(email, password, name, studentId);
+        });
+        console.log('Email register form listener configurado');
+    }
+
     // Toggle entre login y registro
     const toggleRegister = document.getElementById('toggle-register');
     if (toggleRegister) {
-        toggleRegister.addEventListener('click', () => {
-            showNotification('Función de registro próximamente disponible', 'info');
-        });
+        toggleRegister.addEventListener('click', toggleAuthMode);
+        console.log('Toggle register button listener configurado');
     }
 }
 
@@ -190,9 +230,126 @@ function loginWithEmail(email, password) {
         })
         .catch((error) => {
             console.error('Error en login con email:', error);
-            showNotification('Error al iniciar sesión', 'error');
+            let errorMessage = 'Error al iniciar sesión';
+            
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    errorMessage = 'No existe una cuenta con este correo';
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = 'Contraseña incorrecta';
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = 'Correo electrónico inválido';
+                    break;
+                case 'auth/user-disabled':
+                    errorMessage = 'Esta cuenta ha sido deshabilitada';
+                    break;
+                default:
+                    errorMessage = 'Error al iniciar sesión: ' + error.message;
+            }
+            
+            showNotification(errorMessage, 'error');
             throw error;
         });
+}
+
+function registerWithEmail(email, password, name, studentId) {
+    console.log('Registrando usuario:', email);
+    
+    return auth.createUserWithEmailAndPassword(email, password)
+        .then((result) => {
+            console.log('Registro exitoso:', result.user.email);
+            
+            // Actualizar el perfil del usuario con el nombre
+            return result.user.updateProfile({
+                displayName: name
+            }).then(() => {
+                // Guardar información adicional en Firestore
+                return db.collection('users').doc(result.user.uid).set({
+                    email: email,
+                    name: name,
+                    studentId: studentId,
+                    career: null, // Se seleccionará después
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }).then(() => {
+                showNotification('¡Cuenta creada exitosamente! Bienvenido ' + name, 'success');
+                console.log('Información del usuario guardada en Firestore');
+            });
+        })
+        .catch((error) => {
+            console.error('Error en registro:', error);
+            let errorMessage = 'Error al crear la cuenta';
+            
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    errorMessage = 'Ya existe una cuenta con este correo electrónico';
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = 'Correo electrónico inválido';
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = 'La contraseña es muy débil';
+                    break;
+                case 'auth/operation-not-allowed':
+                    errorMessage = 'El registro con email no está habilitado';
+                    break;
+                default:
+                    errorMessage = 'Error al crear la cuenta: ' + error.message;
+            }
+            
+            showNotification(errorMessage, 'error');
+            throw error;
+        });
+}
+
+let isRegisterMode = false;
+
+function toggleAuthMode() {
+    isRegisterMode = !isRegisterMode;
+    
+    const loginForm = document.getElementById('email-login-form');
+    const registerForm = document.getElementById('email-register-form');
+    const toggleText = document.getElementById('auth-toggle-text');
+    const toggleButton = document.getElementById('toggle-register');
+    const googleBtnText = document.getElementById('google-btn-text');
+    
+    if (isRegisterMode) {
+        // Cambiar a modo registro
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        toggleText.innerHTML = '¿Ya tienes cuenta? <button id="toggle-register" class="link-button">Inicia sesión</button>';
+        googleBtnText.textContent = 'Registrarse con Google';
+        
+        // Limpiar campos de login
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        
+        console.log('Cambiado a modo registro');
+    } else {
+        // Cambiar a modo login
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        toggleText.innerHTML = '¿No tienes cuenta? <button id="toggle-register" class="link-button">Regístrate</button>';
+        googleBtnText.textContent = 'Iniciar sesión con Google';
+        
+        // Limpiar campos de registro
+        document.getElementById('register-name').value = '';
+        document.getElementById('register-student-id').value = '';
+        document.getElementById('register-email').value = '';
+        document.getElementById('register-password').value = '';
+        document.getElementById('register-confirm-password').value = '';
+        
+        console.log('Cambiado a modo login');
+    }
+    
+    // Re-configurar el event listener del botón toggle
+    const newToggleButton = document.getElementById('toggle-register');
+    if (newToggleButton) {
+        newToggleButton.addEventListener('click', toggleAuthMode);
+    }
 }
 
 function showCareerSelection(user) {
@@ -847,7 +1004,7 @@ function getTypeLabel(type) {
         'AB': 'Área Básica',
         'AP': 'Área Profesional', 
         'EP': 'Electiva Profesional',
-        'EL': 'Electiva Libre',
+        'EC': 'Electiva Formación General',
         'english': 'Inglés',
         'practicas': 'Prácticas',
         'proyecto': 'Proyecto de Grado'
@@ -1454,7 +1611,7 @@ function addEquivalency() {
             id: code,
             name,
             credits,
-            type: 'EL',
+            type: 'EC',
             isCustom: true,
             institution,
             completed: true,
@@ -1649,7 +1806,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar Firebase
     if (initializeFirebase()) {
         setupAuthStateListener();
-        setupLoginEventListeners(); 
+        setupLoginEventListeners(); // Configurar listeners de login inmediatamente
         console.log('Aplicación inicializada correctamente');
     } else {
         showNotification('Error inicializando la aplicación', 'error');
