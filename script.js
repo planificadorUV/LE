@@ -1649,7 +1649,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar Firebase
     if (initializeFirebase()) {
         setupAuthStateListener();
-        setupLoginEventListeners(); // Configurar listeners de login inmediatamente
+        setupLoginEventListeners(); 
         console.log('Aplicación inicializada correctamente');
     } else {
         showNotification('Error inicializando la aplicación', 'error');
