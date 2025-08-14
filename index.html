@@ -39,13 +39,14 @@
             <div class="auth-content">
                 <button id="google-login-btn" class="btn-primary auth-btn">
                     <i class="fab fa-google"></i>
-                    Iniciar sesión con Google
+                    <span id="google-btn-text">Iniciar sesión con Google</span>
                 </button>
                 
                 <div class="auth-divider">
                     <span>o</span>
                 </div>
                 
+                <!-- Login Form -->
                 <form id="email-login-form" class="auth-form">
                     <div class="form-group">
                         <label for="email">Correo electrónico</label>
@@ -62,9 +63,37 @@
                         Iniciar sesión
                     </button>
                 </form>
+
+                <!-- Registration Form -->
+                <form id="email-register-form" class="auth-form hidden">
+                    <div class="form-group">
+                        <label for="register-name">Nombre completo</label>
+                        <input type="text" id="register-name" required placeholder="Tu nombre completo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">Correo electrónico institucional</label>
+                        <input type="email" id="register-email" required placeholder="tu@correounivalle.edu.co">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <input type="password" id="register-password" required placeholder="Mínimo 8 caracteres">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirmar contraseña</label>
+                        <input type="password" id="register-confirm-password" required placeholder="Confirma tu contraseña">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Crear cuenta
+                    </button>
+                </form>
                 
                 <div class="auth-toggle">
-                    <p>¿No tienes cuenta? <button id="toggle-register" class="link-button">Regístrate</button></p>
+                    <p id="auth-toggle-text">¿No tienes cuenta? <button id="toggle-register" class="link-button">Regístrate</button></p>
                 </div>
             </div>
         </div>
@@ -81,7 +110,7 @@
             
             <div class="career-options">
                 <button class="career-select-btn" data-career="diseno-industrial" onclick="selectCareer('diseno-industrial')">
-                    <div class="career-icon">🎨</div>
+                    <div class="career-icon">💡</div>
                     <div class="career-info">
                         <h3>Diseño Industrial</h3>
                         <p>Programa de pregrado</p>
@@ -442,6 +471,7 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="pensums/pensum-di.js"></script>
     <script src="script.js"></script>
 </body>
