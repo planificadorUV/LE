@@ -78,6 +78,48 @@ function initializeFirebase() {
 }
 
 // =================== FUNCIONES DE AUTENTICACIÓN ===================
+function setupLoginEventListeners() {
+    console.log('Configurando event listeners de login...');
+    
+    // Login con Google
+    const googleBtn = document.getElementById('google-login-btn');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', loginWithGoogle);
+        console.log('Google login button listener configurado');
+    }
+
+    // Login con email
+    const emailForm = document.getElementById('email-login-form');
+    if (emailForm) {
+        emailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showNotification('Por favor, completa todos los campos', 'error');
+                return;
+            }
+            
+            if (!email.endsWith('@correounivalle.edu.co')) {
+                showNotification('Debes usar tu correo institucional (@correounivalle.edu.co)', 'error');
+                return;
+            }
+            
+            loginWithEmail(email, password);
+        });
+        console.log('Email login form listener configurado');
+    }
+
+    // Toggle entre login y registro
+    const toggleRegister = document.getElementById('toggle-register');
+    if (toggleRegister) {
+        toggleRegister.addEventListener('click', () => {
+            showNotification('Función de registro próximamente disponible', 'info');
+        });
+    }
+}
+
 function setupAuthStateListener() {
     if (!auth) {
         console.error('Auth no está inicializado');
@@ -1607,6 +1649,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar Firebase
     if (initializeFirebase()) {
         setupAuthStateListener();
+        setupLoginEventListeners(); // Configurar listeners de login inmediatamente
         console.log('Aplicación inicializada correctamente');
     } else {
         showNotification('Error inicializando la aplicación', 'error');
