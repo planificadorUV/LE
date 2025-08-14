@@ -306,6 +306,17 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    transition: all 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.auth-form.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    position: absolute;
+    width: calc(100% - 6rem);
 }
 
 .form-group {
