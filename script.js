@@ -949,8 +949,9 @@ function renderSubjectBank(plan) {
         
         if (category.subjects.length > 0) {
             html += `
-                <div class="category-section">
-                    <div class="category-header">
+                <div class="category-section" data-category="${categoryKey}">
+                    <div class="category-header" onclick="toggleCategory('${categoryKey}')">
+                        <i class="fas fa-chevron-down category-toggle"></i>
                         <i class="fas ${category.icon}"></i>
                         <span>${category.name}</span>
                         <span class="category-count">${category.subjects.length}</span>
@@ -1363,6 +1364,24 @@ function toggleSemesterCollapse(semesterId) {
     if (semester) {
         semester.collapsed = !semester.collapsed;
         render();
+    }
+}
+
+function toggleCategory(categoryKey) {
+    const categorySection = document.querySelector(`.category-section[data-category="${categoryKey}"]`);
+    if (!categorySection) return;
+    
+    const categorySubjects = categorySection.querySelector('.category-subjects');
+    const toggleIcon = categorySection.querySelector('.category-toggle');
+    
+    if (categorySubjects.style.display === 'none') {
+        categorySubjects.style.display = 'flex';
+        toggleIcon.classList.remove('fa-chevron-right');
+        toggleIcon.classList.add('fa-chevron-down');
+    } else {
+        categorySubjects.style.display = 'none';
+        toggleIcon.classList.remove('fa-chevron-down');
+        toggleIcon.classList.add('fa-chevron-right');
     }
 }
 
@@ -1861,6 +1880,7 @@ window.renamePlan = renamePlan;
 window.deletePlan = deletePlan;
 window.addSemester = addSemester;
 window.toggleSemesterCollapse = toggleSemesterCollapse;
+window.toggleCategory = toggleCategory;
 window.renameSemester = renameSemester;
 window.deleteSemester = deleteSemester;
 window.autoOrganizeSubjects = autoOrganizeSubjects;
