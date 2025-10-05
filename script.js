@@ -892,17 +892,19 @@ function renderSubjectBank(plan) {
     const searchTerm = document.getElementById('subject-search')?.value.toLowerCase() || '';
     const activeFilter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
     
-    let subjects = plan.subjects.filter(s => s.location === 'bank');
+    let allSubjects = plan.subjects.filter(s => s.location === 'bank');
     
+    // Aplicar búsqueda
     if (searchTerm) {
-        subjects = subjects.filter(s => 
+        allSubjects = allSubjects.filter(s => 
             s.name.toLowerCase().includes(searchTerm) || 
             s.id.toLowerCase().includes(searchTerm)
         );
     }
     
+    // Aplicar filtro de estado
     if (activeFilter !== 'all') {
-        subjects = subjects.filter(s => {
+        allSubjects = allSubjects.filter(s => {
             switch (activeFilter) {
                 case 'available':
                     return canTakeSubject(s, plan) && !s.completed;
@@ -916,14 +918,56 @@ function renderSubjectBank(plan) {
         });
     }
     
-    console.log('Materias en el banco:', subjects.length);
+    // Organizar por categorías
+    const categories = {
+        'AB': { name: 'Área Básica (AB)', icon: 'fa-book', subjects: [] },
+        'AP': { name: 'Área Profesional (AP)', icon: 'fa-graduation-cap', subjects: [] },
+        'EP': { name: 'Electivas Profesionales (EP)', icon: 'fa-star', subjects: [] },
+        'EC': { name: 'Electivas Formación General (EC)', icon: 'fa-globe', subjects: [] }
+    };
     
-    if (subjects.length === 0) {
+    // Clasificar materias por categoría
+    allSubjects.forEach(subject => {
+        const type = subject.type || 'AB';
+        if (categories[type]) {
+            categories[type].subjects.push(subject);
+        }
+    });
+    
+    console.log('Materias por categoría:', {
+        AB: categories.AB.subjects.length,
+        AP: categories.AP.subjects.length,
+        EP: categories.EP.subjects.length,
+        EC: categories.EC.subjects.length
+    });
+    
+    // Renderizar por categorías
+    let html = '';
+    
+    Object.keys(categories).forEach(categoryKey => {
+        const category = categories[categoryKey];
+        
+        if (category.subjects.length > 0) {
+            html += `
+                <div class="category-section">
+                    <div class="category-header">
+                        <i class="fas ${category.icon}"></i>
+                        <span>${category.name}</span>
+                        <span class="category-count">${category.subjects.length}</span>
+                    </div>
+                    <div class="category-subjects">
+                        ${category.subjects.map(subject => createSubjectCardHTML(subject, plan)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    if (html === '') {
         container.innerHTML = '<div class="no-results"><i class="fas fa-graduation-cap"></i><p>No hay materias que coincidan con los filtros</p></div>';
-        return;
+    } else {
+        container.innerHTML = html;
     }
-    
-    container.innerHTML = subjects.map(subject => createSubjectCardHTML(subject, plan)).join('');
 }
 
 function createSubjectCardHTML(subject, plan) {
