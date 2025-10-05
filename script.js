@@ -449,6 +449,36 @@ function getInitialStateForUser() {
     return initialState;
 }
 
+function syncElectivasFG(plannerState) {
+    // Sincronizar electivas FG con todos los planes
+    if (typeof ELECTIVAS_FG === 'undefined') {
+        console.warn('ELECTIVAS_FG no disponible para sincronizar');
+        return plannerState;
+    }
+    
+    console.log('Sincronizando', ELECTIVAS_FG.length, 'electivas FG con los planes...');
+    
+    Object.keys(plannerState.plans).forEach(planId => {
+        const plan = plannerState.plans[planId];
+        const existingSubjectIds = new Set(plan.subjects.map(s => s.id));
+        
+        // Agregar solo las electivas FG que no existen en el plan
+        ELECTIVAS_FG.forEach(fgSubject => {
+            if (!existingSubjectIds.has(fgSubject.id)) {
+                plan.subjects.push({
+                    ...fgSubject,
+                    completed: false,
+                    location: 'bank',
+                    equivalencies: []
+                });
+            }
+        });
+    });
+    
+    console.log('Sincronización completada');
+    return plannerState;
+}
+
 function loadPlannerData(userId, careerId) {
     console.log('=== CARGANDO DATOS ===');
     console.log('Usuario:', userId);
@@ -471,8 +501,8 @@ function loadPlannerData(userId, careerId) {
             console.log('Datos cargados desde Firebase:', data);
             
             if (data && data.plans) {
-                plannerState = data;
-                console.log('Estado establecido desde Firebase');
+                plannerState = syncElectivasFG(data);
+                console.log('Estado establecido desde Firebase y sincronizado');
             } else {
                 console.log('Datos en formato incorrecto, creando estado inicial');
                 const initialState = getInitialStateForUser();
