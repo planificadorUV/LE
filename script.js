@@ -782,7 +782,7 @@ function renderStatsBoard(plan) {
         
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">Ciclo Básico</span>
+                <span class="stat-title">Ciclo Básico (AB)</span>
                 <span class="stat-value">${stats.categories.AB?.completed || 0}/${stats.categories.AB?.required || 49}</span>
             </div>
             <div class="progress-bar">
@@ -792,7 +792,7 @@ function renderStatsBoard(plan) {
         
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">Ciclo Profesional</span>
+                <span class="stat-title">Ciclo Profesional (AP)</span>
                 <span class="stat-value">${stats.categories.AP?.completed || 0}/${stats.categories.AP?.required || 57}</span>
             </div>
             <div class="progress-bar">
@@ -802,7 +802,7 @@ function renderStatsBoard(plan) {
         
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">Electivas Profesionales</span>
+                <span class="stat-title">Electivas Profesionales (EP)</span>
                 <span class="stat-value">${stats.categories.EP?.completed || 0}/${stats.categories.EP?.required || 17}</span>
             </div>
             <div class="progress-bar">
@@ -812,7 +812,10 @@ function renderStatsBoard(plan) {
         
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">Electivas Formación General</span>
+                <span class="stat-title">
+                    Electivas Formación General (EC)
+                    <i class="fas fa-info-circle fg-info-icon" title="Solo cuentan materias con componente COM en SIRA (AHU, EVS, etc.). Las marcadas como SIN son electivas complementarias de la carrera y NO cuentan como FG."></i>
+                </span>
                 <span class="stat-value">${stats.categories.EC?.completed || 0}/${stats.categories.EC?.required || 17}</span>
             </div>
             <div class="progress-bar">
