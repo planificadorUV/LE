@@ -885,6 +885,45 @@ body.zen-mode .right-panel {
     background: var(--text-secondary);
 }
 
+/* Category Sections */
+.category-section {
+    margin-bottom: 1.5rem;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-left: 4px solid var(--primary-red);
+}
+
+.category-header i {
+    color: var(--primary-red);
+    font-size: 1rem;
+}
+
+.category-count {
+    margin-left: auto;
+    background: var(--primary-red);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.category-subjects {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
 .subject-card {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
