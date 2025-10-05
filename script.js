@@ -405,18 +405,37 @@ function getInitialStateForUser() {
     
     console.log('PENSUM_DI tiene', PENSUM_DI.length, 'materias');
     
+    // Combinar materias del pensum con electivas de formación general
+    let allSubjects = PENSUM_DI.map(subject => ({
+        ...subject,
+        completed: false,
+        location: 'bank',
+        equivalencies: []
+    }));
+    
+    // Agregar electivas de formación general si están disponibles
+    if (typeof ELECTIVAS_FG !== 'undefined') {
+        console.log('ELECTIVAS_FG tiene', ELECTIVAS_FG.length, 'materias');
+        const fgSubjects = ELECTIVAS_FG.map(subject => ({
+            ...subject,
+            completed: false,
+            location: 'bank',
+            equivalencies: []
+        }));
+        allSubjects = [...allSubjects, ...fgSubjects];
+    } else {
+        console.warn('ELECTIVAS_FG no está definido, solo se cargarán materias del pensum');
+    }
+    
+    console.log('Total de materias:', allSubjects.length);
+    
     const initialPlanId = 'plan_1';
     const initialState = {
         activePlanId: initialPlanId,
         plans: {
             [initialPlanId]: {
                 name: 'Plan Principal',
-                subjects: PENSUM_DI.map(subject => ({
-                    ...subject,
-                    completed: false,
-                    location: 'bank',
-                    equivalencies: []
-                })),
+                subjects: allSubjects,
                 semesters: [
                     { id: 1, name: 'Semestre 1', collapsed: false },
                     { id: 2, name: 'Semestre 2', collapsed: false }
