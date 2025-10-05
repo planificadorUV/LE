@@ -117,12 +117,11 @@ function setupLoginEventListeners() {
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('register-name').value;
-            const studentId = document.getElementById('register-student-id').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('register-confirm-password').value;
             
-            if (!name || !studentId || !email || !password || !confirmPassword) {
+            if (!name || !email || !password || !confirmPassword) {
                 showNotification('Por favor, completa todos los campos', 'error');
                 return;
             }
@@ -142,12 +141,7 @@ function setupLoginEventListeners() {
                 return;
             }
             
-            if (!/^\d{10}$/.test(studentId)) {
-                showNotification('El código estudiantil debe tener 10 dígitos', 'error');
-                return;
-            }
-            
-            registerWithEmail(email, password, name, studentId);
+            registerWithEmail(email, password, name);
         });
         console.log('Email register form listener configurado');
     }
@@ -788,11 +782,41 @@ function renderStatsBoard(plan) {
         
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">Materias Vistas</span>
-                <span class="stat-value">${stats.completedSubjects}/${stats.totalSubjects}</span>
+                <span class="stat-title">Ciclo Básico</span>
+                <span class="stat-value">${stats.categories.AB?.completed || 0}/${stats.categories.AB?.required || 49}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${(stats.completedSubjects / stats.totalSubjects) * 100}%"></div>
+                <div class="progress-bar-fill" style="width: ${stats.categories.AB ? Math.round((stats.categories.AB.completed / stats.categories.AB.required) * 100) : 0}%"></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Ciclo Profesional</span>
+                <span class="stat-value">${stats.categories.AP?.completed || 0}/${stats.categories.AP?.required || 57}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: ${stats.categories.AP ? Math.round((stats.categories.AP.completed / stats.categories.AP.required) * 100) : 0}%"></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Electivas Profesionales</span>
+                <span class="stat-value">${stats.categories.EP?.completed || 0}/${stats.categories.EP?.required || 17}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: ${stats.categories.EP ? Math.round((stats.categories.EP.completed / stats.categories.EP.required) * 100) : 0}%"></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Electivas Formación General</span>
+                <span class="stat-value">${stats.categories.EC?.completed || 0}/${stats.categories.EC?.required || 17}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: ${stats.categories.EC ? Math.round((stats.categories.EC.completed / stats.categories.EC.required) * 100) : 0}%"></div>
             </div>
         </div>
         
@@ -805,13 +829,6 @@ function renderStatsBoard(plan) {
                 <div class="progress-bar-fill english" style="width: ${stats.englishTotal > 0 ? (stats.englishCompleted / stats.englishTotal) * 100 : 0}%"></div>
             </div>
         </div>
-        
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-title">Semestres</span>
-                <span class="stat-value">${plan.semesters.length}</span>
-            </div>
-        </div>
     `;
 }
 
@@ -819,20 +836,46 @@ function calculateStats(plan) {
     const subjects = plan.subjects || [];
     const completed = subjects.filter(s => s.completed);
     
-    const totalCredits = subjects.reduce((sum, s) => sum + (s.credits || 0), 0);
-    const completedCredits = completed.reduce((sum, s) => sum + (s.credits || 0), 0);
+    // Valores correctos para Diseño Industrial
+    const DI_REQUIREMENTS = {
+        total: 140,
+        AB: 49,  // Área Básica (Ciclo Básico)
+        AP: 57,  // Área Profesional (Ciclo Profesional) 
+        EP: 17,  // Electivas Profesionales
+        EC: 17   // Electivas Complementarias (Formación General)
+    };
     
-    const englishSubjects = subjects.filter(s => s.category === 'english' || s.type === 'english');
+    // Calcular créditos por categoría
+    const categoryStats = {};
+    Object.keys(DI_REQUIREMENTS).forEach(category => {
+        if (category === 'total') return;
+        
+        const categorySubjects = subjects.filter(s => s.type === category);
+        const categoryCompleted = categorySubjects.filter(s => s.completed);
+        
+        categoryStats[category] = {
+            completed: categoryCompleted.reduce((sum, s) => sum + (s.credits || 0), 0),
+            required: DI_REQUIREMENTS[category],
+            subjects: categorySubjects.length,
+            completedSubjects: categoryCompleted.length
+        };
+    });
+    
+    const totalCompletedCredits = completed.reduce((sum, s) => sum + (s.credits || 0), 0);
+    
+    // Inglés (parte del área básica pero se muestra por separado)
+    const englishSubjects = subjects.filter(s => s.category === 'english' || s.type === 'english' || s.name.toLowerCase().includes('inglés'));
     const englishCompleted = englishSubjects.filter(s => s.completed).length;
     
     return {
         totalSubjects: subjects.length,
         completedSubjects: completed.length,
-        totalCredits,
-        completedCredits,
-        completionPercentage: totalCredits > 0 ? Math.round((completedCredits / totalCredits) * 100) : 0,
+        totalCredits: DI_REQUIREMENTS.total,
+        completedCredits: totalCompletedCredits,
+        completionPercentage: Math.round((totalCompletedCredits / DI_REQUIREMENTS.total) * 100),
         englishTotal: englishSubjects.length,
-        englishCompleted
+        englishCompleted,
+        categories: categoryStats
     };
 }
 
@@ -1804,11 +1847,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Inicializar Firebase
-    if (initializeFirebase()) {
+    try {
+        app = firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+        googleProvider = new firebase.auth.GoogleAuthProvider();
+        
+        console.log('Firebase inicializado correctamente');
+        
+        // Configurar listeners
         setupAuthStateListener();
-        setupLoginEventListeners(); // Configurar listeners de login inmediatamente
+        setupLoginEventListeners();
+        
         console.log('Aplicación inicializada correctamente');
-    } else {
+    } catch (error) {
+        console.error('Error inicializando Firebase:', error);
         showNotification('Error inicializando la aplicación', 'error');
     }
 });
