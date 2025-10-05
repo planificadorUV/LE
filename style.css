@@ -154,9 +154,9 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-     background: 
+    background: 
         linear-gradient(135deg, rgba(17, 24, 39, 0.85), rgba(139, 21, 56, 0.85)),
-        url('./images/LE.jpg');
+        url('./images/FAI.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -708,16 +708,28 @@ body.zen-mode .right-panel {
 }
 
 .stat-card {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    transition: all var(--animation-speed) ease;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
 .stat-card:hover {
+    background: rgba(255, 255, 255, 0.08);
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
+}
+
+.stat-percentage {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    opacity: 0.8;
 }
 
 .stat-header {
@@ -731,6 +743,21 @@ body.zen-mode .right-panel {
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fg-info-icon {
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    cursor: help;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.fg-info-icon:hover {
+    opacity: 1;
 }
 
 .stat-value {
@@ -1191,15 +1218,10 @@ body.zen-mode .right-panel {
     border-bottom: none;
 }
 
-.detail-label {
+.stat-title {
     font-size: 0.875rem;
     color: var(--text-secondary);
     font-weight: 500;
-}
-
-.detail-value {
-    font-size: 0.875rem;
-    color: var(--text-primary);
     font-weight: 600;
 }
 
