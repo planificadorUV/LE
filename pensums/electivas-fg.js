@@ -227,7 +227,11 @@ const ELECTIVAS_FG = [
     { id: '507101C', name: 'DESARROLLO DE CLIENTES', credits: 3, type: 'EC', category: 'Emprendimiento', prerequisites: [] }
 ];
 
-// Exportar para uso en otros módulos
+// Exportar para uso en el navegador y Node.js
+if (typeof window !== 'undefined') {
+    window.ELECTIVAS_FG = ELECTIVAS_FG;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { ELECTIVAS_FG };
 }
