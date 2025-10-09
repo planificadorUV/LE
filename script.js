@@ -1857,35 +1857,161 @@ function exportPlan() {
     const plan = getActivePlan();
     if (!plan) return;
     
-    const exportData = {
-        planName: plan.name,
-        exportDate: new Date().toISOString(),
-        semesters: plan.semesters.map(semester => ({
-            name: semester.name,
-            subjects: plan.subjects
-                .filter(s => s.location === `semester-${semester.id}`)
-                .map(s => ({
-                    id: s.id,
-                    name: s.name,
-                    credits: s.credits,
-                    type: getTypeLabel(s.type),
-                    completed: s.completed
-                }))
-        })),
-        stats: calculateStats(plan)
-    };
+    // Pedir código del estudiante
+    const codigoEstudiante = prompt('Ingresa tu código estudiantil:', '');
+    if (!codigoEstudiante || codigoEstudiante.trim() === '') {
+        showNotification('Exportación cancelada', 'info');
+        return;
+    }
     
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `plan-academico-${plan.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showNotification('Plan exportado exitosamente', 'success');
+    try {
+        // Obtener jsPDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Información del usuario
+        const user = auth.currentUser;
+        const userName = user?.displayName || user?.email || 'Usuario';
+        const stats = calculateStats(plan);
+        
+        // Configuración de colores
+        const uvRed = [209, 16, 29];
+        const darkGray = [55, 65, 81];
+        const lightGray = [156, 163, 175];
+        
+        let yPos = 20;
+        
+        // Header - Logo y título
+        doc.setFillColor(...uvRed);
+        doc.rect(0, 0, 210, 35, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('UNIVERSIDAD DEL VALLE', 105, 15, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Plan Académico - Diseño Industrial', 105, 25, { align: 'center' });
+        
+        yPos = 45;
+        
+        // Información del estudiante
+        doc.setTextColor(...darkGray);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('INFORMACIÓN DEL ESTUDIANTE', 20, yPos);
+        
+        yPos += 8;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`Nombre: ${userName}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Código: ${codigoEstudiante}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Plan: ${plan.name}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Fecha de exportación: ${new Date().toLocaleDateString('es-CO')}`, 20, yPos);
+        
+        yPos += 10;
+        
+        // Resumen de progreso
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('RESUMEN DE PROGRESO', 20, yPos);
+        
+        yPos += 8;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`Créditos completados: ${stats.completedCredits} / ${stats.totalCredits} (${stats.completionPercentage}%)`, 20, yPos);
+        yPos += 6;
+        doc.text(`Ciclo Básico (AB): ${stats.categories.AB?.completed || 0} / ${stats.categories.AB?.required || 49} créditos`, 20, yPos);
+        yPos += 6;
+        doc.text(`Ciclo Profesional (AP): ${stats.categories.AP?.completed || 0} / ${stats.categories.AP?.required || 57} créditos`, 20, yPos);
+        yPos += 6;
+        doc.text(`Electivas Profesionales (EP): ${stats.categories.EP?.completed || 0} / ${stats.categories.EP?.required || 17} créditos`, 20, yPos);
+        yPos += 6;
+        doc.text(`Electivas Formación General (EC): ${stats.categories.EC?.completed || 0} / ${stats.categories.EC?.required || 17} créditos`, 20, yPos);
+        yPos += 6;
+        doc.text(`Inglés: ${stats.englishCompleted} / ${stats.englishTotal}`, 20, yPos);
+        
+        yPos += 12;
+        
+        // Semestres
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('PLAN POR SEMESTRES', 20, yPos);
+        
+        yPos += 8;
+        
+        plan.semesters.forEach((semester, index) => {
+            const subjects = plan.subjects.filter(s => s.location === `semester-${semester.id}`);
+            const semesterCredits = subjects.reduce((sum, s) => sum + (s.credits || 0), 0);
+            
+            // Verificar si necesitamos nueva página
+            if (yPos > 250) {
+                doc.addPage();
+                yPos = 20;
+            }
+            
+            // Título del semestre
+            doc.setFillColor(240, 240, 240);
+            doc.rect(20, yPos - 4, 170, 8, 'F');
+            
+            doc.setTextColor(...uvRed);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.text(`${semester.name} - ${semesterCredits} créditos`, 22, yPos);
+            
+            yPos += 8;
+            
+            if (subjects.length === 0) {
+                doc.setTextColor(...lightGray);
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(9);
+                doc.text('Sin materias asignadas', 25, yPos);
+                yPos += 6;
+            } else {
+                doc.setTextColor(...darkGray);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                
+                subjects.forEach(subject => {
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    
+                    const status = subject.completed ? '✓' : '○';
+                    const typeLabel = getTypeLabel(subject.type);
+                    doc.text(`${status} ${subject.id} - ${subject.name}`, 25, yPos);
+                    doc.text(`${subject.credits} cr | ${typeLabel}`, 160, yPos);
+                    yPos += 5;
+                });
+            }
+            
+            yPos += 4;
+        });
+        
+        // Footer en todas las páginas
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setTextColor(...lightGray);
+            doc.setFontSize(8);
+            doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+            doc.text('Generado por Planificador Académico UV', 105, 285, { align: 'center' });
+        }
+        
+        // Guardar PDF
+        const fileName = `plan-academico-${codigoEstudiante}-${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        showNotification('Plan exportado exitosamente como PDF', 'success');
+    } catch (error) {
+        console.error('Error exportando PDF:', error);
+        showNotification('Error al generar el PDF', 'error');
+    }
 }
 
 function resetPlan() {
