@@ -897,13 +897,22 @@ function calculateStats(plan) {
         EC: 17   // Electivas Complementarias (Formación General)
     };
     
+    // Códigos de inglés (no cuentan para el ciclo básico)
+    const englishCodes = ['204025C', '204026C', '204027C', '204028C'];
+    
     // Calcular créditos por categoría
     const categoryStats = {};
     Object.keys(DI_REQUIREMENTS).forEach(category => {
         if (category === 'total') return;
         
-        const categorySubjects = subjects.filter(s => s.type === category);
-        const categoryCompleted = categorySubjects.filter(s => s.completed);
+        let categorySubjects = subjects.filter(s => s.type === category);
+        let categoryCompleted = categorySubjects.filter(s => s.completed);
+        
+        // Para el área básica (AB), excluir los créditos de inglés
+        if (category === 'AB') {
+            categorySubjects = categorySubjects.filter(s => !englishCodes.includes(s.id));
+            categoryCompleted = categoryCompleted.filter(s => !englishCodes.includes(s.id));
+        }
         
         categoryStats[category] = {
             completed: categoryCompleted.reduce((sum, s) => sum + (s.credits || 0), 0),
@@ -916,7 +925,6 @@ function calculateStats(plan) {
     const totalCompletedCredits = completed.reduce((sum, s) => sum + (s.credits || 0), 0);
     
     // Inglés (solo los 4 niveles obligatorios del pensum de DI)
-    const englishCodes = ['204025C', '204026C', '204027C', '204028C'];
     const englishSubjects = subjects.filter(s => englishCodes.includes(s.id));
     const englishCompleted = englishSubjects.filter(s => s.completed).length;
     
