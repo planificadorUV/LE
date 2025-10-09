@@ -1596,33 +1596,65 @@ function processSiraData() {
 }
 
 function parseSiraData(data) {
-    const lines = data.split('\n').filter(line => line.trim());
+    const lines = data.split('\n');
     const results = [];
     
-    for (const line of lines) {
-        const patterns = [
-            /(\w+)\s+(.+?)\s+(\d+(?:\.\d+)?)\s*$/,
-            /(\w+)\s+(.+?)\s+\d+\s+(\d+(?:\.\d+)?)\s*$/,
-        ];
+    console.log('=== PARSEANDO DATOS DEL SIRA ===');
+    console.log('Total de líneas:', lines.length);
+    
+    // Patrón para identificar una línea de materia del SIRA
+    // Formato: CÓDIGO GR SDE ASIGNATURA TM FUN COM CRD CAL HAB [CANCELACIÓN]
+    // Ejemplo: 507008C 01 00 CREACIÓN DE LA FORMA N EC LCO 3 4.0
+    // Las columnas pueden estar separadas por espacios o tabulaciones
+    const subjectPattern = /^(\d{6}[A-Z])\s+\d+\s+\d+\s+(.+?)\s+[A-Z]+\s+[A-Z]{2,3}\s+[A-Z]{3}\s+\d+\s+(\d+\.\d+|E\.X)/;
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
         
-        for (const pattern of patterns) {
-            const match = line.match(pattern);
-            if (match) {
-                const [, code, name, grade] = match;
-                const gradeNum = parseFloat(grade);
-                
-                if (gradeNum >= 3.0) {
-                    results.push({
-                        code: code.trim(),
-                        name: name.trim(),
-                        grade: gradeNum
-                    });
-                }
-                break;
+        // Saltar líneas vacías, headers, y resúmenes
+        if (!line || 
+            line.startsWith('PERIODO:') ||
+            line.startsWith('Fecha Matricula:') ||
+            line.startsWith('CÓDIGO') ||
+            line.startsWith('Resumen') ||
+            line.startsWith('Créditos') ||
+            line.startsWith('Núm.') ||
+            line.startsWith('%') ||
+            line.startsWith('Promedio') ||
+            line.includes('CANCELACIÓN:') ||
+            line.includes('REACTIVACIÓN')) {
+            continue;
+        }
+        
+        const match = line.match(subjectPattern);
+        
+        if (match) {
+            const [, code, name, gradeStr] = match;
+            
+            // Saltar materias con E.X (exoneradas) o canceladas
+            if (gradeStr === 'E.X') {
+                console.log(`Saltando materia exonerada: ${code} - ${name}`);
+                continue;
+            }
+            
+            const grade = parseFloat(gradeStr);
+            
+            // Solo importar materias aprobadas (nota >= 3.0)
+            if (grade >= 3.0) {
+                const cleanName = name.trim();
+                results.push({
+                    code: code.trim(),
+                    name: cleanName,
+                    grade: grade
+                });
+                console.log(`✓ Materia aprobada: ${code} - ${cleanName} (${grade})`);
+            } else {
+                console.log(`✗ Materia reprobada: ${code} - ${name} (${grade})`);
             }
         }
     }
     
+    console.log(`Total de materias aprobadas encontradas: ${results.length}`);
     return results;
 }
 
