@@ -337,13 +337,22 @@
             <button class="modal-close-btn" onclick="hideModal('import-modal')">&times;</button>
             <div class="modal-header">
                 <h2><i class="fas fa-file-import"></i> Importar desde SIRA</h2>
-                <p>Pega tu "Registro de Calificaciones" de SIRA. El sistema procesará materias con nota >= 3.0.</p>
+                <p>Importa automáticamente tus materias aprobadas desde el Sistema de Información y Registro Académico.</p>
+                <div style="background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; padding: 0.75rem; margin-top: 0.75rem; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 0.875rem;">
+                        <strong>Instrucciones:</strong><br>
+                        1. Ingresa al <a href="https://sira.univalle.edu.co/sra" target="_blank" style="color: #3b82f6; text-decoration: underline;">SIRA</a><br>
+                        2. Ve a <strong>Consultas → Registro de Calificaciones</strong><br>
+                        3. Selecciona <strong>todos los periodos</strong> que quieras importar<br>
+                        4. Copia todo el contenido y pégalo abajo
+                    </p>
+                </div>
             </div>
             
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="sira-data">Datos de SIRA:</label>
-                    <textarea id="sira-data" placeholder="Pega aquí los datos copiados desde tu registro de calificaciones en SIRA..." rows="8"></textarea>
+                    <label for="sira-data">Historial de Calificaciones:</label>
+                    <textarea id="sira-data" placeholder="Pega aquí el historial completo de calificaciones del SIRA...&#10;&#10;Debe incluir los periodos con el formato:&#10;PERIODO: MARZO/2023 - JULIO/2023&#10;CÓDIGO  ASIGNATURA  CAL&#10;507008C  CREACIÓN DE LA FORMA  4.0" rows="12" style="font-family: monospace; font-size: 0.875rem;"></textarea>
                 </div>
                 
                 <div class="import-preview hidden" id="import-preview">
