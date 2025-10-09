@@ -22,14 +22,14 @@ const PENSUM_DI = [
     { id: '507012C', name: 'INTRODUCCIÓN MATERIALES Y PROCESOS', credits: 2, type: 'AB', prerequisites: [] },
     { id: '507013C', name: 'MATEMÁTICAS', credits: 2, type: 'AB', prerequisites: [] },
     { id: '507009C', name: 'FÍSICA PARA EL DISEÑO', credits: 2, type: 'AB', prerequisites: [] },
-    { id: '507111C', name: 'DISEÑO COLONIAL Y MODERNIDAD D.I.', credits: 2, type: 'AB', prerequisites: [] },
-    { id: '507035C', name: 'DISIDENCIAS Y RESISTENCIAS', credits: 3, type: 'AB', prerequisites: [] },
-    { id: '507036C', name: 'ESTUDIOS CRÍTICOS DEL DISEÑO', credits: 3, type: 'AB', prerequisites: [] },
     { id: '507025C', name: 'PROYECTO - SER HUMANO', credits: 7, type: 'AB', prerequisites: [] },
     { id: '507024C', name: 'PROYECTOS - RELACIONES Y VÍNCULOS', credits: 4, type: 'AB', prerequisites: [] },
     { id: '507021C', name: 'PROYECTOS - ESTRUCTURAS Y AUTONOMÍAS', credits: 4, type: 'AB', prerequisites: [] },
-    // Ciclo Profesional (Componente Profesional)
 
+    // Ciclo Profesional (Componente Profesional)
+    { id: '507111C', name: 'DISEÑO COLONIAL Y MODERNIDAD D.I.', credits: 2, type: 'AP', prerequisites: [] },
+    { id: '507035C', name: 'DISIDENCIAS Y RESISTENCIAS', credits: 3, type: 'AP', prerequisites: [] },
+    { id: '507036C', name: 'ESTUDIOS CRÍTICOS DEL DISEÑO', credits: 3, type: 'AP', prerequisites: [] },
     { id: '507047C', name: 'HERRAMIENTAS DIGITALES - REPRESENTACIÓN', credits: 2, type: 'AP', prerequisites: [] },
     { id: '507014C', name: 'MATERIALES Y PROCESOS - METALES', credits: 3, type: 'AP', prerequisites: ['507012C'] },
     { id: '507011C', name: 'HERRAMIENTAS DIGITALES - PROGRAMACIÓN', credits: 2, type: 'AP', prerequisites: [] },
