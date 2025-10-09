@@ -449,6 +449,50 @@ function getInitialStateForUser() {
     return initialState;
 }
 
+function syncPensumClassifications(plannerState) {
+    // Sincronizar las clasificaciones (type) de las materias del pensum
+    if (typeof PENSUM_DI === 'undefined') {
+        console.warn('PENSUM_DI no disponible para sincronizar');
+        return plannerState;
+    }
+    
+    console.log('=== SINCRONIZANDO CLASIFICACIONES DEL PENSUM ===');
+    
+    // Crear un mapa de código -> materia del pensum
+    const pensumMap = new Map();
+    PENSUM_DI.forEach(subject => {
+        pensumMap.set(subject.id, subject);
+    });
+    
+    Object.keys(plannerState.plans).forEach(planId => {
+        const plan = plannerState.plans[planId];
+        let updatedCount = 0;
+        
+        // Actualizar la clasificación de cada materia según el pensum
+        plan.subjects.forEach(subject => {
+            const pensumSubject = pensumMap.get(subject.id);
+            if (pensumSubject && subject.type !== pensumSubject.type) {
+                console.log(`Actualizando ${subject.id}: ${subject.type} → ${pensumSubject.type}`);
+                subject.type = pensumSubject.type;
+                
+                // También actualizar category si existe en el pensum
+                if (pensumSubject.category) {
+                    subject.category = pensumSubject.category;
+                }
+                
+                updatedCount++;
+            }
+        });
+        
+        if (updatedCount > 0) {
+            console.log(`Plan "${plan.name}": ${updatedCount} materias actualizadas`);
+        }
+    });
+    
+    console.log('Sincronización de clasificaciones completada');
+    return plannerState;
+}
+
 function syncElectivasFG(plannerState) {
     // Sincronizar electivas FG con todos los planes
     if (typeof ELECTIVAS_FG === 'undefined') {
@@ -501,7 +545,10 @@ function loadPlannerData(userId, careerId) {
             console.log('Datos cargados desde Firebase:', data);
             
             if (data && data.plans) {
-                plannerState = syncElectivasFG(data);
+                // Primero sincronizar clasificaciones del pensum
+                let syncedData = syncPensumClassifications(data);
+                // Luego sincronizar electivas FG
+                plannerState = syncElectivasFG(syncedData);
                 console.log('Estado establecido desde Firebase y sincronizado');
             } else {
                 console.log('Datos en formato incorrecto, creando estado inicial');
@@ -922,7 +969,9 @@ function calculateStats(plan) {
         };
     });
     
-    const totalCompletedCredits = completed.reduce((sum, s) => sum + (s.credits || 0), 0);
+    // Calcular créditos totales completados (excluyendo inglés)
+    const completedWithoutEnglish = completed.filter(s => !englishCodes.includes(s.id));
+    const totalCompletedCredits = completedWithoutEnglish.reduce((sum, s) => sum + (s.credits || 0), 0);
     
     // Inglés (solo los 4 niveles obligatorios del pensum de DI)
     const englishSubjects = subjects.filter(s => englishCodes.includes(s.id));
