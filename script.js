@@ -1984,9 +1984,24 @@ function exportPlan() {
                     
                     const status = subject.completed ? '✓' : '○';
                     const typeLabel = getTypeLabel(subject.type);
-                    doc.text(`${status} ${subject.id} - ${subject.name}`, 25, yPos);
-                    doc.text(`${subject.credits} cr | ${typeLabel}`, 160, yPos);
-                    yPos += 5;
+                    
+                    // Truncar nombre si es muy largo
+                    let subjectName = subject.name;
+                    if (subjectName.length > 60) {
+                        subjectName = subjectName.substring(0, 57) + '...';
+                    }
+                    
+                    // Texto principal
+                    doc.text(`${status} ${subject.id}`, 25, yPos);
+                    doc.text(subjectName, 50, yPos, { maxWidth: 105 });
+                    
+                    // Info a la derecha
+                    doc.setFontSize(8);
+                    doc.text(`${subject.credits} cr`, 160, yPos);
+                    doc.text(typeLabel, 172, yPos);
+                    doc.setFontSize(9);
+                    
+                    yPos += 6;
                 });
             }
             
