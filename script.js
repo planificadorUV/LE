@@ -915,8 +915,9 @@ function calculateStats(plan) {
     
     const totalCompletedCredits = completed.reduce((sum, s) => sum + (s.credits || 0), 0);
     
-    // Inglés (parte del área básica pero se muestra por separado)
-    const englishSubjects = subjects.filter(s => s.category === 'english' || s.type === 'english' || s.name.toLowerCase().includes('inglés'));
+    // Inglés (solo los 4 niveles obligatorios del pensum de DI)
+    const englishCodes = ['204025C', '204026C', '204027C', '204028C'];
+    const englishSubjects = subjects.filter(s => englishCodes.includes(s.id));
     const englishCompleted = englishSubjects.filter(s => s.completed).length;
     
     return {
@@ -1972,36 +1973,52 @@ function exportPlan() {
                 doc.text('Sin materias asignadas', 25, yPos);
                 yPos += 6;
             } else {
-                doc.setTextColor(...darkGray);
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(9);
-                
                 subjects.forEach(subject => {
-                    if (yPos > 270) {
+                    if (yPos > 265) {
                         doc.addPage();
                         yPos = 20;
                     }
                     
-                    const status = subject.completed ? '✓' : '○';
                     const typeLabel = getTypeLabel(subject.type);
                     
-                    // Truncar nombre si es muy largo
-                    let subjectName = subject.name;
-                    if (subjectName.length > 60) {
-                        subjectName = subjectName.substring(0, 57) + '...';
+                    // Estado: VISTA o PENDIENTE
+                    if (subject.completed) {
+                        doc.setFillColor(34, 197, 94); // Verde
+                        doc.rect(25, yPos - 3, 3, 3, 'F');
+                        doc.setTextColor(34, 197, 94);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(7);
+                        doc.text('VISTA', 30, yPos);
+                    } else {
+                        doc.setFillColor(156, 163, 175); // Gris
+                        doc.rect(25, yPos - 3, 3, 3, 'F');
+                        doc.setTextColor(...lightGray);
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(7);
+                        doc.text('PEND', 30, yPos);
                     }
                     
-                    // Texto principal
-                    doc.text(`${status} ${subject.id}`, 25, yPos);
-                    doc.text(subjectName, 50, yPos, { maxWidth: 105 });
-                    
-                    // Info a la derecha
+                    // Código y nombre
+                    doc.setTextColor(...darkGray);
+                    doc.setFont('helvetica', 'bold');
                     doc.setFontSize(8);
-                    doc.text(`${subject.credits} cr`, 160, yPos);
-                    doc.text(typeLabel, 172, yPos);
-                    doc.setFontSize(9);
+                    doc.text(subject.id, 48, yPos);
                     
-                    yPos += 6;
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8);
+                    
+                    // Dividir texto largo en múltiples líneas
+                    const maxWidth = 95;
+                    const lines = doc.splitTextToSize(subject.name, maxWidth);
+                    doc.text(lines[0], 65, yPos);
+                    
+                    // Créditos y tipo
+                    doc.setFontSize(7);
+                    doc.setTextColor(...lightGray);
+                    doc.text(`${subject.credits} cr`, 165, yPos);
+                    doc.text(typeLabel, 175, yPos);
+                    
+                    yPos += 7;
                 });
             }
             
