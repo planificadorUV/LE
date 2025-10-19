@@ -456,7 +456,7 @@ function syncPensumClassifications(plannerState) {
         return plannerState;
     }
     
-    console.log('=== SINCRONIZANDO CLASIFICACIONES DEL PENSUM ===');
+    console.log('=== SINCRONIZANDO PENSUM ===');
     
     // Crear un mapa de código -> materia del pensum
     const pensumMap = new Map();
@@ -467,8 +467,12 @@ function syncPensumClassifications(plannerState) {
     Object.keys(plannerState.plans).forEach(planId => {
         const plan = plannerState.plans[planId];
         let updatedCount = 0;
+        let addedCount = 0;
         
-        // Actualizar la clasificación de cada materia según el pensum
+        // Crear set de IDs existentes
+        const existingIds = new Set(plan.subjects.map(s => s.id));
+        
+        // Actualizar clasificaciones de materias existentes
         plan.subjects.forEach(subject => {
             const pensumSubject = pensumMap.get(subject.id);
             if (pensumSubject && subject.type !== pensumSubject.type) {
@@ -484,12 +488,26 @@ function syncPensumClassifications(plannerState) {
             }
         });
         
-        if (updatedCount > 0) {
-            console.log(`Plan "${plan.name}": ${updatedCount} materias actualizadas`);
+        // Agregar materias del pensum que faltan
+        PENSUM_DI.forEach(pensumSubject => {
+            if (!existingIds.has(pensumSubject.id)) {
+                console.log(`Agregando materia faltante: ${pensumSubject.id} - ${pensumSubject.name}`);
+                plan.subjects.push({
+                    ...pensumSubject,
+                    completed: false,
+                    location: 'bank',
+                    equivalencies: []
+                });
+                addedCount++;
+            }
+        });
+        
+        if (updatedCount > 0 || addedCount > 0) {
+            console.log(`Plan "${plan.name}": ${updatedCount} actualizadas, ${addedCount} agregadas`);
         }
     });
     
-    console.log('Sincronización de clasificaciones completada');
+    console.log('Sincronización del pensum completada');
     return plannerState;
 }
 
@@ -1285,10 +1303,12 @@ function renderSubjectInfo(subjectId) {
             ` : ''}
             
             <div class="subject-actions">
-                <button onclick="toggleSubjectCompleted('${subject.id}')" class="btn-secondary">
-                    <i class="fas fa-${subject.completed ? 'times' : 'check'}"></i>
-                    ${subject.completed ? 'Desmarcar' : 'Marcar como vista'}
-                </button>
+                ${subject.location !== 'bank' || subject.completed ? `
+                    <button onclick="toggleSubjectCompleted('${subject.id}')" class="btn-secondary">
+                        <i class="fas fa-${subject.completed ? 'times' : 'check'}"></i>
+                        ${subject.completed ? 'Desmarcar' : 'Marcar como vista'}
+                    </button>
+                ` : ''}
                 
                 ${subject.location !== 'bank' ? `
                     <button onclick="moveSubject('${subject.id}', 'bank')" class="btn-secondary">
@@ -1318,8 +1338,15 @@ function toggleSubjectCompleted(subjectId) {
         return;
     }
 
+    // Solo permitir marcar como vista si está en un semestre, NO en el banco
+    if (!subject.completed && subject.location === 'bank') {
+        showNotification('⚠️ No puedes marcar una materia como vista si está en el banco. Primero arrástrala a un semestre.', 'error');
+        return;
+    }
+
     subject.completed = !subject.completed;
     
+    // Si se desmarca, regresarla al banco
     if (!subject.completed && subject.location !== 'bank') {
         subject.location = 'bank';
     }
@@ -1654,23 +1681,41 @@ function processSiraData() {
 
 function parseSiraData(data) {
     const lines = data.split('\n');
-    const results = [];
+    const semestersByPeriod = [];
     
     console.log('=== PARSEANDO DATOS DEL SIRA ===');
     console.log('Total de líneas:', lines.length);
     
+    let currentPeriod = null;
+    let currentSemesterSubjects = [];
+    
+    // Patrón para identificar periodo
+    const periodPattern = /^PERIODO:\s*(.+)$/;
     // Patrón para identificar una línea de materia del SIRA
-    // Formato: CÓDIGO GR SDE ASIGNATURA TM FUN COM CRD CAL HAB [CANCELACIÓN]
-    // Ejemplo: 507008C 01 00 CREACIÓN DE LA FORMA N EC LCO 3 4.0
-    // Las columnas pueden estar separadas por espacios o tabulaciones
     const subjectPattern = /^(\d{6}[A-Z])\s+\d+\s+\d+\s+(.+?)\s+[A-Z]+\s+[A-Z]{2,3}\s+[A-Z]{3}\s+\d+\s+(\d+\.\d+|E\.X)/;
     
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         
+        // Detectar nuevo periodo
+        const periodMatch = line.match(periodPattern);
+        if (periodMatch) {
+            // Guardar el semestre anterior si existe
+            if (currentPeriod && currentSemesterSubjects.length > 0) {
+                semestersByPeriod.push({
+                    period: currentPeriod,
+                    subjects: currentSemesterSubjects
+                });
+            }
+            
+            currentPeriod = periodMatch[1].trim();
+            currentSemesterSubjects = [];
+            console.log(`\n📅 Periodo encontrado: ${currentPeriod}`);
+            continue;
+        }
+        
         // Saltar líneas vacías, headers, y resúmenes
         if (!line || 
-            line.startsWith('PERIODO:') ||
             line.startsWith('Fecha Matricula:') ||
             line.startsWith('CÓDIGO') ||
             line.startsWith('Resumen') ||
@@ -1683,14 +1728,14 @@ function parseSiraData(data) {
             continue;
         }
         
+        // Buscar materias
         const match = line.match(subjectPattern);
-        
-        if (match) {
+        if (match && currentPeriod) {
             const [, code, name, gradeStr] = match;
             
-            // Saltar materias con E.X (exoneradas) o canceladas
+            // Saltar materias con E.X (exoneradas)
             if (gradeStr === 'E.X') {
-                console.log(`Saltando materia exonerada: ${code} - ${name}`);
+                console.log(`  ⊘ Exonerada: ${code}`);
                 continue;
             }
             
@@ -1698,21 +1743,28 @@ function parseSiraData(data) {
             
             // Solo importar materias aprobadas (nota >= 3.0)
             if (grade >= 3.0) {
-                const cleanName = name.trim();
-                results.push({
+                currentSemesterSubjects.push({
                     code: code.trim(),
-                    name: cleanName,
+                    name: name.trim(),
                     grade: grade
                 });
-                console.log(`✓ Materia aprobada: ${code} - ${cleanName} (${grade})`);
+                console.log(`  ✓ ${code} - ${grade}`);
             } else {
-                console.log(`✗ Materia reprobada: ${code} - ${name} (${grade})`);
+                console.log(`  ✗ ${code} - ${grade} (reprobada)`);
             }
         }
     }
     
-    console.log(`Total de materias aprobadas encontradas: ${results.length}`);
-    return results;
+    // Guardar el último semestre
+    if (currentPeriod && currentSemesterSubjects.length > 0) {
+        semestersByPeriod.push({
+            period: currentPeriod,
+            subjects: currentSemesterSubjects
+        });
+    }
+    
+    console.log(`\n📊 Total: ${semestersByPeriod.length} semestres encontrados`);
+    return semestersByPeriod;
 }
 
 function confirmSiraImport() {
@@ -1724,25 +1776,56 @@ function confirmSiraImport() {
     const plan = getActivePlan();
     if (!plan) return;
     
-    let importedCount = 0;
+    console.log('=== ORGANIZANDO MATERIAS POR SEMESTRES ===');
     
-    processedSiraData.forEach(siraItem => {
-        const subject = plan.subjects.find(s => 
-            s.id.toLowerCase() === siraItem.code.toLowerCase() ||
-            s.name.toLowerCase().includes(siraItem.name.toLowerCase().substring(0, 10))
-        );
+    // Limpiar semestres existentes (excepto los primeros 2 por defecto)
+    plan.semesters = plan.semesters.slice(0, 2);
+    
+    let totalImported = 0;
+    let semesterNumber = 1;
+    
+    processedSiraData.forEach((semesterData, index) => {
+        console.log(`\nSemestre ${semesterNumber}: ${semesterData.period}`);
         
-        if (subject && !subject.completed) {
-            subject.completed = true;
-            subject.location = 'bank';
-            importedCount++;
+        // Crear o usar semestre existente
+        let semester = plan.semesters.find(s => s.id === semesterNumber);
+        if (!semester) {
+            semester = {
+                id: semesterNumber,
+                name: `Semestre ${semesterNumber}`,
+                collapsed: false
+            };
+            plan.semesters.push(semester);
         }
+        
+        let semesterImported = 0;
+        
+        // Procesar cada materia del semestre
+        semesterData.subjects.forEach(siraSubject => {
+            const subject = plan.subjects.find(s => 
+                s.id.toLowerCase() === siraSubject.code.toLowerCase()
+            );
+            
+            if (subject) {
+                subject.completed = true;
+                subject.location = `semester-${semesterNumber}`;
+                semesterImported++;
+                totalImported++;
+                console.log(`  ✓ ${subject.id} → Semestre ${semesterNumber}`);
+            } else {
+                console.log(`  ⚠ ${siraSubject.code} no encontrada en el pensum`);
+            }
+        });
+        
+        console.log(`  Total: ${semesterImported} materias organizadas`);
+        semesterNumber++;
     });
     
-    if (importedCount > 0) {
+    if (totalImported > 0) {
+        savePlannerData(); // Guardar cambios en Firebase
         render();
         hideModal('import-modal');
-        showNotification(`${importedCount} materias importadas exitosamente`, 'success');
+        showNotification(`✓ ${totalImported} materias importadas en ${processedSiraData.length} semestres`, 'success');
     } else {
         showNotification('No se encontraron coincidencias con el pensum', 'error');
     }
