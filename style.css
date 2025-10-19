@@ -990,27 +990,34 @@ body.zen-mode .right-panel {
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
+    box-sizing: border-box !important;
 }
 
-.subject-card .subject-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
+.subject-card > .subject-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 0.5rem !important;
+    flex-shrink: 0 !important;
 }
 
-.subject-card .subject-name {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
+.subject-card > .subject-name {
+    flex: 1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    font-size: 0.875rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.5rem !important;
 }
 
-.subject-card .subject-type {
-    margin-top: auto;
+.subject-card > .subject-type {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+    font-size: 0.75rem !important;
 }
 
 .subject-card:hover {
@@ -1273,27 +1280,34 @@ body.zen-mode .right-panel {
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
+    box-sizing: border-box !important;
 }
 
-.semester-subject .subject-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
+.semester-subject > .subject-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 0.5rem !important;
+    flex-shrink: 0 !important;
 }
 
-.semester-subject .subject-name {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
+.semester-subject > .subject-name {
+    flex: 1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    font-size: 0.875rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.5rem !important;
 }
 
-.semester-subject .subject-type {
-    margin-top: auto;
+.semester-subject > .subject-type {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+    font-size: 0.75rem !important;
 }
 
 .semester-subject:last-child {
