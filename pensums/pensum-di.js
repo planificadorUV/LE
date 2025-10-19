@@ -25,13 +25,13 @@ const PENSUM_DI = [
     { id: '507025C', name: 'PROYECTO - SER HUMANO', credits: 7, type: 'AB', prerequisites: [] },
     { id: '507024C', name: 'PROYECTOS - RELACIONES Y VÍNCULOS', credits: 4, type: 'AB', prerequisites: [] },
     { id: '507021C', name: 'PROYECTOS - ESTRUCTURAS Y AUTONOMÍAS', credits: 4, type: 'AB', prerequisites: [] },
+    { id: '507047C', name: 'HERRAMIENTAS DIGITALES - REPRESENTACIÓN', credits: 2, type: 'AB', prerequisites: [] },
+    { id: '507014C', name: 'MATERIALES Y PROCESOS - METALES', credits: 3, type: 'AB', prerequisites: ['507012C'] },
 
     // Ciclo Profesional (Componente Profesional)
     { id: '507111C', name: 'DISEÑO COLONIAL Y MODERNIDAD D.I.', credits: 2, type: 'AP', prerequisites: [] },
     { id: '507035C', name: 'DISIDENCIAS Y RESISTENCIAS', credits: 3, type: 'AP', prerequisites: [] },
     { id: '507036C', name: 'ESTUDIOS CRÍTICOS DEL DISEÑO', credits: 3, type: 'AP', prerequisites: [] },
-    { id: '507047C', name: 'HERRAMIENTAS DIGITALES - REPRESENTACIÓN', credits: 2, type: 'AP', prerequisites: [] },
-    { id: '507014C', name: 'MATERIALES Y PROCESOS - METALES', credits: 3, type: 'AP', prerequisites: ['507012C'] },
     { id: '507011C', name: 'HERRAMIENTAS DIGITALES - PROGRAMACIÓN', credits: 2, type: 'AP', prerequisites: [] },
     { id: '507015C', name: 'MATERIALES Y PROCESOS - NUEVOS MATERIALES', credits: 3, type: 'AP', prerequisites: ['507012C'] },
     { id: '507023C', name: 'PROYECTO - PRODUCTO', credits: 7, type: 'AP', prerequisites: [] },
