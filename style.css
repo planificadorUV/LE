@@ -1248,6 +1248,10 @@ body.zen-mode .right-panel {
     cursor: move;
     transition: all var(--animation-speed) ease;
     position: relative;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .semester-subject:last-child {
