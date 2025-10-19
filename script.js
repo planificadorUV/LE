@@ -1660,18 +1660,30 @@ function processSiraData() {
         }
         
         const previewContainer = document.getElementById('preview-content');
-        previewContainer.innerHTML = processedSiraData.map(item => `
-            <div class="preview-item">
-                <span class="preview-subject-code">${item.code}</span>
-                <span class="preview-subject-name">${item.name}</span>
-                <span class="preview-grade">${item.grade}</span>
+        
+        // Contar total de materias
+        const totalSubjects = processedSiraData.reduce((sum, sem) => sum + sem.subjects.length, 0);
+        
+        // Generar HTML por semestre
+        previewContainer.innerHTML = processedSiraData.map((semester, index) => `
+            <div style="margin-bottom: 1rem;">
+                <div style="font-weight: bold; color: #3b82f6; margin-bottom: 0.5rem;">
+                    📅 Semestre ${index + 1}: ${semester.period}
+                </div>
+                ${semester.subjects.map(subject => `
+                    <div class="preview-item">
+                        <span class="preview-subject-code">${subject.code}</span>
+                        <span class="preview-subject-name">${subject.name}</span>
+                        <span class="preview-grade">${subject.grade}</span>
+                    </div>
+                `).join('')}
             </div>
         `).join('');
         
         document.getElementById('import-preview').classList.remove('hidden');
         document.getElementById('import-confirmed-btn').classList.remove('hidden');
         
-        showNotification(`${processedSiraData.length} materias encontradas`, 'success');
+        showNotification(`${totalSubjects} materias encontradas en ${processedSiraData.length} semestres`, 'success');
         
     } catch (error) {
         console.error('Error procesando datos SIRA:', error);
