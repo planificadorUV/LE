@@ -986,10 +986,31 @@ body.zen-mode .right-panel {
     user-select: none;
     transition: all var(--animation-speed) ease;
     position: relative;
-    min-height: 100px;
+    height: 110px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+}
+
+.subject-card .subject-header {
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.subject-card .subject-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.subject-card .subject-type {
+    margin-top: auto;
 }
 
 .subject-card:hover {
@@ -1248,10 +1269,31 @@ body.zen-mode .right-panel {
     cursor: move;
     transition: all var(--animation-speed) ease;
     position: relative;
-    min-height: 100px;
+    height: 110px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+}
+
+.semester-subject .subject-header {
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.semester-subject .subject-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.semester-subject .subject-type {
+    margin-top: auto;
 }
 
 .semester-subject:last-child {
