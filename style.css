@@ -986,7 +986,7 @@ body.zen-mode .right-panel {
     user-select: none;
     transition: all var(--animation-speed) ease;
     position: relative;
-    height: 110px !important;
+    min-height: 90px;
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
@@ -1002,16 +1002,11 @@ body.zen-mode .right-panel {
 }
 
 .subject-card > .subject-name {
-    flex: 1 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    font-size: 0.875rem !important;
-    line-height: 1.4 !important;
-    margin-bottom: 0.5rem !important;
+    flex: 1;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+    word-wrap: break-word;
 }
 
 .subject-card > .subject-type {
