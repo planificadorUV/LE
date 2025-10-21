@@ -1546,16 +1546,80 @@ body.zen-mode .right-panel {
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
 
-.btn-icon:active {
+/* Botones específicos del banco de materias */
+#import-sira-btn,
+#add-equivalency-btn,
+#add-custom-btn {
+    padding: 0.625rem;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--animation-speed) ease;
+    font-size: 1rem;
+}
+
+#import-sira-btn:hover,
+#add-equivalency-btn:hover,
+#add-custom-btn:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+#import-sira-btn:active,
+#add-equivalency-btn:active,
+#add-custom-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
 }
 
-.action-buttons {
+/* Botones del header - estilo consistente */
+#theme-toggle,
+#zen-mode-toggle,
+#logout-app-btn {
+    padding: 0.625rem;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--animation-speed) ease;
+    font-size: 1rem;
+}
+
+#theme-toggle:hover,
+#zen-mode-toggle:hover,
+#logout-app-btn:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+#theme-toggle:active,
+#zen-mode-toggle:active,
+#logout-app-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
 }
 
 /* Modales */
