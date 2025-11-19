@@ -428,23 +428,47 @@ body {
     padding: 2rem;
     color: white;
     cursor: pointer;
-    transition: all var(--animation-speed) ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     gap: 1.5rem;
     text-align: left;
     width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.career-select-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.career-select-btn:hover::before {
+    left: 100%;
 }
 
 .career-select-btn:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
+    transform: translateX(8px) translateY(-5px);
+    box-shadow: 
+        0 12px 35px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .career-icon {
     font-size: 3rem;
     min-width: 80px;
+    transition: transform 0.3s ease;
+}
+
+.career-select-btn:hover .career-icon {
+    transform: scale(1.2) rotate(-5deg);
 }
 
 .career-info {
@@ -465,6 +489,11 @@ body {
 .career-arrow {
     font-size: 1.5rem;
     opacity: 0.7;
+    transition: transform 0.3s ease;
+}
+
+.career-select-btn:hover .career-arrow {
+    transform: translateX(8px);
 }
 
 .career-coming-soon {
@@ -1415,36 +1444,58 @@ body.zen-mode .right-panel {
 .support-links {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .support-link {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem;
+    padding: 0.875rem 1rem;
     background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
     color: var(--text-primary);
     text-decoration: none;
-    transition: all var(--animation-speed) ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 0.875rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.support-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.5s ease;
+}
+
+.support-link:hover::before {
+    left: 100%;
 }
 
 .support-link:hover {
     background: var(--bg-primary);
     border-color: var(--primary-red);
-    transform: translateY(-1px);
+    transform: translateX(5px) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .support-link.legion {
-    border-left: 3px solid var(--legion-orange);
+    border-left: 4px solid var(--legion-orange);
 }
 
 .support-link.legion:hover {
     border-color: var(--legion-orange);
     background: rgba(255, 107, 53, 0.1);
+}
+
+.support-link.email {
+    border-left: 4px solid var(--info-blue);
 }
 
 .support-link.email:hover {
@@ -1455,6 +1506,12 @@ body.zen-mode .right-panel {
 .support-link i:first-child {
     color: var(--primary-red);
     margin-right: 0.75rem;
+    font-size: 1.125rem;
+    transition: transform 0.3s ease;
+}
+
+.support-link:hover i:first-child {
+    transform: scale(1.2);
 }
 
 .support-link.legion i:first-child {
@@ -1468,158 +1525,258 @@ body.zen-mode .right-panel {
 .support-link i:last-child {
     color: var(--text-secondary);
     font-size: 0.75rem;
+    transition: transform 0.3s ease;
 }
 
-/* Botones */
-.btn-primary,
-.btn-secondary,
-.btn-danger {
-    padding: 0.75rem 1rem;
+.support-link:hover i:last-child {
+    transform: translateX(4px);
+}
+
+/* ============================================
+   BOTONES MEJORADOS - Sistema de Diseño Moderno
+   ============================================ */
+
+/* Botón Primario - Con gradiente y efectos de elevación */
+.btn-primary {
+    position: relative;
+    padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all var(--animation-speed) ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     text-decoration: none;
     min-height: 44px;
+    color: white;
+    background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-hover) 100%);
+    box-shadow: 
+        0 4px 15px rgba(209, 16, 29, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
 }
 
-.btn-primary {
-    background: var(--primary-red);
-    color: white;
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .btn-primary:hover {
-    background: var(--primary-red-hover);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 25px rgba(209, 16, 29, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+.btn-primary:hover::before {
+    opacity: 1;
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 
+        0 2px 10px rgba(209, 16, 29, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón Secundario - Con efecto de onda */
 .btn-secondary {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    min-height: 44px;
     background: var(--bg-tertiary);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(209, 16, 29, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
 }
 
 .btn-secondary:hover {
-    background: var(--bg-primary);
     border-color: var(--primary-red);
+    color: var(--primary-red);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
+.btn-secondary:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-secondary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Botón Danger - Efecto dramático */
 .btn-danger {
-    background: var(--primary-red);
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    min-height: 44px;
     color: white;
+    background: linear-gradient(135deg, #dc2626 0%, var(--primary-red) 100%);
+    box-shadow: 
+        0 4px 15px rgba(220, 38, 38, 0.35),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.btn-danger::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
 }
 
 .btn-danger:hover {
-    background: var(--primary-red-hover);
-    transform: translateY(-1px);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+        0 8px 25px rgba(220, 38, 38, 0.45),
+        0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+.btn-danger:hover::after {
+    left: 100%;
+}
+
+.btn-danger:active {
+    transform: translateY(0) scale(1);
+    box-shadow: 
+        0 2px 10px rgba(220, 38, 38, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón de Icono - Efecto de rotación y escala */
 .btn-icon {
+    position: relative;
     padding: 0.625rem;
     width: 40px;
     height: 40px;
     min-width: 40px;
     min-height: 40px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     background: var(--bg-tertiary);
     color: var(--text-primary);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--animation-speed) ease;
     font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .btn-icon:hover {
     background: var(--bg-secondary);
     border-color: var(--primary-red);
     color: var(--primary-red);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    transform: translateY(-3px) rotate(5deg) scale(1.1);
+    box-shadow: 0 6px 16px rgba(209, 16, 29, 0.25);
 }
 
-/* Botones específicos del banco de materias */
+.btn-icon:active {
+    transform: translateY(-1px) rotate(0deg) scale(1.05);
+    box-shadow: 0 2px 8px rgba(209, 16, 29, 0.2);
+}
+
+/* Botones específicos del banco de materias con el nuevo estilo */
 #import-sira-btn,
 #add-equivalency-btn,
-#add-custom-btn {
+#add-custom-btn,
+#theme-toggle,
+#zen-mode-toggle,
+#logout-app-btn {
+    position: relative;
     padding: 0.625rem;
     width: 40px;
     height: 40px;
     min-width: 40px;
     min-height: 40px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     background: var(--bg-tertiary);
     color: var(--text-primary);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--animation-speed) ease;
     font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 #import-sira-btn:hover,
 #add-equivalency-btn:hover,
-#add-custom-btn:hover {
-    background: var(--bg-secondary);
-    border-color: var(--primary-red);
-    color: var(--primary-red);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
-}
-
-#import-sira-btn:active,
-#add-equivalency-btn:active,
-#add-custom-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
-}
-
-/* Botones del header - estilo consistente */
-#theme-toggle,
-#zen-mode-toggle,
-#logout-app-btn {
-    padding: 0.625rem;
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--animation-speed) ease;
-    font-size: 1rem;
-}
-
+#add-custom-btn:hover,
 #theme-toggle:hover,
 #zen-mode-toggle:hover,
 #logout-app-btn:hover {
     background: var(--bg-secondary);
     border-color: var(--primary-red);
     color: var(--primary-red);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    transform: translateY(-3px) rotate(5deg) scale(1.1);
+    box-shadow: 0 6px 16px rgba(209, 16, 29, 0.25);
 }
 
+#import-sira-btn:active,
+#add-equivalency-btn:active,
+#add-custom-btn:active,
 #theme-toggle:active,
 #zen-mode-toggle:active,
 #logout-app-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
+    transform: translateY(-1px) rotate(0deg) scale(1.05);
+    box-shadow: 0 2px 8px rgba(209, 16, 29, 0.2);
 }
 
 /* Modales */
@@ -1668,8 +1825,8 @@ body.zen-mode .right-panel {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: none;
-    border: none;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
     font-size: 1.5rem;
     color: var(--text-secondary);
     cursor: pointer;
@@ -1678,13 +1835,16 @@ body.zen-mode .right-panel {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: all var(--animation-speed) ease;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal-close-btn:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    background: var(--bg-primary);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 12px rgba(209, 16, 29, 0.2);
 }
 
 .modal-header {
