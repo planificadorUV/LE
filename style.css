@@ -726,7 +726,9 @@ body.zen-mode .right-panel {
 
 .bank-controls {
     display: flex;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
 }
 
 /* Stats Board */
@@ -1730,10 +1732,123 @@ body.zen-mode .right-panel {
     box-shadow: 0 2px 8px rgba(209, 16, 29, 0.2);
 }
 
-/* Botones específicos del banco de materias con el nuevo estilo */
+/* ============================================
+   BOTONES DEL BANCO DE MATERIAS - CON TEXTO
+   ============================================ */
+
+/* Botones del banco - diseño con texto + icono */
 #import-sira-btn,
 #add-equivalency-btn,
-#add-custom-btn,
+#add-custom-btn {
+    position: relative;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+/* Botón Importar SIRA - Azul */
+#import-sira-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 
+        0 4px 12px rgba(59, 130, 246, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#import-sira-btn::before {
+    content: 'Importar desde SIRA';
+    flex: 1;
+    text-align: left;
+}
+
+#import-sira-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 20px rgba(59, 130, 246, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Botón Equivalencia - Verde */
+#add-equivalency-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 
+        0 4px 12px rgba(16, 185, 129, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#add-equivalency-btn::before {
+    content: 'Añadir Equivalencia';
+    flex: 1;
+    text-align: left;
+}
+
+#add-equivalency-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 20px rgba(16, 185, 129, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Botón Personalizada - Morado */
+#add-custom-btn {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 
+        0 4px 12px rgba(139, 92, 246, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#add-custom-btn::before {
+    content: 'Materia Personalizada';
+    flex: 1;
+    text-align: left;
+}
+
+#add-custom-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 20px rgba(139, 92, 246, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Efecto shimmer para todos los botones del banco */
+#import-sira-btn::after,
+#add-equivalency-btn::after,
+#add-custom-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+#import-sira-btn:hover::after,
+#add-equivalency-btn:hover::after,
+#add-custom-btn:hover::after {
+    left: 100%;
+}
+
+/* Iconos de los botones del banco */
+#import-sira-btn i,
+#add-equivalency-btn i,
+#add-custom-btn i {
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+
+/* Botones del header - mantener estilo de icono solo */
 #theme-toggle,
 #zen-mode-toggle,
 #logout-app-btn {
@@ -1756,9 +1871,6 @@ body.zen-mode .right-panel {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
-#import-sira-btn:hover,
-#add-equivalency-btn:hover,
-#add-custom-btn:hover,
 #theme-toggle:hover,
 #zen-mode-toggle:hover,
 #logout-app-btn:hover {
@@ -1769,9 +1881,6 @@ body.zen-mode .right-panel {
     box-shadow: 0 6px 16px rgba(209, 16, 29, 0.25);
 }
 
-#import-sira-btn:active,
-#add-equivalency-btn:active,
-#add-custom-btn:active,
 #theme-toggle:active,
 #zen-mode-toggle:active,
 #logout-app-btn:active {
