@@ -2346,6 +2346,56 @@ body.zen-mode .right-panel {
 }
 
 /* Print styles */
+/* Expand/Collapse Button Styles */
+#expand-collapse-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all var(--animation-speed) ease;
+}
+
+#expand-collapse-btn i {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#expand-collapse-btn.collapsed i {
+    transform: rotate(180deg);
+}
+
+/* Semester Column Collapse Animation */
+.semester-column {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.semester-column.collapsed {
+    max-width: 60px;
+    overflow: hidden;
+}
+
+.semester-column.collapsed .semester-content {
+    display: none;
+}
+
+.semester-column.collapsed .semester-header {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    padding: 1rem 0.5rem;
+}
+
+.semester-column.collapsed .semester-header h3 {
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.semester-column.collapsed .semester-credits {
+    display: none;
+}
+
+.semester-column.collapsed .semester-controls {
+    display: none;
+}
+
 @media print {
     .app-header,
     .left-panel,
