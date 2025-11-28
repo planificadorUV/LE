@@ -1564,29 +1564,47 @@ function deleteSemester(semesterId) {
     showNotification(`Semestre "${semester.name}" eliminado`, 'success');
 }
 
-function autoOrganizeSubjects() {
+let allSemestersExpanded = true;
+
+function toggleExpandCollapse() {
     const plan = getActivePlan();
-    if (!plan) return;
+    if (!plan || !plan.semesters) return;
     
-    if (!confirm('¿Deseas reorganizar automáticamente las materias? Esto moverá todas las materias no completadas al banco y las organizará por prerrequisitos.')) {
-        return;
+    const btn = document.getElementById('expand-collapse-btn');
+    const text = document.getElementById('expand-collapse-text');
+    const semesterColumns = document.querySelectorAll('.semester-column');
+    
+    allSemestersExpanded = !allSemestersExpanded;
+    
+    // Actualizar estado visual del botón
+    if (allSemestersExpanded) {
+        btn.classList.remove('collapsed');
+        text.textContent = 'Expandir Todo';
+    } else {
+        btn.classList.add('collapsed');
+        text.textContent = 'Desexpandir Todo';
     }
     
-    plan.subjects.forEach(subject => {
-        if (!subject.completed) {
-            subject.location = 'bank';
+    // Actualizar estado de los semestres
+    plan.semesters.forEach((semester, index) => {
+        semester.collapsed = !allSemestersExpanded;
+    });
+    
+    // Aplicar clases CSS con transición suave
+    semesterColumns.forEach(column => {
+        if (allSemestersExpanded) {
+            column.classList.remove('collapsed');
+        } else {
+            column.classList.add('collapsed');
         }
     });
     
-    if (plan.semesters.length < 2) {
-        plan.semesters = [
-            { id: 1, name: 'Semestre 1', collapsed: false },
-            { id: 2, name: 'Semestre 2', collapsed: false }
-        ];
-    }
+    // Guardar cambios
+    savePlannerData();
     
-    render();
-    showNotification('Materias reorganizadas automáticamente', 'success');
+    // Mostrar notificación
+    const message = allSemestersExpanded ? 'Semestres expandidos' : 'Semestres contraídos';
+    showNotification(message, 'success');
 }
 
 // =================== FUNCIONES DE MODALES ===================
