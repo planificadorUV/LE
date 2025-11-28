@@ -5,17 +5,21 @@
 :root {
     --primary-red: #d1101d;
     --primary-red-hover: #a80c17;
-    --career-yellow: #ffc72c;
-    --career-yellow-hover: #e6b327;
     --institutional-blue: #2563eb;
     --institutional-blue-hover: #1d4ed8;
-    --success-green: #22c55e;
-    --info-blue: #3b82f6;
-    --english-blue: #5e81ac;
-    --prereq-color: #a855f7;
-    --postreq-color: #f59e0b;
-    --legion-orange: #ff6b35;
-    --legion-orange-hover: #e55a2d;
+    /* Colores para la app - solo rojo y azul */
+    --accent-red: #d1101d;
+    --accent-blue: #2563eb;
+    /* Colores heredados para compatibilidad (redirigidos a rojo/azul) */
+    --career-yellow: #d1101d;
+    --career-yellow-hover: #a80c17;
+    --success-green: #2563eb;
+    --info-blue: #2563eb;
+    --english-blue: #2563eb;
+    --prereq-color: #d1101d;
+    --postreq-color: #2563eb;
+    --legion-orange: #d1101d;
+    --legion-orange-hover: #a80c17;
     
     /* Tema Oscuro (Default) */
     --bg-primary: #111827;
@@ -2351,7 +2355,6 @@ body.zen-mode .right-panel {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: all var(--animation-speed) ease;
 }
 
 #expand-collapse-btn i {
@@ -2363,13 +2366,10 @@ body.zen-mode .right-panel {
 }
 
 /* Semester Column Collapse Animation */
-.semester-column {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .semester-column.collapsed {
     max-width: 60px;
     overflow: hidden;
+    transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .semester-column.collapsed .semester-content {
