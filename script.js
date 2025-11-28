@@ -1567,44 +1567,57 @@ function deleteSemester(semesterId) {
 let allSemestersExpanded = true;
 
 function toggleExpandCollapse() {
-    const plan = getActivePlan();
-    if (!plan || !plan.semesters) return;
-    
-    const btn = document.getElementById('expand-collapse-btn');
-    const text = document.getElementById('expand-collapse-text');
-    const semesterColumns = document.querySelectorAll('.semester-column');
-    
-    allSemestersExpanded = !allSemestersExpanded;
-    
-    // Actualizar estado visual del botón
-    if (allSemestersExpanded) {
-        btn.classList.remove('collapsed');
-        text.textContent = 'Expandir Todo';
-    } else {
-        btn.classList.add('collapsed');
-        text.textContent = 'Desexpandir Todo';
-    }
-    
-    // Actualizar estado de los semestres
-    plan.semesters.forEach((semester, index) => {
-        semester.collapsed = !allSemestersExpanded;
-    });
-    
-    // Aplicar clases CSS con transición suave
-    semesterColumns.forEach(column => {
-        if (allSemestersExpanded) {
-            column.classList.remove('collapsed');
-        } else {
-            column.classList.add('collapsed');
+    try {
+        const plan = getActivePlan();
+        if (!plan || !plan.semesters) {
+            console.warn('No hay plan activo');
+            return;
         }
-    });
-    
-    // Guardar cambios
-    savePlannerData();
-    
-    // Mostrar notificación
-    const message = allSemestersExpanded ? 'Semestres expandidos' : 'Semestres contraídos';
-    showNotification(message, 'success');
+        
+        const btn = document.getElementById('expand-collapse-btn');
+        const text = document.getElementById('expand-collapse-text');
+        
+        if (!btn || !text) {
+            console.warn('Elementos del botón no encontrados');
+            return;
+        }
+        
+        const semesterColumns = document.querySelectorAll('.semester-column');
+        
+        allSemestersExpanded = !allSemestersExpanded;
+        
+        // Actualizar estado visual del botón
+        if (allSemestersExpanded) {
+            btn.classList.remove('collapsed');
+            text.textContent = 'Expandir Todo';
+        } else {
+            btn.classList.add('collapsed');
+            text.textContent = 'Desexpandir Todo';
+        }
+        
+        // Actualizar estado de los semestres
+        plan.semesters.forEach((semester) => {
+            semester.collapsed = !allSemestersExpanded;
+        });
+        
+        // Aplicar clases CSS con transición suave
+        semesterColumns.forEach(column => {
+            if (allSemestersExpanded) {
+                column.classList.remove('collapsed');
+            } else {
+                column.classList.add('collapsed');
+            }
+        });
+        
+        // Guardar cambios
+        savePlannerData();
+        
+        // Mostrar notificación
+        const message = allSemestersExpanded ? 'Semestres expandidos' : 'Semestres contraídos';
+        showNotification(message, 'success');
+    } catch (error) {
+        console.error('Error en toggleExpandCollapse:', error);
+    }
 }
 
 // =================== FUNCIONES DE MODALES ===================
