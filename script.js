@@ -1574,6 +1574,7 @@ function populateEquivalencyTargetSelect() {
 }
 
 function addNewEquivalency() {
+    const type = document.getElementById('equiv-type').value;
     const code = document.getElementById('equiv-code').value.trim();
     const name = document.getElementById('equiv-name').value.trim();
     const program = document.getElementById('equiv-program').value.trim();
@@ -1600,6 +1601,7 @@ function addNewEquivalency() {
     targetSubject.location = 'bank';
     targetSubject.equivalencies = targetSubject.equivalencies || [];
     targetSubject.equivalencies.push({
+        type,
         code,
         name,
         program,
@@ -1608,6 +1610,7 @@ function addNewEquivalency() {
     });
     
     // Limpiar formulario
+    document.getElementById('equiv-type').value = 'equivalence';
     document.getElementById('equiv-code').value = '';
     document.getElementById('equiv-name').value = '';
     document.getElementById('equiv-program').value = '';
@@ -1617,7 +1620,8 @@ function addNewEquivalency() {
     
     savePlannerData();
     renderEquivalenciesList();
-    showNotification('Equivalencia añadida exitosamente', 'success');
+    const typeLabel = type === 'exonerated' ? 'Exonerada' : 'Equivalencia';
+    showNotification(`${typeLabel} añadida exitosamente`, 'success');
 }
 
 function renderEquivalenciesList() {
@@ -1640,23 +1644,29 @@ function renderEquivalenciesList() {
         return;
     }
     
-    listContainer.innerHTML = equivalencies.map(subject => `
+    listContainer.innerHTML = equivalencies.map(subject => {
+        const equiv = subject.equivalencies[0];
+        const typeLabel = equiv.type === 'exonerated' ? 'Exonerada (E.X.)' : 'Equivalencia';
+        const typeIcon = equiv.type === 'exonerated' ? 'fa-certificate' : 'fa-exchange-alt';
+        const typeColor = equiv.type === 'exonerated' ? 'var(--institutional-blue)' : 'var(--primary-red)';
+        
+        return `
         <div class="equivalency-card">
             <div class="equivalency-card-header">
                 <div class="equivalency-from">
-                    <div class="equivalency-from-label">Cursada en</div>
-                    <div class="equivalency-from-content">${subject.equivalencies[0].name}</div>
+                    <div class="equivalency-from-label">${typeLabel}</div>
+                    <div class="equivalency-from-content">${equiv.name}</div>
                     <div class="equivalency-from-details">
-                        ${subject.equivalencies[0].code} • ${subject.equivalencies[0].credits} créditos
+                        ${equiv.code} • ${equiv.credits} créditos
                     </div>
                     <div class="equivalency-from-details" style="margin-top: 0.5rem;">
-                        <strong>Programa:</strong> ${subject.equivalencies[0].program}
+                        <strong>Programa:</strong> ${equiv.program}
                     </div>
                     <div class="equivalency-from-details">
-                        <strong>Universidad:</strong> ${subject.equivalencies[0].university}
+                        <strong>Universidad:</strong> ${equiv.university}
                     </div>
                 </div>
-                <div class="equivalency-arrow">→</div>
+                <div class="equivalency-arrow" style="color: ${typeColor};">→</div>
                 <div class="equivalency-to">
                     <div class="equivalency-to-label">Equivale a</div>
                     <div class="equivalency-to-content">${subject.name}</div>
@@ -1670,8 +1680,8 @@ function renderEquivalenciesList() {
             </div>
             <div class="equivalency-meta">
                 <div class="equivalency-meta-item">
-                    <i class="fas fa-check-circle" style="color: var(--institutional-blue);"></i>
-                    <span>Aprobada</span>
+                    <i class="fas ${typeIcon}" style="color: ${typeColor};"></i>
+                    <span>${typeLabel}</span>
                 </div>
             </div>
             <div class="equivalency-actions">
@@ -1680,7 +1690,8 @@ function renderEquivalenciesList() {
                 </button>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function removeEquivalency(subjectId) {
