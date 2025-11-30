@@ -202,9 +202,6 @@
                             <button id="import-sira-btn" class="btn-icon" title="Importar desde SIRA" onclick="showImportModal()">
                                 <i class="fas fa-file-import"></i>
                             </button>
-                            <button id="add-equivalency-btn" class="btn-icon" title="Añadir equivalencia" onclick="showEquivalencyModal()">
-                                <i class="fas fa-plus"></i>
-                            </button>
                             <button id="add-custom-btn" class="btn-icon" title="Añadir materia personalizada" onclick="showCustomSubjectModal()">
                                 <i class="fas fa-plus-circle"></i>
                             </button>
@@ -338,6 +335,14 @@
         <div class="equivalencies-content">
             <!-- Formulario de entrada -->
             <div class="equivalency-form">
+                <div class="form-group">
+                    <label for="equiv-type">Tipo:</label>
+                    <select id="equiv-type">
+                        <option value="equivalence">Equivalencia</option>
+                        <option value="exonerated">Exonerada (E.X.)</option>
+                    </select>
+                </div>
+                
                 <div class="form-group">
                     <label for="equiv-code">Código Materia:</label>
                     <input type="text" id="equiv-code" placeholder="Ej: EXT001">
