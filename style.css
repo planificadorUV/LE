@@ -2467,6 +2467,17 @@ body.zen-mode .right-panel {
     border: 1px solid var(--border-color);
 }
 
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-section.hidden {
+    display: none;
+}
+
 .equivalency-form .form-group {
     display: flex;
     flex-direction: column;
