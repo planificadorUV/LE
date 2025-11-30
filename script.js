@@ -1557,6 +1557,32 @@ function toggleEquivalenciesPanel() {
     }
 }
 
+function updateEquivalencyForm() {
+    const type = document.getElementById('equiv-type').value;
+    const equivalenceSection = document.getElementById('equivalence-section');
+    const targetLabel = document.getElementById('equiv-target-label');
+    const btnText = document.getElementById('btn-equiv-text');
+    
+    if (type === 'exonerated') {
+        // Ocultar sección de datos de materia cursada
+        equivalenceSection.classList.add('hidden');
+        targetLabel.textContent = 'Materia exonerada';
+        btnText.textContent = 'Añadir Exonerada';
+        
+        // Limpiar campos de equivalencia
+        document.getElementById('equiv-code').value = '';
+        document.getElementById('equiv-name').value = '';
+        document.getElementById('equiv-program').value = '';
+        document.getElementById('equiv-university').value = '';
+        document.getElementById('equiv-credits').value = '3';
+    } else {
+        // Mostrar sección de datos de materia cursada
+        equivalenceSection.classList.remove('hidden');
+        targetLabel.textContent = 'Equivale a';
+        btnText.textContent = 'Añadir Equivalencia';
+    }
+}
+
 function populateEquivalencyTargetSelect() {
     const plan = getActivePlan();
     if (!plan) return;
@@ -1575,15 +1601,10 @@ function populateEquivalencyTargetSelect() {
 
 function addNewEquivalency() {
     const type = document.getElementById('equiv-type').value;
-    const code = document.getElementById('equiv-code').value.trim();
-    const name = document.getElementById('equiv-name').value.trim();
-    const program = document.getElementById('equiv-program').value.trim();
-    const university = document.getElementById('equiv-university').value.trim();
-    const credits = parseInt(document.getElementById('equiv-credits').value) || 3;
     const targetId = document.getElementById('equiv-target').value;
     
-    if (!code || !name || !program || !university || !targetId) {
-        showNotification('Por favor, completa todos los campos', 'error');
+    if (!targetId) {
+        showNotification('Por favor, selecciona una materia', 'error');
         return;
     }
     
@@ -1596,18 +1617,38 @@ function addNewEquivalency() {
         return;
     }
     
-    // Marcar como completada y agregar equivalencia
+    // Marcar como completada
     targetSubject.completed = true;
     targetSubject.location = 'bank';
     targetSubject.equivalencies = targetSubject.equivalencies || [];
-    targetSubject.equivalencies.push({
-        type,
-        code,
-        name,
-        program,
-        university,
-        credits
-    });
+    
+    if (type === 'exonerated') {
+        // Exonerada: solo guardar tipo
+        targetSubject.equivalencies.push({
+            type: 'exonerated'
+        });
+    } else {
+        // Equivalencia: validar y guardar todos los datos
+        const code = document.getElementById('equiv-code').value.trim();
+        const name = document.getElementById('equiv-name').value.trim();
+        const program = document.getElementById('equiv-program').value.trim();
+        const university = document.getElementById('equiv-university').value.trim();
+        const credits = parseInt(document.getElementById('equiv-credits').value) || 3;
+        
+        if (!code || !name || !program || !university) {
+            showNotification('Por favor, completa todos los campos de la equivalencia', 'error');
+            return;
+        }
+        
+        targetSubject.equivalencies.push({
+            type: 'equivalence',
+            code,
+            name,
+            program,
+            university,
+            credits
+        });
+    }
     
     // Limpiar formulario
     document.getElementById('equiv-type').value = 'equivalence';
@@ -1617,6 +1658,7 @@ function addNewEquivalency() {
     document.getElementById('equiv-university').value = '';
     document.getElementById('equiv-credits').value = '3';
     document.getElementById('equiv-target').value = '';
+    updateEquivalencyForm();
     
     savePlannerData();
     renderEquivalenciesList();
@@ -1650,9 +1692,17 @@ function renderEquivalenciesList() {
         const typeIcon = equiv.type === 'exonerated' ? 'fa-certificate' : 'fa-exchange-alt';
         const typeColor = equiv.type === 'exonerated' ? 'var(--institutional-blue)' : 'var(--primary-red)';
         
-        return `
-        <div class="equivalency-card">
-            <div class="equivalency-card-header">
+        // Contenido diferente según el tipo
+        let fromContent = '';
+        if (equiv.type === 'exonerated') {
+            fromContent = `
+                <div class="equivalency-from">
+                    <div class="equivalency-from-label">${typeLabel}</div>
+                    <div class="equivalency-from-content" style="font-style: italic; color: var(--text-secondary);">Sin datos de materia cursada</div>
+                </div>
+            `;
+        } else {
+            fromContent = `
                 <div class="equivalency-from">
                     <div class="equivalency-from-label">${typeLabel}</div>
                     <div class="equivalency-from-content">${equiv.name}</div>
@@ -1666,6 +1716,13 @@ function renderEquivalenciesList() {
                         <strong>Universidad:</strong> ${equiv.university}
                     </div>
                 </div>
+            `;
+        }
+        
+        return `
+        <div class="equivalency-card">
+            <div class="equivalency-card-header">
+                ${fromContent}
                 <div class="equivalency-arrow" style="color: ${typeColor};">→</div>
                 <div class="equivalency-to">
                     <div class="equivalency-to-label">Equivale a</div>
@@ -2451,6 +2508,7 @@ window.renameSemester = renameSemester;
 window.deleteSemester = deleteSemester;
 window.toggleExpandCollapse = toggleExpandCollapse;
 window.toggleEquivalenciesPanel = toggleEquivalenciesPanel;
+window.updateEquivalencyForm = updateEquivalencyForm;
 window.addNewEquivalency = addNewEquivalency;
 window.renderEquivalenciesList = renderEquivalenciesList;
 window.removeEquivalency = removeEquivalency;
