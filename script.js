@@ -734,15 +734,6 @@ function setupEventListeners() {
         }, 300));
     }
 
-    // Filter tabs
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-            e.target.classList.add('active');
-            render();
-        });
-    });
-
     // Modal functionality
     setupModalListeners();
 
@@ -1025,22 +1016,6 @@ function renderSubjectBank(plan) {
             s.name.toLowerCase().includes(searchTerm) || 
             s.id.toLowerCase().includes(searchTerm)
         );
-    }
-    
-    // Aplicar filtro de estado
-    if (activeFilter !== 'all') {
-        allSubjects = allSubjects.filter(s => {
-            switch (activeFilter) {
-                case 'available':
-                    return canTakeSubject(s, plan) && !s.completed;
-                case 'completed':
-                    return s.completed;
-                case 'locked':
-                    return !canTakeSubject(s, plan) && !s.completed;
-                default:
-                    return true;
-            }
-        });
     }
     
     // Organizar por categorías
@@ -1575,10 +1550,74 @@ function toggleEquivalenciesPanel() {
     
     if (equivalenciesPanelOpen) {
         panel.classList.remove('hidden');
+        populateEquivalencyTargetSelect();
         renderEquivalenciesList();
     } else {
         panel.classList.add('hidden');
     }
+}
+
+function populateEquivalencyTargetSelect() {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const select = document.getElementById('equiv-target');
+    if (!select) return;
+    
+    // Mostrar todas las materias del banco
+    const bankSubjects = plan.subjects.filter(s => s.location === 'bank');
+    
+    select.innerHTML = '<option value="">Selecciona una materia...</option>' +
+        bankSubjects.map(s => 
+            `<option value="${s.id}">${s.id} - ${s.name} (${s.credits} cr)</option>`
+        ).join('');
+}
+
+function addNewEquivalency() {
+    const code = document.getElementById('equiv-code').value.trim();
+    const name = document.getElementById('equiv-name').value.trim();
+    const program = document.getElementById('equiv-program').value.trim();
+    const university = document.getElementById('equiv-university').value.trim();
+    const credits = parseInt(document.getElementById('equiv-credits').value) || 3;
+    const targetId = document.getElementById('equiv-target').value;
+    
+    if (!code || !name || !program || !university || !targetId) {
+        showNotification('Por favor, completa todos los campos', 'error');
+        return;
+    }
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const targetSubject = plan.subjects.find(s => s.id === targetId);
+    if (!targetSubject) {
+        showNotification('Materia destino no encontrada', 'error');
+        return;
+    }
+    
+    // Marcar como completada y agregar equivalencia
+    targetSubject.completed = true;
+    targetSubject.location = 'bank';
+    targetSubject.equivalencies = targetSubject.equivalencies || [];
+    targetSubject.equivalencies.push({
+        code,
+        name,
+        program,
+        university,
+        credits
+    });
+    
+    // Limpiar formulario
+    document.getElementById('equiv-code').value = '';
+    document.getElementById('equiv-name').value = '';
+    document.getElementById('equiv-program').value = '';
+    document.getElementById('equiv-university').value = '';
+    document.getElementById('equiv-credits').value = '3';
+    document.getElementById('equiv-target').value = '';
+    
+    savePlannerData();
+    renderEquivalenciesList();
+    showNotification('Equivalencia añadida exitosamente', 'success');
 }
 
 function renderEquivalenciesList() {
@@ -1611,7 +1650,10 @@ function renderEquivalenciesList() {
                         ${subject.equivalencies[0].code} • ${subject.equivalencies[0].credits} créditos
                     </div>
                     <div class="equivalency-from-details" style="margin-top: 0.5rem;">
-                        <strong>Institución:</strong> ${subject.equivalencies[0].institution}
+                        <strong>Programa:</strong> ${subject.equivalencies[0].program}
+                    </div>
+                    <div class="equivalency-from-details">
+                        <strong>Universidad:</strong> ${subject.equivalencies[0].university}
                     </div>
                 </div>
                 <div class="equivalency-arrow">→</div>
@@ -2398,6 +2440,7 @@ window.renameSemester = renameSemester;
 window.deleteSemester = deleteSemester;
 window.toggleExpandCollapse = toggleExpandCollapse;
 window.toggleEquivalenciesPanel = toggleEquivalenciesPanel;
+window.addNewEquivalency = addNewEquivalency;
 window.renderEquivalenciesList = renderEquivalenciesList;
 window.removeEquivalency = removeEquivalency;
 window.showModal = showModal;
