@@ -1565,6 +1565,97 @@ function deleteSemester(semesterId) {
 }
 
 let allSemestersExpanded = true;
+let equivalenciesPanelOpen = false;
+
+function toggleEquivalenciesPanel() {
+    const panel = document.getElementById('equivalencies-panel');
+    if (!panel) return;
+    
+    equivalenciesPanelOpen = !equivalenciesPanelOpen;
+    
+    if (equivalenciesPanelOpen) {
+        panel.classList.remove('hidden');
+        renderEquivalenciesList();
+    } else {
+        panel.classList.add('hidden');
+    }
+}
+
+function renderEquivalenciesList() {
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const listContainer = document.getElementById('equivalencies-list');
+    if (!listContainer) return;
+    
+    // Filtrar materias con equivalencias
+    const equivalencies = plan.subjects.filter(s => s.equivalencies && s.equivalencies.length > 0);
+    
+    if (equivalencies.length === 0) {
+        listContainer.innerHTML = `
+            <div class="no-equivalencies">
+                <i class="fas fa-exchange-alt"></i>
+                <p>No hay equivalencias registradas</p>
+            </div>
+        `;
+        return;
+    }
+    
+    listContainer.innerHTML = equivalencies.map(subject => `
+        <div class="equivalency-card">
+            <div class="equivalency-card-header">
+                <div class="equivalency-from">
+                    <div class="equivalency-from-label">Cursada en</div>
+                    <div class="equivalency-from-content">${subject.equivalencies[0].name}</div>
+                    <div class="equivalency-from-details">
+                        ${subject.equivalencies[0].code} • ${subject.equivalencies[0].credits} créditos
+                    </div>
+                    <div class="equivalency-from-details" style="margin-top: 0.5rem;">
+                        <strong>Institución:</strong> ${subject.equivalencies[0].institution}
+                    </div>
+                </div>
+                <div class="equivalency-arrow">→</div>
+                <div class="equivalency-to">
+                    <div class="equivalency-to-label">Equivale a</div>
+                    <div class="equivalency-to-content">${subject.name}</div>
+                    <div class="equivalency-to-details">
+                        ${subject.id} • ${subject.credits} créditos
+                    </div>
+                    <div class="equivalency-to-details" style="margin-top: 0.5rem;">
+                        <strong>Tipo:</strong> ${getTypeLabel(subject.type)}
+                    </div>
+                </div>
+            </div>
+            <div class="equivalency-meta">
+                <div class="equivalency-meta-item">
+                    <i class="fas fa-check-circle" style="color: var(--institutional-blue);"></i>
+                    <span>Aprobada</span>
+                </div>
+            </div>
+            <div class="equivalency-actions">
+                <button onclick="removeEquivalency('${subject.id}')" title="Eliminar equivalencia">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function removeEquivalency(subjectId) {
+    if (!confirm('¿Eliminar esta equivalencia?')) return;
+    
+    const plan = getActivePlan();
+    if (!plan) return;
+    
+    const subject = plan.subjects.find(s => s.id === subjectId);
+    if (subject) {
+        subject.equivalencies = [];
+        subject.completed = false;
+        savePlannerData();
+        renderEquivalenciesList();
+        showNotification('Equivalencia eliminada', 'success');
+    }
+}
 
 function toggleExpandCollapse() {
     try {
@@ -2306,6 +2397,9 @@ window.toggleCategory = toggleCategory;
 window.renameSemester = renameSemester;
 window.deleteSemester = deleteSemester;
 window.toggleExpandCollapse = toggleExpandCollapse;
+window.toggleEquivalenciesPanel = toggleEquivalenciesPanel;
+window.renderEquivalenciesList = renderEquivalenciesList;
+window.removeEquivalency = removeEquivalency;
 window.showModal = showModal;
 window.hideModal = hideModal;
 window.showImportModal = showImportModal;
