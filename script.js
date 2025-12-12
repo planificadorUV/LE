@@ -1008,7 +1008,11 @@ function renderSubjectBank(plan) {
     const searchTerm = document.getElementById('subject-search')?.value.toLowerCase() || '';
     const activeFilter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
     
-    let allSubjects = plan.subjects.filter(s => s.location === 'bank');
+    // Filtrar materias en banco, excluyendo las que tienen equivalencias (exoneradas o equivalencias)
+    let allSubjects = plan.subjects.filter(s => 
+        s.location === 'bank' && 
+        (!s.equivalencies || s.equivalencies.length === 0)
+    );
     
     // Aplicar búsqueda
     if (searchTerm) {
@@ -1790,10 +1794,10 @@ function toggleExpandCollapse() {
         // Actualizar estado visual del botón
         if (allSemestersExpanded) {
             btn.classList.remove('collapsed');
-            text.textContent = 'Expandir Todo';
+            text.textContent = 'Desexpandir Todo';
         } else {
             btn.classList.add('collapsed');
-            text.textContent = 'Desexpandir Todo';
+            text.textContent = 'Expandir Todo';
         }
         
         // Actualizar estado de los semestres
