@@ -1695,7 +1695,7 @@ body.zen-mode .right-panel {
         0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Botón de Icono - Efecto de rotación y escala */
+/* Botón de Icono - Color plano adaptable */
 .btn-icon {
     position: relative;
     padding: 0.625rem;
@@ -1704,7 +1704,7 @@ body.zen-mode .right-panel {
     min-width: 40px;
     min-height: 40px;
     border: 2px solid var(--primary-red);
-    background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-hover) 100%);
+    background: var(--primary-red);
     color: white;
     border-radius: 10px;
     cursor: pointer;
@@ -1713,34 +1713,34 @@ body.zen-mode .right-panel {
     justify-content: center;
     font-size: 1rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(209, 16, 29, 0.3);
+    box-shadow: 0 4px 12px rgba(209, 16, 29, 0.35);
     font-weight: 600;
 }
 
 .btn-icon:hover {
-    background: linear-gradient(135deg, var(--primary-red-hover) 0%, var(--primary-red) 100%);
+    background: var(--primary-red-hover);
     border-color: var(--primary-red-hover);
     color: white;
     transform: translateY(-3px) rotate(5deg) scale(1.1);
-    box-shadow: 0 8px 20px rgba(209, 16, 29, 0.4);
+    box-shadow: 0 8px 20px rgba(209, 16, 29, 0.45);
 }
 
 .btn-icon:active {
     transform: translateY(-1px) rotate(0deg) scale(1.05);
-    box-shadow: 0 4px 12px rgba(209, 16, 29, 0.3);
+    box-shadow: 0 4px 12px rgba(209, 16, 29, 0.35);
 }
 
 /* Botón de Icono Azul (alternativo) */
 .btn-icon.btn-blue {
     border-color: var(--institutional-blue);
-    background: linear-gradient(135deg, var(--institutional-blue) 0%, #1d4ed8 100%);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    background: var(--institutional-blue);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
 .btn-icon.btn-blue:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, var(--institutional-blue) 100%);
-    border-color: #1d4ed8;
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    background: var(--institutional-blue-hover);
+    border-color: var(--institutional-blue-hover);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
 }
 
 /* ============================================
@@ -1770,9 +1770,9 @@ body.zen-mode .right-panel {
 
 /* Botón Importar SIRA - Azul Legión */
 #import-sira-btn {
-    background: linear-gradient(135deg, var(--institutional-blue) 0%, #1d4ed8 100%);
+    background: var(--institutional-blue);
     box-shadow: 
-        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 4px 12px rgba(37, 99, 235, 0.35),
         0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -1783,17 +1783,18 @@ body.zen-mode .right-panel {
 }
 
 #import-sira-btn:hover {
+    background: var(--institutional-blue-hover);
     transform: translateY(-2px);
     box-shadow: 
-        0 6px 20px rgba(37, 99, 235, 0.4),
+        0 6px 20px rgba(37, 99, 235, 0.45),
         0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* Botón Equivalencia - Rojo Legión */
 #add-equivalency-btn {
-    background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-hover) 100%);
+    background: var(--primary-red);
     box-shadow: 
-        0 4px 12px rgba(209, 16, 29, 0.3),
+        0 4px 12px rgba(209, 16, 29, 0.35),
         0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -1804,17 +1805,18 @@ body.zen-mode .right-panel {
 }
 
 #add-equivalency-btn:hover {
+    background: var(--primary-red-hover);
     transform: translateY(-2px);
     box-shadow: 
-        0 6px 20px rgba(209, 16, 29, 0.4),
+        0 6px 20px rgba(209, 16, 29, 0.45),
         0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* Botón Personalizada - Rojo Legión */
 #add-custom-btn {
-    background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-hover) 100%);
+    background: var(--primary-red);
     box-shadow: 
-        0 4px 12px rgba(209, 16, 29, 0.3),
+        0 4px 12px rgba(209, 16, 29, 0.35),
         0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -1825,9 +1827,10 @@ body.zen-mode .right-panel {
 }
 
 #add-custom-btn:hover {
+    background: var(--primary-red-hover);
     transform: translateY(-2px);
     box-shadow: 
-        0 6px 20px rgba(139, 92, 246, 0.4),
+        0 6px 20px rgba(209, 16, 29, 0.45),
         0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
