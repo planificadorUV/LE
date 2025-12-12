@@ -1730,24 +1730,7 @@ body.zen-mode .right-panel {
     box-shadow: 0 4px 12px rgba(209, 16, 29, 0.35);
 }
 
-/* Botón de Icono Azul (alternativo) */
-.btn-icon.btn-blue {
-    border-color: var(--institutional-blue);
-    background: var(--institutional-blue);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-}
 
-.btn-icon.btn-blue:hover {
-    background: var(--institutional-blue-hover);
-    border-color: var(--institutional-blue-hover);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
-}
-
-/* ============================================
-   BOTONES DEL BANCO DE MATERIAS - CON TEXTO
-   ============================================ */
-
-/* Botones del banco - diseño con texto + icono */
 #import-sira-btn,
 #add-equivalency-btn,
 #add-custom-btn {
@@ -1768,12 +1751,11 @@ body.zen-mode .right-panel {
     overflow: hidden;
 }
 
-/* Botón Importar SIRA - Azul Legión */
+/* Botón Importar SIRA - Adaptable */
 #import-sira-btn {
-    background: var(--institutional-blue);
-    box-shadow: 
-        0 4px 12px rgba(37, 99, 235, 0.35),
-        0 1px 3px rgba(0, 0, 0, 0.1);
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    box-shadow: none;
 }
 
 #import-sira-btn::before {
@@ -1783,19 +1765,17 @@ body.zen-mode .right-panel {
 }
 
 #import-sira-btn:hover {
-    background: var(--institutional-blue-hover);
-    transform: translateY(-2px);
-    box-shadow: 
-        0 6px 20px rgba(37, 99, 235, 0.45),
-        0 2px 6px rgba(0, 0, 0, 0.15);
+    background: var(--bg-primary);
+    border-color: var(--primary-red);
+    transform: translateX(5px) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Botón Equivalencia - Rojo Legión */
+/* Botón Equivalencia - Adaptable */
 #add-equivalency-btn {
-    background: var(--primary-red);
-    box-shadow: 
-        0 4px 12px rgba(209, 16, 29, 0.35),
-        0 1px 3px rgba(0, 0, 0, 0.1);
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    box-shadow: none;
 }
 
 #add-equivalency-btn::before {
@@ -1805,19 +1785,17 @@ body.zen-mode .right-panel {
 }
 
 #add-equivalency-btn:hover {
-    background: var(--primary-red-hover);
-    transform: translateY(-2px);
-    box-shadow: 
-        0 6px 20px rgba(209, 16, 29, 0.45),
-        0 2px 6px rgba(0, 0, 0, 0.15);
+    background: var(--bg-primary);
+    border-color: var(--primary-red);
+    transform: translateX(5px) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Botón Personalizada - Rojo Legión */
+/* Botón Personalizada - Adaptable */
 #add-custom-btn {
-    background: var(--primary-red);
-    box-shadow: 
-        0 4px 12px rgba(209, 16, 29, 0.35),
-        0 1px 3px rgba(0, 0, 0, 0.1);
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    box-shadow: none;
 }
 
 #add-custom-btn::before {
@@ -1827,11 +1805,10 @@ body.zen-mode .right-panel {
 }
 
 #add-custom-btn:hover {
-    background: var(--primary-red-hover);
-    transform: translateY(-2px);
-    box-shadow: 
-        0 6px 20px rgba(209, 16, 29, 0.45),
-        0 2px 6px rgba(0, 0, 0, 0.15);
+    background: var(--bg-primary);
+    border-color: var(--primary-red);
+    transform: translateX(5px) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Efecto shimmer para todos los botones del banco */
