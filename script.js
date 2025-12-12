@@ -1807,10 +1807,10 @@ function toggleExpandCollapse() {
         
         // Aplicar clases CSS con transición suave
         semesterColumns.forEach(column => {
-            if (allSemestersExpanded) {
-                column.classList.remove('collapsed');
-            } else {
+            if (!allSemestersExpanded) {
                 column.classList.add('collapsed');
+            } else {
+                column.classList.remove('collapsed');
             }
         });
         
