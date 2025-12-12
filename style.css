@@ -1703,9 +1703,9 @@ body.zen-mode .right-panel {
     height: 40px;
     min-width: 40px;
     min-height: 40px;
-    border: 2px solid var(--border-color);
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    border: 2px solid var(--primary-red);
+    background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-hover) 100%);
+    color: white;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
@@ -1713,20 +1713,34 @@ body.zen-mode .right-panel {
     justify-content: center;
     font-size: 1rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(209, 16, 29, 0.3);
+    font-weight: 600;
 }
 
 .btn-icon:hover {
-    background: var(--bg-secondary);
-    border-color: var(--primary-red);
-    color: var(--primary-red);
+    background: linear-gradient(135deg, var(--primary-red-hover) 0%, var(--primary-red) 100%);
+    border-color: var(--primary-red-hover);
+    color: white;
     transform: translateY(-3px) rotate(5deg) scale(1.1);
-    box-shadow: 0 6px 16px rgba(209, 16, 29, 0.25);
+    box-shadow: 0 8px 20px rgba(209, 16, 29, 0.4);
 }
 
 .btn-icon:active {
     transform: translateY(-1px) rotate(0deg) scale(1.05);
-    box-shadow: 0 2px 8px rgba(209, 16, 29, 0.2);
+    box-shadow: 0 4px 12px rgba(209, 16, 29, 0.3);
+}
+
+/* Botón de Icono Azul (alternativo) */
+.btn-icon.btn-blue {
+    border-color: var(--institutional-blue);
+    background: linear-gradient(135deg, var(--institutional-blue) 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-icon.btn-blue:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, var(--institutional-blue) 100%);
+    border-color: #1d4ed8;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
 }
 
 /* ============================================
