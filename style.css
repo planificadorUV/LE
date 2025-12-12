@@ -1743,7 +1743,7 @@ body.zen-mode .right-panel {
     gap: 0.75rem;
     font-size: 0.875rem;
     font-weight: 600;
-    color: white;
+    color: var(--text-primary);
     border: none;
     border-radius: 10px;
     cursor: pointer;
