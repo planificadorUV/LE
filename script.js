@@ -889,6 +889,7 @@ function renderStatsBoard(plan) {
     
     container.innerHTML = `
         <div class="stat-card">
+            <span class="stat-percentage">${stats.completionPercentage}%</span>
             <div class="stat-header">
                 <span class="stat-title">Progreso Total</span>
                 <span class="stat-value">${stats.completedCredits}/${stats.totalCredits}</span>
@@ -904,7 +905,7 @@ function renderStatsBoard(plan) {
                 <span class="stat-value">${stats.categories.AB?.completed || 0}/${stats.categories.AB?.required || 49}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.categories.AB ? Math.round((stats.categories.AB.completed / stats.categories.AB.required) * 100) : 0}%"></div>
+                <div class="progress-bar-fill ${stats.categories.AB && stats.categories.AB.completed >= stats.categories.AB.required ? 'completed' : ''}" style="width: ${stats.categories.AB ? Math.round((stats.categories.AB.completed / stats.categories.AB.required) * 100) : 0}%"></div>
             </div>
         </div>
         
@@ -914,7 +915,7 @@ function renderStatsBoard(plan) {
                 <span class="stat-value">${stats.categories.AP?.completed || 0}/${stats.categories.AP?.required || 57}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.categories.AP ? Math.round((stats.categories.AP.completed / stats.categories.AP.required) * 100) : 0}%"></div>
+                <div class="progress-bar-fill ${stats.categories.AP && stats.categories.AP.completed >= stats.categories.AP.required ? 'completed' : ''}" style="width: ${stats.categories.AP ? Math.round((stats.categories.AP.completed / stats.categories.AP.required) * 100) : 0}%"></div>
             </div>
         </div>
         
@@ -924,7 +925,7 @@ function renderStatsBoard(plan) {
                 <span class="stat-value">${stats.categories.EP?.completed || 0}/${stats.categories.EP?.required || 17}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.categories.EP ? Math.round((stats.categories.EP.completed / stats.categories.EP.required) * 100) : 0}%"></div>
+                <div class="progress-bar-fill ${stats.categories.EP && stats.categories.EP.completed >= stats.categories.EP.required ? 'completed' : ''}" style="width: ${stats.categories.EP ? Math.round((stats.categories.EP.completed / stats.categories.EP.required) * 100) : 0}%"></div>
             </div>
         </div>
         
@@ -937,7 +938,17 @@ function renderStatsBoard(plan) {
                 <span class="stat-value">${stats.categories.EC?.completed || 0}/${stats.categories.EC?.required || 17}</span>
             </div>
             <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.categories.EC ? Math.round((stats.categories.EC.completed / stats.categories.EC.required) * 100) : 0}%"></div>
+                <div class="progress-bar-fill ${stats.categories.EC && stats.categories.EC.completed >= stats.categories.EC.required ? 'completed' : ''}" style="width: ${stats.categories.EC ? Math.round((stats.categories.EC.completed / stats.categories.EC.required) * 100) : 0}%"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Deporte (Requisito)</span>
+                <span class="stat-value">${stats.sportsCompleted}/${stats.sportsTotal}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: ${stats.sportsTotal > 0 ? (stats.sportsCompleted / stats.sportsTotal) * 100 : 0}%"></div>
             </div>
         </div>
         
@@ -968,6 +979,9 @@ function calculateStats(plan) {
     
     // Códigos de inglés (no cuentan para el ciclo básico)
     const englishCodes = ['204025C', '204026C', '204027C', '204028C'];
+
+    // Deporte formativo (requisito de grado, no cuenta como EC)
+    const sportsCodes = ['404032C', '404002C'];
     
     // Calcular créditos por categoría
     const categoryStats = {};
@@ -982,6 +996,12 @@ function calculateStats(plan) {
             categorySubjects = categorySubjects.filter(s => !englishCodes.includes(s.id));
             categoryCompleted = categoryCompleted.filter(s => !englishCodes.includes(s.id));
         }
+
+        // Para formación general (EC), excluir deporte formativo (es requisito aparte)
+        if (category === 'EC') {
+            categorySubjects = categorySubjects.filter(s => !sportsCodes.includes(s.id));
+            categoryCompleted = categoryCompleted.filter(s => !sportsCodes.includes(s.id));
+        }
         
         categoryStats[category] = {
             completed: categoryCompleted.reduce((sum, s) => sum + (s.credits || 0), 0),
@@ -992,12 +1012,16 @@ function calculateStats(plan) {
     });
     
     // Calcular créditos totales completados (excluyendo inglés)
-    const completedWithoutEnglish = completed.filter(s => !englishCodes.includes(s.id));
+    const completedWithoutEnglish = completed.filter(s => !englishCodes.includes(s.id) && !sportsCodes.includes(s.id));
     const totalCompletedCredits = completedWithoutEnglish.reduce((sum, s) => sum + (s.credits || 0), 0);
     
     // Inglés (solo los 4 niveles obligatorios del pensum de DI)
     const englishSubjects = subjects.filter(s => englishCodes.includes(s.id));
     const englishCompleted = englishSubjects.filter(s => s.completed).length;
+
+    // Deporte (requisito de grado)
+    const sportsSubjects = subjects.filter(s => sportsCodes.includes(s.id));
+    const sportsCompleted = sportsSubjects.filter(s => s.completed).length;
     
     return {
         totalSubjects: subjects.length,
@@ -1007,6 +1031,8 @@ function calculateStats(plan) {
         completionPercentage: Math.round((totalCompletedCredits / DI_REQUIREMENTS.total) * 100),
         englishTotal: englishSubjects.length,
         englishCompleted,
+        sportsTotal: sportsSubjects.length,
+        sportsCompleted,
         categories: categoryStats
     };
 }
