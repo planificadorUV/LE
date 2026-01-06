@@ -1,13 +1,13 @@
 // =================== DATOS DEL PENSUM - DISEÑO INDUSTRIAL Res. 188===================
 
 const PENSUM_DI = [
-    // Requisito de Inglés (Área Básica pero con conteo separado)
+
     { id: '204025C', name: 'INGLÉS CON FINES GENERALES Y ACADÉM. I', credits: 2, type: 'AB', category: 'english', prerequisites: [] },
     { id: '204026C', name: 'INGLÉS FINES GENERALES Y ACADÉMICOS II', credits: 2, type: 'AB', category: 'english', prerequisites: ['204025C'] },
     { id: '204027C', name: 'INGLÉS CON FINES GENERALES Y ACADÉM. III', credits: 2, type: 'AB', category: 'english', prerequisites: ['204026C'] },
     { id: '204028C', name: 'INGLÉS FINES GENERALES Y ACADÉMICOS IV', credits: 2, type: 'AB', category: 'english', prerequisites: ['204027C'] },
     
-    // Ciclo Básico
+    
     { id: '506026C', name: 'ESCRITURA, EXPRESIÓN Y COMUNICACIÓN', credits: 2, type: 'AB', prerequisites: [] },
     { id: '507048C', name: 'PRODUCCIÓN INTERSUBJETIVA DEL ESPACIO FÍSICO Y SOCIAL', credits: 2, type: 'AB', prerequisites: [] },
     { id: '507031C', name: 'DISEÑO MUNDO', credits: 3, type: 'AB', prerequisites: [] },
@@ -26,26 +26,26 @@ const PENSUM_DI = [
     { id: '507024C', name: 'PROYECTOS - RELACIONES Y VÍNCULOS', credits: 4, type: 'AB', prerequisites: [] },
     { id: '507021C', name: 'PROYECTOS - ESTRUCTURAS Y AUTONOMÍAS', credits: 4, type: 'AB', prerequisites: [] },
     { id: '507047C', name: 'HERRAMIENTAS DIGITALES - REPRESENTACIÓN', credits: 2, type: 'AB', prerequisites: [] },
-    { id: '507014C', name: 'MATERIALES Y PROCESOS - METALES', credits: 3, type: 'AB', prerequisites: ['507012C'] },
+    { id: '507014C', name: 'MATERIALES Y PROCESOS - METALES', credits: 3, type: 'AB', prerequisites: [] },
 
-    // Ciclo Profesional (Componente Profesional)
+   
     { id: '507111C', name: 'DISEÑO COLONIAL Y MODERNIDAD D.I.', credits: 2, type: 'AP', prerequisites: [] },
     { id: '507035C', name: 'DISIDENCIAS Y RESISTENCIAS', credits: 3, type: 'AP', prerequisites: [] },
     { id: '507036C', name: 'ESTUDIOS CRÍTICOS DEL DISEÑO', credits: 3, type: 'AP', prerequisites: [] },
     { id: '507011C', name: 'HERRAMIENTAS DIGITALES - PROGRAMACIÓN', credits: 2, type: 'AP', prerequisites: [] },
-    { id: '507015C', name: 'MATERIALES Y PROCESOS - NUEVOS MATERIALES', credits: 3, type: 'AP', prerequisites: ['507012C'] },
+    { id: '507015C', name: 'MATERIALES Y PROCESOS - NUEVOS MATERIALES', credits: 3, type: 'AP', prerequisites: [] },
     { id: '507023C', name: 'PROYECTO - PRODUCTO', credits: 7, type: 'AP', prerequisites: [] },
     { id: '507059C', name: 'HERRAMIENTAS DIGITALES - COMPROBACIÓN', credits: 2, type: 'AP', prerequisites: [] },
     { id: '507115C', name: 'PROYECTO - GESTIÓN', credits: 7, type: 'AP', prerequisites: [] },
-    { id: '507016C', name: 'MATERIALES Y PROCESOS - POLIMEROS', credits: 3, type: 'AP', prerequisites: ['507012C'] },
+    { id: '507016C', name: 'MATERIALES Y PROCESOS - POLIMEROS', credits: 3, type: 'AP', prerequisites: [] },
     { id: '507020C', name: 'PROYECTO - ENTORNO', credits: 7, type: 'AP', prerequisites: [] },
     { id: '507060C', name: 'HERRAMIENTAS DIGITALES - CREACIÓN VISUALIZACIÓN', credits: 2, type: 'AP', prerequisites: [] },
     { id: '507019C', name: 'PROYECTO - BIOSFERA', credits: 7, type: 'AP', prerequisites: [] },
     { id: '507058C', name: 'HERRAMIENTAS DIGITALES - SIMULACIÓN', credits: 2, type: 'AP', prerequisites: [] },
-    { id: '507096C', name: 'PROYECTO FINAL FORMULACIÓN', credits: 3, type: 'AP', prerequisites: ['507026C'] },
+    { id: '507096C', name: 'PROYECTO FINAL FORMULACIÓN', credits: 3, type: 'AP', prerequisites: ['507012C'] },
     { id: '507095C', name: 'PROYECTO FINAL DESARROLLO', credits: 4, type: 'AP', prerequisites: ['507096C'] },
 
-    // Electivas Profesionales
+  
     { id: '507092C', name: 'BIOMIMESIS', credits: 2, type: 'EP', prerequisites: [] },
     { id: '507082C', name: 'COLOR', credits: 3, type: 'EP', prerequisites: [] },
     { id: '507057C', name: 'CREACIÓN CON MADERA', credits: 2, type: 'EP', prerequisites: [] },
