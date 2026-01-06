@@ -896,6 +896,10 @@ function renderStatsBoard(plan) {
             <div class="progress-bar">
                 <div class="progress-bar-fill completed" style="width: ${stats.completionPercentage}%"></div>
             </div>
+            <div class="stat-subinfo">
+                <span class="stat-pill">Inglés: ${stats.englishCompleted}/${stats.englishTotal}</span>
+                <span class="stat-pill">Deporte: ${stats.sportsCompleted}/${stats.sportsTotal}</span>
+            </div>
         </div>
         
         <div class="stat-card">
@@ -940,34 +944,6 @@ function renderStatsBoard(plan) {
                 <div class="progress-bar-fill ${stats.categories.EC && stats.categories.EC.completed >= stats.categories.EC.required ? 'completed' : ''}" style="width: ${stats.categories.EC ? Math.round((stats.categories.EC.completed / stats.categories.EC.required) * 100) : 0}%"></div>
             </div>
         </div>
-
-        <div class="stat-card requirements">
-            <div class="stat-header">
-                <span class="stat-title">Requisitos</span>
-                <span class="stat-value">&nbsp;</span>
-            </div>
-            <div class="requirements-list">
-                <div class="requirements-item">
-                    <div class="requirements-row">
-                        <span class="requirements-label">Inglés</span>
-                        <span class="requirements-value">${stats.englishCompleted}/${stats.englishTotal}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill english" style="width: ${stats.englishTotal > 0 ? (stats.englishCompleted / stats.englishTotal) * 100 : 0}%"></div>
-                    </div>
-                </div>
-
-                <div class="requirements-item">
-                    <div class="requirements-row">
-                        <span class="requirements-label">Deporte</span>
-                        <span class="requirements-value">${stats.sportsCompleted}/${stats.sportsTotal}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill sports" style="width: ${stats.sportsTotal > 0 ? (stats.sportsCompleted / stats.sportsTotal) * 100 : 0}%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
     `;
 }
 
@@ -985,10 +961,14 @@ function calculateStats(plan) {
     };
     
     // Códigos de inglés (no cuentan para el ciclo básico)
-    const englishCodes = ['204025C', '204026C', '204027C', '204028C'];
+    const normalizeCode = (value) => String(value || '').trim().toUpperCase();
+    const getSubjectCode = (s) => normalizeCode(s?.id ?? s?.code ?? s?.codigo);
 
-    // Deporte formativo (requisito de grado, no cuenta como EC)
-    const sportsCodes = ['404032C', '404002C'];
+    const englishCodes = ['204025C', '204026C', '204027C', '204028C'];
+    const englishCodeSet = new Set(englishCodes.map(normalizeCode));
+
+    const sportsCodes = ['404032C', '404002C', '404010C'];
+    const sportsCodeSet = new Set(sportsCodes.map(normalizeCode));
     
     // Calcular créditos por categoría
     const categoryStats = {};
@@ -1000,14 +980,14 @@ function calculateStats(plan) {
         
         // Para el área básica (AB), excluir los créditos de inglés
         if (category === 'AB') {
-            categorySubjects = categorySubjects.filter(s => !englishCodes.includes(s.id));
-            categoryCompleted = categoryCompleted.filter(s => !englishCodes.includes(s.id));
+            categorySubjects = categorySubjects.filter(s => !englishCodeSet.has(getSubjectCode(s)));
+            categoryCompleted = categoryCompleted.filter(s => !englishCodeSet.has(getSubjectCode(s)));
         }
 
         // Para formación general (EC), excluir deporte formativo (es requisito aparte)
         if (category === 'EC') {
-            categorySubjects = categorySubjects.filter(s => !sportsCodes.includes(s.id));
-            categoryCompleted = categoryCompleted.filter(s => !sportsCodes.includes(s.id));
+            categorySubjects = categorySubjects.filter(s => !sportsCodeSet.has(getSubjectCode(s)));
+            categoryCompleted = categoryCompleted.filter(s => !sportsCodeSet.has(getSubjectCode(s)));
         }
         
         categoryStats[category] = {
@@ -1019,16 +999,17 @@ function calculateStats(plan) {
     });
     
     // Calcular créditos totales completados (excluyendo inglés)
-    const completedWithoutEnglish = completed.filter(s => !englishCodes.includes(s.id) && !sportsCodes.includes(s.id));
+    const completedWithoutEnglish = completed.filter(s => !englishCodeSet.has(getSubjectCode(s)) && !sportsCodeSet.has(getSubjectCode(s)));
     const totalCompletedCredits = completedWithoutEnglish.reduce((sum, s) => sum + (s.credits || 0), 0);
     
     // Inglés (solo los 4 niveles obligatorios del pensum de DI)
-    const englishSubjects = subjects.filter(s => englishCodes.includes(s.id));
+    const englishSubjects = subjects.filter(s => englishCodeSet.has(getSubjectCode(s)));
     const englishCompleted = englishSubjects.filter(s => s.completed).length;
 
     // Deporte (requisito de grado)
-    const sportsSubjects = subjects.filter(s => sportsCodes.includes(s.id));
-    const sportsCompleted = sportsSubjects.filter(s => s.completed).length;
+    const sportsSubjects = subjects.filter(s => sportsCodeSet.has(getSubjectCode(s)));
+    const sportsCompletedCount = sportsSubjects.filter(s => s.completed).length;
+    const sportsCompleted = sportsCompletedCount > 0 ? 1 : 0;
     
     return {
         totalSubjects: subjects.length,
@@ -1038,7 +1019,7 @@ function calculateStats(plan) {
         completionPercentage: Math.round((totalCompletedCredits / DI_REQUIREMENTS.total) * 100),
         englishTotal: englishSubjects.length,
         englishCompleted,
-        sportsTotal: sportsSubjects.length,
+        sportsTotal: 1,
         sportsCompleted,
         categories: categoryStats
     };
