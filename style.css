@@ -768,9 +768,58 @@ body.zen-mode .right-panel {
     margin-bottom: 1rem;
 }
 
+.progress-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+    min-width: 180px;
+}
+
+.progress-summary-metrics {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.progress-summary-percentage {
+    display: inline-flex;
+    align-items: center;
+    height: 18px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(5, 150, 105, 0.12);
+    border: 1px solid rgba(5, 150, 105, 0.25);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.progress-summary-credits {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.progress-summary-bar {
+    width: 220px;
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+.progress-summary-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--english-blue);
+    transition: width var(--animation-speed) ease;
+}
+
 .stats-board-horizontal {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
 }
 
