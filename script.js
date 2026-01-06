@@ -889,9 +889,8 @@ function renderStatsBoard(plan) {
     
     container.innerHTML = `
         <div class="stat-card">
-            <span class="stat-percentage">${stats.completionPercentage}%</span>
             <div class="stat-header">
-                <span class="stat-title">Progreso Total</span>
+                <span class="stat-title">Progreso Total <span class="stat-badge">${stats.completionPercentage}%</span></span>
                 <span class="stat-value">${stats.completedCredits}/${stats.totalCredits}</span>
             </div>
             <div class="progress-bar">
@@ -942,23 +941,31 @@ function renderStatsBoard(plan) {
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card requirements">
             <div class="stat-header">
-                <span class="stat-title">Deporte (Requisito)</span>
-                <span class="stat-value">${stats.sportsCompleted}/${stats.sportsTotal}</span>
+                <span class="stat-title">Requisitos</span>
+                <span class="stat-value">&nbsp;</span>
             </div>
-            <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${stats.sportsTotal > 0 ? (stats.sportsCompleted / stats.sportsTotal) * 100 : 0}%"></div>
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-title">Inglés</span>
-                <span class="stat-value">${stats.englishCompleted}/${stats.englishTotal}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-bar-fill english" style="width: ${stats.englishTotal > 0 ? (stats.englishCompleted / stats.englishTotal) * 100 : 0}%"></div>
+            <div class="requirements-list">
+                <div class="requirements-item">
+                    <div class="requirements-row">
+                        <span class="requirements-label">Inglés</span>
+                        <span class="requirements-value">${stats.englishCompleted}/${stats.englishTotal}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill english" style="width: ${stats.englishTotal > 0 ? (stats.englishCompleted / stats.englishTotal) * 100 : 0}%"></div>
+                    </div>
+                </div>
+
+                <div class="requirements-item">
+                    <div class="requirements-row">
+                        <span class="requirements-label">Deporte</span>
+                        <span class="requirements-value">${stats.sportsCompleted}/${stats.sportsTotal}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill sports" style="width: ${stats.sportsTotal > 0 ? (stats.sportsCompleted / stats.sportsTotal) * 100 : 0}%"></div>
+                    </div>
+                </div>
             </div>
         </div>
     `;
