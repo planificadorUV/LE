@@ -886,22 +886,21 @@ function renderStatsBoard(plan) {
 
     const stats = calculateStats(plan);
     console.log('Stats calculadas:', stats);
+
+    const summary = document.getElementById('progress-summary');
+    if (summary) {
+        summary.innerHTML = `
+            <div class="progress-summary-metrics">
+                <span class="progress-summary-percentage">${stats.completionPercentage}%</span>
+                <span class="progress-summary-credits">${stats.completedCredits}/${stats.totalCredits}</span>
+            </div>
+            <div class="progress-summary-bar" aria-label="Progreso total">
+                <div class="progress-summary-bar-fill" style="width: ${stats.completionPercentage}%"></div>
+            </div>
+        `;
+    }
     
     container.innerHTML = `
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-title">Progreso Total <span class="stat-badge">${stats.completionPercentage}%</span></span>
-                <span class="stat-value">${stats.completedCredits}/${stats.totalCredits}</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-bar-fill completed" style="width: ${stats.completionPercentage}%"></div>
-            </div>
-            <div class="stat-subinfo">
-                <span class="stat-pill">Inglés: ${stats.englishCompleted}/${stats.englishTotal}</span>
-                <span class="stat-pill">Deporte: ${stats.sportsCompleted}/${stats.sportsTotal}</span>
-            </div>
-        </div>
-        
         <div class="stat-card">
             <div class="stat-header">
                 <span class="stat-title">Ciclo Básico (AB)</span>
@@ -942,6 +941,26 @@ function renderStatsBoard(plan) {
             </div>
             <div class="progress-bar">
                 <div class="progress-bar-fill ${stats.categories.EC && stats.categories.EC.completed >= stats.categories.EC.required ? 'completed' : ''}" style="width: ${stats.categories.EC ? Math.round((stats.categories.EC.completed / stats.categories.EC.required) * 100) : 0}%"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Inglés</span>
+                <span class="stat-value">${stats.englishCompleted}/${stats.englishTotal}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill english ${stats.englishTotal > 0 && stats.englishCompleted >= stats.englishTotal ? 'completed' : ''}" style="width: ${stats.englishTotal > 0 ? Math.round((stats.englishCompleted / stats.englishTotal) * 100) : 0}%"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Deporte</span>
+                <span class="stat-value">${stats.sportsCompleted}/${stats.sportsTotal}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill sports ${stats.sportsCompleted >= stats.sportsTotal ? 'completed' : ''}" style="width: ${stats.sportsTotal > 0 ? Math.round((stats.sportsCompleted / stats.sportsTotal) * 100) : 0}%"></div>
             </div>
         </div>
     `;
