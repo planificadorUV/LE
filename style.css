@@ -848,6 +848,25 @@ body.zen-mode .right-panel {
     line-height: 1;
 }
 
+.stat-subinfo {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.stat-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
 .stat-title {
     font-size: 0.875rem;
     font-weight: 500;
@@ -907,6 +926,20 @@ body.zen-mode .right-panel {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+}
+
+.stat-card.requirements .requirements-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.requirements-item .progress-bar {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="light"] .requirements-item .progress-bar {
+    background: rgba(17, 24, 39, 0.08);
 }
 
 .requirements-row {
