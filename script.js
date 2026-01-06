@@ -468,6 +468,7 @@ function syncPensumClassifications(plannerState) {
         const plan = plannerState.plans[planId];
         let updatedCount = 0;
         let addedCount = 0;
+        const arraysEqual = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
         
         // Crear set de IDs existentes
         const existingIds = new Set(plan.subjects.map(s => s.id));
@@ -475,17 +476,29 @@ function syncPensumClassifications(plannerState) {
         // Actualizar clasificaciones de materias existentes
         plan.subjects.forEach(subject => {
             const pensumSubject = pensumMap.get(subject.id);
-            if (pensumSubject && subject.type !== pensumSubject.type) {
+            if (!pensumSubject) return;
+
+            let changed = false;
+
+            if (subject.type !== pensumSubject.type) {
                 console.log(`Actualizando ${subject.id}: ${subject.type} → ${pensumSubject.type}`);
                 subject.type = pensumSubject.type;
-                
-                // También actualizar category si existe en el pensum
-                if (pensumSubject.category) {
-                    subject.category = pensumSubject.category;
-                }
-                
-                updatedCount++;
+                changed = true;
             }
+
+            if (pensumSubject.category && subject.category !== pensumSubject.category) {
+                subject.category = pensumSubject.category;
+                changed = true;
+            }
+
+            const pensumPrereqs = Array.isArray(pensumSubject.prerequisites) ? pensumSubject.prerequisites : [];
+            const subjectPrereqs = Array.isArray(subject.prerequisites) ? subject.prerequisites : null;
+            if (!Array.isArray(subject.prerequisites) || !arraysEqual(subjectPrereqs, pensumPrereqs)) {
+                subject.prerequisites = [...pensumPrereqs];
+                changed = true;
+            }
+
+            if (changed) updatedCount++;
         });
         
         // Agregar materias del pensum que faltan
@@ -1233,9 +1246,9 @@ function renderSubjectInfo(subjectId) {
         return;
     }
 
-    const prerequisites = subject.prerequisites || [];
+    const prerequisites = Array.isArray(subject.prerequisites) ? subject.prerequisites : [];
     const postrequisites = plan.subjects.filter(s => 
-        s.prerequisites && s.prerequisites.includes(subject.id)
+        Array.isArray(s.prerequisites) && s.prerequisites.includes(subject.id)
     );
 
     container.innerHTML = `
