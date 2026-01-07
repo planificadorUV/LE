@@ -747,6 +747,17 @@ function setupEventListeners() {
         }, 300));
     }
 
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    if (filterTabs.length) {
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                render();
+            });
+        });
+    }
+
     // Modal functionality
     setupModalListeners();
 
@@ -1067,6 +1078,10 @@ function renderSubjectBank(plan) {
             s.id.toLowerCase().includes(searchTerm)
         );
     }
+
+    if (activeFilter !== 'all') {
+        allSubjects = allSubjects.filter(s => (s.type || 'AB') === activeFilter);
+    }
     
     // Organizar por categorías
     const categories = {
@@ -1125,6 +1140,7 @@ function createSubjectCardHTML(subject, plan) {
     const canTake = canTakeSubject(subject, plan);
     
     let cardClass = 'subject-card';
+    if (subject.type) cardClass += ` type-${subject.type}`;
     if (subject.completed) cardClass += ' completed';
     if (!canTake && !subject.completed) cardClass += ' locked';
     if (canTake && !subject.completed) cardClass += ' available';
@@ -1208,7 +1224,7 @@ function renderSemesters(plan) {
 
 function createSemesterSubjectHTML(subject) {
     return `
-        <div class="semester-subject ${subject.completed ? 'completed' : ''}" 
+        <div class="semester-subject ${subject.type ? `type-${subject.type}` : ''} ${subject.completed ? 'completed' : ''}" 
              data-subject-id="${subject.id}"
              draggable="true"
              ondragstart="dragStart(event)"
