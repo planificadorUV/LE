@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificador Académico - Diseño Industrial UV</title>
+    <title>Planificador Académico - Universidad del Valle</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
+    <!-- Font Awesome para íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- jsPDF para exportar PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body data-theme="dark">
     
+    <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
@@ -24,6 +28,7 @@
         </div>
     </div>
 
+    <!-- Auth Container -->
     <div id="auth-container" class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -40,13 +45,64 @@
                     <span id="google-btn-text">Iniciar sesión con Google</span>
                 </button>
                 
-                <div class="auth-toggle" style="display: none;">
+                <div class="auth-divider">
+                    <span>o</span>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="email-login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Correo electrónico</label>
+                        <input type="email" id="email" required placeholder="tu@correounivalle.edu.co">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Iniciar sesión
+                    </button>
+                </form>
+
+                <!-- Registration Form -->
+                <form id="email-register-form" class="auth-form hidden">
+                    <div class="form-group">
+                        <label for="register-name">Nombre completo</label>
+                        <input type="text" id="register-name" required placeholder="Tu nombre completo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">Correo electrónico institucional</label>
+                        <input type="email" id="register-email" required placeholder="tu@correounivalle.edu.co">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <input type="password" id="register-password" required placeholder="Mínimo 8 caracteres">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirmar contraseña</label>
+                        <input type="password" id="register-confirm-password" required placeholder="Confirma tu contraseña">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Crear cuenta
+                    </button>
+                </form>
+                
+                <div class="auth-toggle">
                     <p id="auth-toggle-text">¿No tienes cuenta? <button id="toggle-register" class="link-button">Regístrate</button></p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Career Selection -->
     <div id="career-selection-container" class="career-selection hidden">
         <div class="career-selection-content">
             <div class="career-header">
@@ -67,15 +123,25 @@
                     </div>
                 </button>
                 
+                <!-- Placeholder para futuras carreras -->
                 <div class="career-coming-soon">
                     <p><i class="fas fa-clock"></i> Más carreras próximamente</p>
                 </div>
             </div>
+            
+            <div class="career-footer">
+                <button id="logout-btn" class="btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Cerrar sesión
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- Main App Container -->
     <div id="app-container" class="app-container hidden">
         
+        <!-- Header -->
         <header class="app-header">
             <div class="header-content">
                 <div class="header-left">
@@ -85,9 +151,12 @@
                     
                     <div class="plan-slots-container">
                         <button id="active-plan-button" class="btn-secondary active-plan-button" onclick="togglePlanSlots()">
-                            Plan Principal <i class="fas fa-chevron-down"></i>
+                            Plan Principal
+                            <i class="fas fa-chevron-down"></i>
                         </button>
-                        <div id="plan-slots-list" class="plan-slots-list hidden"></div>
+                        <div id="plan-slots-list" class="plan-slots-list hidden">
+                            <!-- Plan slots se generan dinámicamente -->
+                        </div>
                     </div>
                 </div>
                 
@@ -100,11 +169,17 @@
                         <i class="fas fa-moon"></i>
                     </button>
                     
-                    <button id="zen-mode-toggle" class="btn-icon hidden-mobile" title="Modo enfoque">
+                    <button id="zen-mode-toggle" class="btn-icon" title="Modo enfoque">
                         <i class="fas fa-expand"></i>
                     </button>
                     
-                    <div class="user-avatar" id="user-avatar">U</div>
+                    <button id="equivalencies-toggle" class="btn-icon" title="Ver equivalencias" onclick="toggleEquivalenciesPanel()">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                    
+                    <div class="user-avatar" id="user-avatar">
+                        U
+                    </div>
                     
                     <button id="logout-app-btn" class="btn-icon" title="Cerrar sesión">
                         <i class="fas fa-sign-out-alt"></i>
@@ -113,12 +188,16 @@
             </div>
         </header>
 
+        <!-- Main Content -->
         <div class="main-content">
             
+            <!-- Left Panel -->
             <div class="left-panel">
+                
+                <!-- Subject Bank -->
                 <section class="bank-section">
                     <div class="section-header">
-                        <h3><i class="fas fa-book"></i> Banco de Materias</h3>
+                        <h3><i class="fas fa-books"></i> Banco de Materias</h3>
                         <div class="bank-controls">
                             <button id="import-sira-btn" class="btn-icon" title="Importar desde SIRA" onclick="showImportModal()">
                                 <i class="fas fa-file-import"></i>
@@ -130,33 +209,83 @@
                     </div>
                     
                     <div class="search-container">
-                        <input type="text" id="subject-search" placeholder="Buscar materias..." class="search-input" oninput="render()">
-                        <i class="fas fa-search search-icon" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                        <input type="text" id="subject-search" placeholder="Buscar materias..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
                     </div>
 
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all" type="button">Todas</button>
+                        <button class="filter-tab" data-filter="AB" type="button">AB</button>
+                        <button class="filter-tab" data-filter="AP" type="button">AP</button>
+                        <button class="filter-tab" data-filter="EP" type="button">EP</button>
+                        <button class="filter-tab" data-filter="EC" type="button">EC</button>
+                    </div>
+
+                    <div class="bank-legend">
+                        <div class="legend-item"><span class="legend-dot ab"></span><span>AB - Básica</span></div>
+                        <div class="legend-item"><span class="legend-dot ap"></span><span>AP - Profesional</span></div>
+                        <div class="legend-item"><span class="legend-dot ep"></span><span>EP - Elect. Prof.</span></div>
+                        <div class="legend-item"><span class="legend-dot ec"></span><span>EC - Form. Gral.</span></div>
+                    </div>
+                    
                     <div id="subject-bank" class="subject-bank">
-                        </div>
+                        <!-- Subject cards se generan dinámicamente -->
+                    </div>
                 </section>
             </div>
 
+            <!-- Center Panel -->
             <div class="center-panel">
                 
+                <!-- Stats Board (Progreso) -->
                 <section class="stats-section-top">
-                    <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
-                        <i class="fas fa-spinner fa-spin"></i> Cargando estadísticas...
+                    <div class="section-header">
+                        <h3><i class="fas fa-chart-pie"></i> Progreso</h3>
+                        <div id="progress-summary" class="progress-summary"></div>
+                    </div>
+                    <div id="stats-board" class="stats-board-horizontal">
+                        <!-- Stats cards se generan dinámicamente -->
                     </div>
                 </section>
                 
                 <div class="semesters-container">
                     <div class="semesters-header">
-                        <h3>Semestres</h3>
-                    </div>
-                    <div id="semesters-grid" class="semesters-grid-container">
+                        <div class="semesters-controls">
+                            <button id="add-semester-btn" class="btn-secondary" onclick="addSemester()">
+                                <i class="fas fa-plus"></i>
+                                Añadir Semestre
+                            </button>
+                            
+                            <button id="expand-collapse-btn" class="btn-secondary" onclick="toggleExpandCollapse()">
+                                <i class="fas fa-expand"></i>
+                                <span id="expand-collapse-text">Expandir Todo</span>
+                            </button>
                         </div>
+                    </div>
+                    
+                    <div id="semesters-grid" class="semesters-grid-container">
+                        <!-- Semester columns se generan dinámicamente -->
+                    </div>
                 </div>
             </div>
 
+            <!-- Right Panel -->
             <div class="right-panel">
+                
+                <!-- Subject Info -->
+                <section class="subject-info-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-info-circle"></i> Información</h3>
+                    </div>
+                    <div id="subject-info" class="subject-info-content">
+                        <div class="no-selection">
+                            <i class="fas fa-hand-pointer"></i>
+                            <p>Selecciona una materia para ver su información</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Enlaces de Apoyo -->
                 <section class="support-links-section">
                     <div class="section-header">
                         <h3><i class="fas fa-link"></i> Enlaces de Apoyo</h3>
@@ -165,54 +294,287 @@
                         <a href="https://linktr.ee/legionestudiantil" target="_blank" class="support-link legion">
                             <i class="fas fa-users"></i>
                             <span>Legión Estudiantil</span>
+                            <i class="fas fa-external-link-alt"></i>
                         </a>
+                        
                         <a href="https://sira.univalle.edu.co/sra/" target="_blank" class="support-link">
                             <i class="fas fa-graduation-cap"></i>
-                            <span>SIRA Académico</span>
+                            <span>SIRA - Sistema Académico</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        
+                        <a href="https://proxse25.univalle.edu.co/login" target="_blank" class="support-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Matrícula Financiera</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        
+                        <a href="https://registro.univalle.edu.co/estudiantes-pregrado/pregrado-programacion-academica/" target="_blank" class="support-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Programación Académica</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        
+                        <a href="mailto:fai.direccion.disenoindustrial@correounivalle.edu.co" class="support-link email">
+                            <i class="fas fa-envelope"></i>
+                            <span>Dirección del Programa</span>
+                            <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
                 </section>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="export-plan-btn" class="btn-secondary" onclick="exportPlan()">
+                        <i class="fas fa-download"></i>
+                        Exportar Plan
+                    </button>
+                    
+                    <button id="reset-plan-btn" class="btn-danger" onclick="resetPlan()">
+                        <i class="fas fa-trash"></i>
+                        Resetear Plan
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Equivalencies Panel -->
+    <div id="equivalencies-panel" class="equivalencies-panel hidden">
+        <div class="equivalencies-header">
+            <h3><i class="fas fa-exchange-alt"></i> Equivalencias</h3>
+            <button class="close-panel-btn" onclick="toggleEquivalenciesPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="equivalencies-content">
+            <!-- Formulario de entrada -->
+            <div class="equivalency-form">
+                <div class="form-group">
+                    <label for="equiv-type">Tipo:</label>
+                    <select id="equiv-type" onchange="updateEquivalencyForm()">
+                        <option value="equivalence">Equivalencia</option>
+                        <option value="exonerated">Exonerada (E.X.)</option>
+                    </select>
+                </div>
+                
+                <!-- Sección de Equivalencia -->
+                <div id="equivalence-section" class="form-section">
+                    <div class="form-group">
+                        <label for="equiv-code">Código Materia:</label>
+                        <input type="text" id="equiv-code" placeholder="Ej: EXT001">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="equiv-name">Nombre Materia:</label>
+                        <input type="text" id="equiv-name" placeholder="Nombre completo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="equiv-program">Programa:</label>
+                        <input type="text" id="equiv-program" placeholder="Ej: Ingeniería Industrial">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="equiv-university">Universidad:</label>
+                        <input type="text" id="equiv-university" placeholder="Nombre de la universidad">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="equiv-credits">Créditos:</label>
+                        <input type="number" id="equiv-credits" min="1" max="10" value="3">
+                    </div>
+                </div>
+                
+                <!-- Sección común -->
+                <div class="form-group">
+                    <label for="equiv-target"><span id="equiv-target-label">Equivale a</span> (del banco):</label>
+                    <select id="equiv-target">
+                        <option value="">Selecciona una materia...</option>
+                    </select>
+                </div>
+                
+                <button class="btn-add-equiv" onclick="addNewEquivalency()">
+                    <i class="fas fa-plus"></i>
+                    <span id="btn-equiv-text">Añadir Equivalencia</span>
+                </button>
+            </div>
+            
+            <!-- Lista de equivalencias -->
+            <div id="equivalencies-list" class="equivalencies-list">
+                <!-- Equivalencias se generan dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales -->
+    
+    <!-- Import SIRA Modal -->
     <div id="import-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="modal-close-btn" onclick="hideModal('import-modal')">&times;</button>
             <div class="modal-header">
-                <h2>Importar desde SIRA</h2>
-                <p>Copia y pega tu historial académico completo.</p>
+                <h2><i class="fas fa-file-import"></i> Importar desde SIRA</h2>
+                <p>Importa automáticamente tus materias aprobadas desde el Sistema de Información y Registro Académico.</p>
+                
+                <div style="background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; padding: 0.75rem; margin-top: 0.75rem; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 0.875rem;">
+                        <strong>📋 Instrucciones:</strong><br>
+                        1. Ingresa al <a href="https://sira.univalle.edu.co/sra" target="_blank" style="color: #3b82f6; text-decoration: underline;">SIRA</a><br>
+                        2. Ve a <strong>Consultas → Registro de Calificaciones</strong><br>
+                        3. Selecciona <strong>todos los periodos desde el inicio</strong><br>
+                        4. Copia <strong>TODO el contenido completo</strong> y pégalo abajo
+                    </p>
+                </div>
+                
+                <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 0.75rem; margin-top: 0.75rem; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 0.875rem; color: #f59e0b;">
+                        <strong>⚠️ Importante:</strong><br>
+                        • Las materias se organizarán <strong>automáticamente por semestres</strong> según los periodos del SIRA<br>
+                        • Es normal que algunas materias no se importen (verifica después)<br>
+                        • Solo se importan materias con nota ≥ 3.0<br>
+                        • Los semestres se crearán automáticamente
+                    </p>
+                </div>
             </div>
+            
             <div class="modal-body">
-                <textarea id="sira-data" placeholder="Pega aquí el contenido..." class="search-input" style="min-height: 200px; font-family: monospace;"></textarea>
-                <div id="import-preview" class="hidden" style="margin-top: 1rem;"></div>
+                <div class="form-group">
+                    <label for="sira-data">Historial de Calificaciones:</label>
+                    <textarea id="sira-data" placeholder="Pega aquí el historial completo de calificaciones del SIRA...&#10;&#10;Debe incluir los periodos con el formato:&#10;PERIODO: MARZO/2023 - JULIO/2023&#10;CÓDIGO  ASIGNATURA  CAL&#10;507008C  CREACIÓN DE LA FORMA  4.0" rows="12" style="font-family: monospace; font-size: 0.875rem;"></textarea>
+                </div>
+                
+                <div class="import-preview hidden" id="import-preview">
+                    <h4>Vista previa de importación:</h4>
+                    <div id="preview-content" class="preview-content"></div>
+                </div>
             </div>
+            
             <div class="modal-footer">
-                <button class="btn-primary" onclick="processSiraData()">Procesar</button>
-                <button id="import-confirmed-btn" class="btn-primary hidden" onclick="confirmSiraImport()">Confirmar</button>
+                <button id="process-sira-btn" class="btn-primary" onclick="processSiraData()">
+                    <i class="fas fa-cog"></i>
+                    Procesar Datos
+                </button>
+                <button id="import-confirmed-btn" class="btn-primary hidden" onclick="confirmSiraImport()">
+                    <i class="fas fa-check"></i>
+                    Confirmar Importación
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Add Equivalency Modal -->
+    <div id="equivalency-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="hideModal('equivalency-modal')">&times;</button>
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Añadir Equivalencia</h2>
+                <p>Busca materias del pensum para marcarlas como vistas o añade una equivalencia externa.</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="equivalency-tabs">
+                    <button class="equiv-tab active" data-tab="pensum" onclick="switchEquivTab('pensum')">Materia del Pensum</button>
+                    <button class="equiv-tab" data-tab="external" onclick="switchEquivTab('external')">Materia Externa</button>
+                </div>
+                
+                <div id="pensum-tab" class="tab-content">
+                    <div class="form-group">
+                        <label for="pensum-search">Buscar materia:</label>
+                        <input type="text" id="pensum-search" placeholder="Escribe el nombre o código de la materia" oninput="searchPensumSubjects()">
+                    </div>
+                    
+                    <div id="pensum-results" class="search-results"></div>
+                </div>
+                
+                <div id="external-tab" class="tab-content hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ext-code">Código:</label>
+                            <input type="text" id="ext-code" placeholder="Ej: EXT001">
+                        </div>
+                        <div class="form-group">
+                            <label for="ext-credits">Créditos:</label>
+                            <input type="number" id="ext-credits" min="1" max="10" value="3">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ext-name">Nombre de la materia:</label>
+                        <input type="text" id="ext-name" placeholder="Nombre completo de la materia">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ext-institution">Institución:</label>
+                        <input type="text" id="ext-institution" placeholder="Universidad o institución donde la cursaste">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ext-equivalent">Equivalente a:</label>
+                        <select id="ext-equivalent">
+                            <option value="">Selecciona una materia del pensum...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="add-equivalency-confirmed-btn" class="btn-primary" onclick="addEquivalency()">
+                    <i class="fas fa-plus"></i>
+                    Añadir Equivalencia
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Subject Modal -->
     <div id="custom-subject-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="modal-close-btn" onclick="hideModal('custom-subject-modal')">&times;</button>
-            <div class="modal-header"><h2>Crear Materia</h2></div>
-            <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
-                <input type="text" id="custom-code" placeholder="Código" class="search-input">
-                <input type="text" id="custom-name" placeholder="Nombre" class="search-input">
-                <input type="number" id="custom-credits" placeholder="Créditos" class="search-input" value="3">
-                <select id="custom-type" class="search-input">
-                    <option value="EP">Electiva Profesional</option>
-                    <option value="EC">Electiva Complementaria</option>
-                </select>
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> Crear Materia Personalizada</h2>
+                <p>Crea una materia que no esté en el pensum (ej. una electiva nueva).</p>
             </div>
+            
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="custom-code">Código:</label>
+                        <input type="text" id="custom-code" placeholder="Ej: ELEC001">
+                    </div>
+                    <div class="form-group">
+                        <label for="custom-credits">Créditos:</label>
+                        <input type="number" id="custom-credits" min="1" max="10" value="3">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="custom-name">Nombre:</label>
+                    <input type="text" id="custom-name" placeholder="Nombre de la materia">
+                </div>
+                
+                <div class="form-group">
+                    <label for="custom-type">Tipo:</label>
+                    <select id="custom-type">
+                        <option value="EP">Electiva Profesional</option>
+                        <option value="EC">Electiva Formación General</option>
+                        <option value="AP">Área Profesional</option>
+                        <option value="AB">Área Básica</option>
+                    </select>
+                </div>
+            </div>
+            
             <div class="modal-footer">
-                <button class="btn-primary" onclick="createCustomSubject()">Crear</button>
+                <button id="create-custom-subject-btn" class="btn-primary" onclick="createCustomSubject()">
+                    <i class="fas fa-plus"></i>
+                    Crear Materia
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="pensums/pensum-di.js"></script>
     <script src="pensums/electivas-fg.js"></script>
     <script src="script.js"></script>
