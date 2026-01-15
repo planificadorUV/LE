@@ -1,252 +1,342 @@
-/* Import Inter font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+// =================== CONFIGURACIÓN FIREBASE ===================
+const firebaseConfig = {
+    apiKey: "AIzaSyDnGsR3zwxDS22OFBoyR0FPntSRnDTXkno",
+    authDomain: "planificadoruv.firebaseapp.com",
+    projectId: "planificadoruv",
+    storageBucket: "planificadoruv.firebasestorage.app",
+    messagingSenderId: "289578190596",
+    appId: "1:289578190596:web:d45140a8bd7aff44b13251"
+};
 
-/* =================== VARIABLES GLOBALES (Tus originales + Nuevas) =================== */
-:root {
-    --primary-red: #d1101d;
-    --primary-red-hover: #a80c17;
-    --institutional-blue: #2563eb;
-    --institutional-blue-hover: #1d4ed8;
+// =================== VARIABLES GLOBALES ===================
+let app, auth, db, googleProvider;
+let plannerState = {};
+let currentCareerId = null;
+let unsubscribePlanner = null;
+let draggedElementId = null;
+let selectedSubjectId = null;
+let isSaving = false;
+let saveTimeout = null;
+let eventListenersSetup = false;
+
+// =================== INICIALIZACIÓN ===================
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.body.dataset.theme = savedTheme;
     
-    /* Colores semánticos */
-    --type-ab: #3b82f6; /* Azul */
-    --type-ap: #8b5cf6; /* Violeta */
-    --type-ep: #f59e0b; /* Ambar */
-    --type-ec: #10b981; /* Esmeralda */
+    try {
+        app = firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+        googleProvider = new firebase.auth.GoogleAuthProvider();
+        setupAuthStateListener();
+        setupEventListeners();
+    } catch (error) {
+        console.error('Error Firebase:', error);
+    }
+});
+
+function setupAuthStateListener() {
+    auth.onAuthStateChanged(user => {
+        const ui = {
+            auth: document.getElementById('auth-container'),
+            app: document.getElementById('app-container'),
+            career: document.getElementById('career-selection-container'),
+            loading: document.getElementById('loading-overlay')
+        };
+        
+        if(ui.loading) ui.loading.classList.add('hidden');
+
+        if (user) {
+            ui.auth?.classList.add('hidden');
+            if(!currentCareerId) {
+                ui.career?.classList.remove('hidden');
+            }
+        } else {
+            ui.auth?.classList.remove('hidden');
+            ui.app?.classList.add('hidden');
+            ui.career?.classList.add('hidden');
+        }
+    });
+}
+
+// =================== RENDERIZADO (LA PARTE QUE FALLABA) ===================
+
+function renderStatsBoard(plan) {
+    // 1. Buscamos el contenedor padre. Si no existe, no hacemos nada.
+    const topSection = document.querySelector('.stats-section-top');
+    if (!topSection) {
+        console.warn("No se encontró '.stats-section-top'");
+        return;
+    }
+
+    // 2. Calculamos las estadísticas
+    const stats = calculateStats(plan);
+
+    // 3. INYECCIÓN DIRECTA: Esto borra el "Cargando..." y pone el dashboard nuevo
+    topSection.innerHTML = `
+        <div class="section-header">
+            <h3><i class="fas fa-chart-pie" style="color: #3b82f6;"></i> Tu Progreso</h3>
+            <div class="total-credits-display">
+                <strong>${stats.completedCredits}</strong> / ${stats.totalCredits} créditos
+            </div>
+        </div>
+        
+        <div class="progress-summary-bar">
+            <div class="progress-summary-bar-fill" style="width: ${stats.completionPercentage}%"></div>
+        </div>
+
+        <div class="stats-board-horizontal">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title" style="color: var(--type-ab)">Ciclo Básico (AB)</span>
+                    <span class="stat-value">${stats.categories.AB?.completed || 0}/${stats.categories.AB?.required || 49}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill type-ab" style="width: ${stats.categories.AB ? Math.round((stats.categories.AB.completed / stats.categories.AB.required) * 100) : 0}%"></div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title" style="color: var(--type-ap)">Profesional (AP)</span>
+                    <span class="stat-value">${stats.categories.AP?.completed || 0}/${stats.categories.AP?.required || 57}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill type-ap" style="width: ${stats.categories.AP ? Math.round((stats.categories.AP.completed / stats.categories.AP.required) * 100) : 0}%"></div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title" style="color: var(--type-ep)">Elect. Prof. (EP)</span>
+                    <span class="stat-value">${stats.categories.EP?.completed || 0}/${stats.categories.EP?.required || 17}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill type-ep" style="width: ${stats.categories.EP ? Math.round((stats.categories.EP.completed / stats.categories.EP.required) * 100) : 0}%"></div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title" style="color: var(--type-ec)">Form. Gral. (EC)</span>
+                    <span class="stat-value">${stats.categories.EC?.completed || 0}/${stats.categories.EC?.required || 17}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill type-ec" style="width: ${stats.categories.EC ? Math.round((stats.categories.EC.completed / stats.categories.EC.required) * 100) : 0}%"></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title"><i class="fas fa-language"></i> Inglés (4 Niveles)</span>
+                    <span class="stat-value">${stats.englishCompleted}/${stats.englishTotal}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill extra" style="width: ${stats.englishTotal > 0 ? Math.round((stats.englishCompleted / stats.englishTotal) * 100) : 0}%"></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title"><i class="fas fa-running"></i> Deporte</span>
+                    <span class="stat-value">${stats.sportsCompleted}/${stats.sportsTotal}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill extra" style="width: ${stats.sportsCompleted >= stats.sportsTotal ? 100 : 0}%"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function calculateStats(plan) {
+    const subjects = plan.subjects || [];
+    const completed = subjects.filter(s => s.completed);
     
-    /* Tema Oscuro (Default) */
-    --bg-primary: #111827;
-    --bg-secondary: #1f2937;
-    --bg-tertiary: #374151;
-    --text-primary: #f9fafb;
-    --text-secondary: #9ca3af;
-    --border-color: #4b5563;
+    // Configuración Diseño Industrial
+    const DI_REQUIREMENTS = { total: 140, AB: 49, AP: 57, EP: 17, EC: 17 };
     
-    /* NUEVO: Gradientes para la barra moderna */
-    --gradient-main: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
-    --gradient-extra: linear-gradient(90deg, #8b5cf6 0%, #d946ef 100%);
+    const normalizeCode = (v) => String(v || '').trim().toUpperCase();
+    const getCode = (s) => normalizeCode(s?.id);
+
+    // Códigos que NO suman al total académico estándar
+    const englishCodes = new Set(['204025C', '204026C', '204027C', '204028C']);
+    const sportsCodes = new Set(['404032C', '404002C', '404010C']);
     
-    /* Layout */
-    --sidebar-width: 320px;
-    --header-height: 70px;
-    --animation-speed: 0.25s;
-    --border-radius: 12px;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    const categoryStats = {};
+    
+    Object.keys(DI_REQUIREMENTS).forEach(cat => {
+        if (cat === 'total') return;
+        let sub = subjects.filter(s => s.type === cat);
+        let comp = sub.filter(s => s.completed);
+        
+        // Exclusiones
+        if (cat === 'AB') {
+            sub = sub.filter(s => !englishCodes.has(getCode(s)));
+            comp = comp.filter(s => !englishCodes.has(getCode(s)));
+        }
+        if (cat === 'EC') {
+            sub = sub.filter(s => !sportsCodes.has(getCode(s)));
+            comp = comp.filter(s => !sportsCodes.has(getCode(s)));
+        }
+        
+        categoryStats[cat] = {
+            completed: comp.reduce((sum, s) => sum + (s.credits || 0), 0),
+            required: DI_REQUIREMENTS[cat]
+        };
+    });
+    
+    // Cálculo total limpio
+    const totalComp = completed.filter(s => !englishCodes.has(getCode(s)) && !sportsCodes.has(getCode(s)))
+                              .reduce((sum, s) => sum + (s.credits || 0), 0);
+    
+    return {
+        totalCredits: DI_REQUIREMENTS.total,
+        completedCredits: totalComp,
+        completionPercentage: Math.min(100, Math.round((totalComp / DI_REQUIREMENTS.total) * 100)),
+        categories: categoryStats,
+        englishTotal: 4,
+        englishCompleted: subjects.filter(s => englishCodes.has(getCode(s)) && s.completed).length,
+        sportsTotal: 1,
+        sportsCompleted: subjects.filter(s => sportsCodes.has(getCode(s)) && s.completed).length >= 1 ? 1 : 0
+    };
 }
 
-[data-theme="light"] {
-    --bg-primary: #f9fafb;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #f3f4f6;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --border-color: #e5e7eb;
+// =================== AUTH & CARGA DE DATOS ===================
+function loginWithGoogle() {
+    const btn = document.getElementById('google-login-btn');
+    if(btn) btn.innerHTML = 'Cargando...';
+    auth.signInWithPopup(googleProvider).catch(err => alert(err.message));
 }
 
-/* Reset y Estilos Base */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { font-size: 16px; }
-body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    line-height: 1.6;
-    transition: background-color var(--animation-speed) ease, color var(--animation-speed) ease;
+function selectCareer(careerId) {
+    currentCareerId = careerId;
+    loadPlannerData(auth.currentUser.uid, careerId);
 }
 
-.hidden { display: none !important; }
-
-/* =================== ESTILOS DEL LOGIN (RESTAURADOS) =================== */
-.auth-container,
-.career-selection {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: 
-        linear-gradient(135deg, rgba(17, 24, 39, 0.85), rgba(139, 21, 56, 0.85)),
-        url('./images/LE.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    padding: 1rem;
-    z-index: 9999; /* Aseguramos que esté por encima de todo */
+function loadPlannerData(userId, careerId) {
+    db.collection('users').doc(userId).collection('planners').doc(careerId)
+        .onSnapshot(doc => {
+            if (doc.exists) {
+                plannerState = doc.data();
+            } else {
+                plannerState = getInitialState();
+                savePlannerData();
+            }
+            initializeAppUI();
+        });
 }
 
-.auth-card {
-    max-width: 420px;
-    width: 100%;
-    padding: 3rem;
-    border-radius: 24px;
-    background: rgba(209, 16, 29, 0.15);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 32px 64px -12px rgba(209, 16, 29, 0.4);
-    position: relative;
-    overflow: hidden;
+function getInitialState() {
+    // Carga segura de pensum + electivas
+    let allSubjects = (typeof PENSUM_DI !== 'undefined' ? PENSUM_DI : []).map(s => ({...s, completed: false, location: 'bank'}));
+    if (typeof ELECTIVAS_FG !== 'undefined') {
+        allSubjects = [...allSubjects, ...ELECTIVAS_FG.map(s => ({...s, completed: false, location: 'bank'}))];
+    }
+    
+    return {
+        activePlanId: 'plan_1',
+        plans: {
+            'plan_1': {
+                name: 'Plan Principal',
+                subjects: allSubjects,
+                semesters: [ { id: 1, name: 'Semestre 1' }, { id: 2, name: 'Semestre 2' } ]
+            }
+        }
+    };
 }
 
-.auth-header { text-align: center; margin-bottom: 2rem; }
-.auth-logo { height: 96px; width: auto; margin-bottom: 1.5rem; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)); }
-.auth-header h1 { font-size: 1.75rem; font-weight: 700; color: white; margin-bottom: 0.5rem; }
-.auth-header p { color: rgba(255, 255, 255, 0.8); }
-
-.auth-btn {
-    width: 100%; padding: 1rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer;
-    background: white; color: var(--primary-red); transition: transform 0.2s;
-}
-.auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
-
-/* =================== NUEVO DASHBOARD (ESTILOS ARREGLADOS) =================== */
-
-/* Contenedor Superior (Donde estaba "Cargando...") */
-.stats-section-top {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    display: block !important; /* Forzamos que se muestre como bloque */
-    min-height: 100px; /* Evita que colapse si está vacío */
+function initializeAppUI() {
+    document.getElementById('career-selection-container').classList.add('hidden');
+    document.getElementById('app-container').classList.remove('hidden');
+    render();
 }
 
-/* Header del Dashboard */
-.stats-section-top .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    border-bottom: none; /* Quitamos línea divisoria interna */
-    padding-bottom: 0;
+function render() {
+    const plan = plannerState.plans[plannerState.activePlanId];
+    if (!plan) return;
+    renderStatsBoard(plan);
+    renderSubjectBank(plan);
+    renderSemesters(plan);
 }
 
-.total-credits-display { font-size: 1.1rem; color: var(--text-secondary); }
-.total-credits-display strong { color: var(--text-primary); font-size: 1.3rem; font-weight: 800; }
-
-/* Barra de Progreso GRANDE */
-.progress-summary-bar {
-    width: 100%;
-    height: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 999px;
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-    margin-top: 0.5rem;
-}
-[data-theme="light"] .progress-summary-bar { background: rgba(0, 0, 0, 0.08); }
-
-.progress-summary-bar-fill {
-    height: 100%;
-    border-radius: 999px;
-    background: var(--gradient-main);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+// =================== BANCO Y SEMESTRES ===================
+function renderSubjectBank(plan) {
+    const container = document.getElementById('subject-bank');
+    if (!container) return;
+    
+    const search = document.getElementById('subject-search')?.value.toLowerCase() || '';
+    const bankSubjects = plan.subjects.filter(s => s.location === 'bank' && s.name.toLowerCase().includes(search));
+    
+    // Renderizado simple
+    container.innerHTML = bankSubjects.map(s => `
+        <div class="subject-card type-${s.type} ${s.completed ? 'completed' : ''}" 
+             draggable="true" ondragstart="dragStart(event)" 
+             data-subject-id="${s.id}" onclick="toggleSubjectCompleted('${s.id}')">
+            <div class="subject-header"><span>${s.id}</span><span>${s.credits} cr</span></div>
+            <div class="subject-name">${s.name}</div>
+        </div>
+    `).join('');
 }
 
-/* Grid de Tarjetas */
-.stats-board-horizontal {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
+function renderSemesters(plan) {
+    const container = document.getElementById('semesters-grid');
+    if (!container) return;
+    
+    container.innerHTML = plan.semesters.map(sem => {
+        const subjects = plan.subjects.filter(s => s.location === `semester-${sem.id}`);
+        const cr = subjects.reduce((sum, s) => sum + (s.credits||0), 0);
+        return `
+            <div class="semester-column">
+                <div class="semester-header"><strong>${sem.name}</strong><span>${cr} cr</span></div>
+                <div class="semester-content drop-zone" ondrop="dropSubject(event, ${sem.id})" ondragover="allowDrop(event)">
+                    ${subjects.map(s => `
+                        <div class="semester-subject type-${s.type} ${s.completed ? 'completed' : ''}" draggable="true" ondragstart="dragStart(event)" data-subject-id="${s.id}">
+                             <div class="subject-header"><span>${s.id}</span><span>${s.credits} cr</span></div>
+                             <div>${s.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('') + `<button class="btn-secondary" onclick="addSemester()">+ Semestre</button>`;
 }
 
-/* Tarjetas Individuales */
-.stat-card {
-    background: var(--bg-primary); /* Fondo oscuro pero distinto al panel */
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 1rem;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-.stat-card:hover { transform: translateY(-2px); border-color: var(--text-secondary); }
-
-.stat-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-.stat-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); }
-.stat-value { font-weight: 700; color: var(--text-primary); }
-
-/* Barras pequeñas dentro de las tarjetas */
-.progress-bar {
-    width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 999px; overflow: hidden;
-}
-.progress-bar-fill { height: 100%; border-radius: 999px; }
-
-/* Colores de barras */
-.progress-bar-fill.type-ab { background: var(--type-ab); }
-.progress-bar-fill.type-ap { background: var(--type-ap); }
-.progress-bar-fill.type-ep { background: var(--type-ep); }
-.progress-bar-fill.type-ec { background: var(--type-ec); }
-.progress-bar-fill.extra { background: var(--gradient-extra); }
-
-/* =================== RESTO DEL LAYOUT (Sidebar, Header, etc.) =================== */
-.app-header {
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-    height: var(--header-height);
-    display: flex; align-items: center; padding: 0 1.5rem;
-}
-.header-content { display: flex; justify-content: space-between; width: 100%; align-items: center; }
-.header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
-.logo-main-container img { height: 40px; width: auto; }
-
-.main-content {
-    display: grid;
-    grid-template-columns: var(--sidebar-width) 1fr var(--sidebar-width);
-    height: calc(100vh - var(--header-height));
+// =================== ACCIONES (Drag & Drop, Guardado) ===================
+function dragStart(e) { draggedElementId = e.target.dataset.subjectId; }
+function allowDrop(e) { e.preventDefault(); }
+function dropSubject(e, semId) {
+    e.preventDefault();
+    const plan = plannerState.plans[plannerState.activePlanId];
+    const sub = plan.subjects.find(s => s.id === draggedElementId);
+    if(sub) { sub.location = `semester-${semId}`; savePlannerData(); }
 }
 
-.left-panel, .right-panel {
-    background: var(--bg-secondary);
-    padding: 1.5rem;
-    overflow-y: auto;
-    border-right: 1px solid var(--border-color);
-    display: flex; flex-direction: column; gap: 1rem;
-}
-.right-panel { border-right: none; border-left: 1px solid var(--border-color); }
-.center-panel { background: var(--bg-primary); padding: 1.5rem; overflow-y: auto; }
-
-/* Semestres */
-.semesters-container { display: flex; flex-direction: column; height: 100%; }
-.semesters-grid-container { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; }
-.semester-column {
-    min-width: 300px; width: 300px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color); border-radius: 12px;
-    display: flex; flex-direction: column;
-}
-.semester-header { padding: 1rem; background: var(--bg-tertiary); border-radius: 12px 12px 0 0; font-weight: 600; display: flex; justify-content: space-between; }
-.semester-content { padding: 0.75rem; flex: 1; overflow-y: auto; }
-.semester-subject, .subject-card {
-    background: var(--bg-primary); border: 1px solid var(--border-color); border-left: 4px solid var(--border-color);
-    border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; cursor: pointer;
+function toggleSubjectCompleted(id) {
+    const plan = plannerState.plans[plannerState.activePlanId];
+    const sub = plan.subjects.find(s => s.id === id);
+    if(sub) { sub.completed = !sub.completed; savePlannerData(); }
 }
 
-/* Colores de materias */
-.semester-subject.type-AB, .subject-card.type-AB { border-left-color: var(--type-ab); }
-.semester-subject.type-AP, .subject-card.type-AP { border-left-color: var(--type-ap); }
-.semester-subject.type-EP, .subject-card.type-EP { border-left-color: var(--type-ep); }
-.semester-subject.type-EC, .subject-card.type-EC { border-left-color: var(--type-ec); }
-.semester-subject.completed, .subject-card.completed { border-left-color: #10b981; opacity: 0.8; }
-
-/* Responsive */
-@media (max-width: 1400px) { .stats-board-horizontal { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 768px) {
-    .main-content { grid-template-columns: 1fr; }
-    .left-panel, .right-panel { display: none; }
-    .stats-board-horizontal { grid-template-columns: 1fr; }
+function addSemester() {
+    const plan = plannerState.plans[plannerState.activePlanId];
+    plan.semesters.push({ id: plan.semesters.length + 1, name: `Semestre ${plan.semesters.length + 1}` });
+    savePlannerData();
 }
 
-/* Utilitarios */
-.btn-primary, .btn-secondary, .btn-danger {
-    padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; justify-content: center;
+function savePlannerData() {
+    if(isSaving) return;
+    isSaving = true;
+    db.collection('users').doc(auth.currentUser.uid).collection('planners').doc(currentCareerId)
+        .set(plannerState).then(() => { render(); isSaving = false; });
 }
-.btn-primary { background: var(--primary-red); color: white; width: 100%; }
-.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); }
-.btn-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); color: var(--text-primary); cursor: pointer; }
 
-/* SEARCH INPUT */
-.search-input { width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); margin-bottom: 1rem; }
+function setupEventListeners() {
+    document.getElementById('google-login-btn')?.addEventListener('click', loginWithGoogle);
+    document.getElementById('subject-search')?.addEventListener('input', render);
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        const t = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.body.dataset.theme = t; localStorage.setItem('theme', t);
+    });
+}
