@@ -1,130 +1,202 @@
 /* Import Inter font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* =================== VARIABLES GLOBALES =================== */
+/* =================== VARIABLES GLOBALES (Tus originales + Nuevas) =================== */
 :root {
-    /* Colores Institucionales y de Marca */
     --primary-red: #d1101d;
     --primary-red-hover: #a80c17;
     --institutional-blue: #2563eb;
+    --institutional-blue-hover: #1d4ed8;
     
-    /* Colores Semánticos (Materias) */
+    /* Colores semánticos */
     --type-ab: #3b82f6; /* Azul */
     --type-ap: #8b5cf6; /* Violeta */
-    --type-ep: #f59e0b; /* Ambar/Naranja */
-    --type-ec: #10b981; /* Verde Esmeralda */
+    --type-ep: #f59e0b; /* Ambar */
+    --type-ec: #10b981; /* Esmeralda */
     
-    /* Tema Oscuro (Por defecto) */
-    --bg-primary: #111827;     /* Fondo más oscuro (Main) */
-    --bg-secondary: #1f2937;   /* Fondo paneles/tarjetas */
-    --bg-tertiary: #374151;    /* Fondo inputs/elementos */
+    /* Tema Oscuro (Default) */
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
     --text-primary: #f9fafb;
     --text-secondary: #9ca3af;
     --border-color: #4b5563;
     
-    /* Gradientes */
-    --gradient-main: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%); /* Cian a Azul */
-    --gradient-extra: linear-gradient(90deg, #8b5cf6 0%, #d946ef 100%); /* Violeta a Rosa */
-
+    /* NUEVO: Gradientes para la barra moderna */
+    --gradient-main: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+    --gradient-extra: linear-gradient(90deg, #8b5cf6 0%, #d946ef 100%);
+    
     /* Layout */
-    --sidebar-width: 300px;
+    --sidebar-width: 320px;
     --header-height: 70px;
     --animation-speed: 0.25s;
+    --border-radius: 12px;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="light"] {
-    --bg-primary: #f3f4f6;
+    --bg-primary: #f9fafb;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #e5e7eb;
+    --bg-tertiary: #f3f4f6;
     --text-primary: #111827;
-    --text-secondary: #4b5563;
-    --border-color: #d1d5db;
+    --text-secondary: #6b7280;
+    --border-color: #e5e7eb;
 }
 
-/* =================== RESET BÁSICO =================== */
+/* Reset y Estilos Base */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; font-size: 16px; }
-
+html { font-size: 16px; }
 body {
     font-family: 'Inter', sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
-    overflow: hidden; /* Evita scroll doble */
+    line-height: 1.6;
+    transition: background-color var(--animation-speed) ease, color var(--animation-speed) ease;
 }
 
 .hidden { display: none !important; }
 
-/* =================== PANTALLAS DE AUTENTICACIÓN (LOGIN) =================== */
-.auth-container, .career-selection {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
+/* =================== ESTILOS DEL LOGIN (RESTAURADOS) =================== */
+.auth-container,
+.career-selection {
+    min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* Fondo con imagen y superposición */
-    background: linear-gradient(rgba(17, 24, 39, 0.85), rgba(139, 21, 56, 0.9)), url('images/LE.jpg');
+    background: 
+        linear-gradient(135deg, rgba(17, 24, 39, 0.85), rgba(139, 21, 56, 0.85)),
+        url('./images/LE.jpg');
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    padding: 1rem;
+    z-index: 9999; /* Aseguramos que esté por encima de todo */
 }
 
 .auth-card {
+    max-width: 420px;
     width: 100%;
-    max-width: 400px;
-    padding: 2.5rem;
-    background: rgba(31, 41, 55, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-    text-align: center;
+    padding: 3rem;
+    border-radius: 24px;
+    background: rgba(209, 16, 29, 0.15);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 32px 64px -12px rgba(209, 16, 29, 0.4);
+    position: relative;
+    overflow: hidden;
 }
 
-.auth-header img { height: 80px; margin-bottom: 1rem; }
-.auth-header h1 { color: white; font-size: 1.5rem; margin-bottom: 0.5rem; }
-.auth-header p { color: #9ca3af; margin-bottom: 2rem; }
+.auth-header { text-align: center; margin-bottom: 2rem; }
+.auth-logo { height: 96px; width: auto; margin-bottom: 1.5rem; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)); }
+.auth-header h1 { font-size: 1.75rem; font-weight: 700; color: white; margin-bottom: 0.5rem; }
+.auth-header p { color: rgba(255, 255, 255, 0.8); }
 
-.career-options { display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 500px; }
-.career-select-btn {
-    display: flex; align-items: center; gap: 1rem;
-    padding: 1.5rem; width: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+.auth-btn {
+    width: 100%; padding: 1rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer;
+    background: white; color: var(--primary-red); transition: transform 0.2s;
+}
+.auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+
+/* =================== NUEVO DASHBOARD (ESTILOS ARREGLADOS) =================== */
+
+/* Contenedor Superior (Donde estaba "Cargando...") */
+.stats-section-top {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    color: white; cursor: pointer; text-align: left;
-    transition: all 0.2s;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: block !important; /* Forzamos que se muestre como bloque */
+    min-height: 100px; /* Evita que colapse si está vacío */
 }
-.career-select-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
-.career-info h3 { font-size: 1.2rem; font-weight: 600; }
 
-/* =================== LAYOUT DE LA APP =================== */
-.app-container { display: flex; flex-direction: column; height: 100vh; }
+/* Header del Dashboard */
+.stats-section-top .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    border-bottom: none; /* Quitamos línea divisoria interna */
+    padding-bottom: 0;
+}
 
-/* Header */
+.total-credits-display { font-size: 1.1rem; color: var(--text-secondary); }
+.total-credits-display strong { color: var(--text-primary); font-size: 1.3rem; font-weight: 800; }
+
+/* Barra de Progreso GRANDE */
+.progress-summary-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+}
+[data-theme="light"] .progress-summary-bar { background: rgba(0, 0, 0, 0.08); }
+
+.progress-summary-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--gradient-main);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Grid de Tarjetas */
+.stats-board-horizontal {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+/* Tarjetas Individuales */
+.stat-card {
+    background: var(--bg-primary); /* Fondo oscuro pero distinto al panel */
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.stat-card:hover { transform: translateY(-2px); border-color: var(--text-secondary); }
+
+.stat-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+.stat-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); }
+.stat-value { font-weight: 700; color: var(--text-primary); }
+
+/* Barras pequeñas dentro de las tarjetas */
+.progress-bar {
+    width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 999px; overflow: hidden;
+}
+.progress-bar-fill { height: 100%; border-radius: 999px; }
+
+/* Colores de barras */
+.progress-bar-fill.type-ab { background: var(--type-ab); }
+.progress-bar-fill.type-ap { background: var(--type-ap); }
+.progress-bar-fill.type-ep { background: var(--type-ep); }
+.progress-bar-fill.type-ec { background: var(--type-ec); }
+.progress-bar-fill.extra { background: var(--gradient-extra); }
+
+/* =================== RESTO DEL LAYOUT (Sidebar, Header, etc.) =================== */
 .app-header {
-    height: var(--header-height);
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
-    padding: 0 1.5rem;
-    display: flex; justify-content: space-between; align-items: center;
-    flex-shrink: 0;
+    height: var(--header-height);
+    display: flex; align-items: center; padding: 0 1.5rem;
 }
-
+.header-content { display: flex; justify-content: space-between; width: 100%; align-items: center; }
 .header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
-.logo-main-container img { height: 40px; }
-.app-title { font-weight: 600; font-size: 1.2rem; }
+.logo-main-container img { height: 40px; width: auto; }
 
-/* Contenido Principal (3 Columnas) */
 .main-content {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr var(--sidebar-width);
     height: calc(100vh - var(--header-height));
-    overflow: hidden;
 }
 
 .left-panel, .right-panel {
@@ -132,155 +204,49 @@ body {
     padding: 1.5rem;
     overflow-y: auto;
     border-right: 1px solid var(--border-color);
-    display: flex; flex-direction: column; gap: 1.5rem;
+    display: flex; flex-direction: column; gap: 1rem;
 }
 .right-panel { border-right: none; border-left: 1px solid var(--border-color); }
-
-.center-panel {
-    background: var(--bg-primary);
-    padding: 1.5rem;
-    overflow-y: auto;
-    display: flex; flex-direction: column;
-}
-
-/* =================== DASHBOARD DE PROGRESO (ESTILO NUEVO) =================== */
-.stats-section-top {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-    display: block; /* Importante para que los elementos se apilen */
-}
-
-/* Encabezado del Dashboard */
-.stats-section-top .section-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 0.5rem; border: none; padding: 0;
-}
-
-.total-credits-display { font-size: 1.1rem; color: var(--text-secondary); }
-.total-credits-display strong { color: var(--text-primary); font-size: 1.3rem; font-weight: 800; }
-
-/* Barra Grande */
-.progress-summary-bar {
-    width: 100%; height: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 999px; overflow: hidden;
-    margin-bottom: 1.5rem;
-}
-[data-theme="light"] .progress-summary-bar { background: rgba(0, 0, 0, 0.1); }
-
-.progress-summary-bar-fill {
-    height: 100%; background: var(--gradient-main);
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
-    transition: width 0.6s ease;
-}
-
-/* Grid de Tarjetas Pequeñas */
-.stats-board-horizontal {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columnas */
-    gap: 1rem;
-}
-
-.stat-card {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 10px; padding: 1rem;
-    transition: transform 0.2s;
-}
-.stat-card:hover { transform: translateY(-2px); border-color: var(--text-secondary); }
-
-.stat-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-.stat-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); }
-.stat-value { font-weight: 700; color: var(--text-primary); }
-
-.progress-bar {
-    height: 6px; background: rgba(255, 255, 255, 0.1);
-    border-radius: 999px; overflow: hidden;
-}
-[data-theme="light"] .progress-bar { background: rgba(0, 0, 0, 0.1); }
-
-.progress-bar-fill { height: 100%; border-radius: 999px; }
-.progress-bar-fill.type-ab { background: var(--type-ab); }
-.progress-bar-fill.type-ap { background: var(--type-ap); }
-.progress-bar-fill.type-ep { background: var(--type-ep); }
-.progress-bar-fill.type-ec { background: var(--type-ec); }
-.progress-bar-fill.extra { background: var(--gradient-extra); }
-
-/* =================== COMPONENTES INTERNOS =================== */
-/* Buscador */
-.search-input {
-    width: 100%; padding: 0.75rem 2.5rem 0.75rem 1rem;
-    background: var(--bg-tertiary); border: 1px solid var(--border-color);
-    border-radius: 8px; color: var(--text-primary);
-}
+.center-panel { background: var(--bg-primary); padding: 1.5rem; overflow-y: auto; }
 
 /* Semestres */
-.semesters-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.semesters-grid-container {
-    display: flex; gap: 1rem; overflow-x: auto;
-    padding-bottom: 1rem; height: 100%;
-}
+.semesters-container { display: flex; flex-direction: column; height: 100%; }
+.semesters-grid-container { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; }
 .semester-column {
     min-width: 300px; width: 300px;
-    background: var(--bg-secondary); border: 1px solid var(--border-color);
-    border-radius: 12px; display: flex; flex-direction: column;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color); border-radius: 12px;
+    display: flex; flex-direction: column;
 }
-.semester-header {
-    padding: 1rem; background: var(--bg-tertiary);
-    border-radius: 12px 12px 0 0; font-weight: 600;
-    display: flex; justify-content: space-between;
-}
+.semester-header { padding: 1rem; background: var(--bg-tertiary); border-radius: 12px 12px 0 0; font-weight: 600; display: flex; justify-content: space-between; }
 .semester-content { padding: 0.75rem; flex: 1; overflow-y: auto; }
-.drop-zone { min-height: 100%; display: flex; flex-direction: column; gap: 0.5rem; }
-
-/* Materias (Cards) */
 .semester-subject, .subject-card {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-left: 4px solid var(--border-color);
-    border-radius: 6px; padding: 0.75rem;
-    cursor: pointer; user-select: none;
+    background: var(--bg-primary); border: 1px solid var(--border-color); border-left: 4px solid var(--border-color);
+    border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; cursor: pointer;
 }
-.subject-card:hover, .semester-subject:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 
-/* Colores de Borde por Tipo */
-.type-AB { border-left-color: var(--type-ab) !important; }
-.type-AP { border-left-color: var(--type-ap) !important; }
-.type-EP { border-left-color: var(--type-ep) !important; }
-.type-EC { border-left-color: var(--type-ec) !important; }
-.completed { border-left-color: #10b981 !important; opacity: 0.7; }
-
-/* Enlaces de Apoyo */
-.support-link {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.8rem; background: var(--bg-tertiary);
-    border: 1px solid var(--border-color); border-radius: 8px;
-    color: var(--text-primary); text-decoration: none !important; /* IMPORTANTE */
-    margin-bottom: 0.5rem; transition: all 0.2s;
-}
-.support-link:hover { background: var(--bg-primary); border-color: var(--type-ab); }
-.support-link i { color: var(--type-ab); }
-
-/* Botones */
-.btn-primary, .btn-secondary, .btn-danger {
-    padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; border: none; font-weight: 500;
-    display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center;
-}
-.btn-primary { background: var(--primary-red); color: white; width: 100%; }
-.btn-secondary { background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); }
-.btn-danger { background: #ef4444; color: white; }
-.btn-icon { width: 36px; height: 36px; border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+/* Colores de materias */
+.semester-subject.type-AB, .subject-card.type-AB { border-left-color: var(--type-ab); }
+.semester-subject.type-AP, .subject-card.type-AP { border-left-color: var(--type-ap); }
+.semester-subject.type-EP, .subject-card.type-EP { border-left-color: var(--type-ep); }
+.semester-subject.type-EC, .subject-card.type-EC { border-left-color: var(--type-ec); }
+.semester-subject.completed, .subject-card.completed { border-left-color: #10b981; opacity: 0.8; }
 
 /* Responsive */
-@media (max-width: 1200px) {
-    .stats-board-horizontal { grid-template-columns: repeat(2, 1fr); }
-}
+@media (max-width: 1400px) { .stats-board-horizontal { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px) {
     .main-content { grid-template-columns: 1fr; }
     .left-panel, .right-panel { display: none; }
     .stats-board-horizontal { grid-template-columns: 1fr; }
 }
+
+/* Utilitarios */
+.btn-primary, .btn-secondary, .btn-danger {
+    padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; justify-content: center;
+}
+.btn-primary { background: var(--primary-red); color: white; width: 100%; }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); }
+.btn-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); color: var(--text-primary); cursor: pointer; }
+
+/* SEARCH INPUT */
+.search-input { width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); margin-bottom: 1rem; }
