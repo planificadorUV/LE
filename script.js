@@ -8,7 +8,7 @@ const firebaseConfig = {
     appId: "1:289578190596:web:d45140a8bd7aff44b13251"
 };
 
-// =================== VARIABLES ===================
+// =================== VARIABLES GLOBALES ===================
 let app, auth, db, googleProvider;
 let plannerState = {};
 let currentCareerId = null;
@@ -17,6 +17,7 @@ let draggedElementId = null;
 let selectedSubjectId = null;
 let isSaving = false;
 let saveTimeout = null;
+let eventListenersSetup = false;
 
 // =================== INICIALIZACIÓN ===================
 document.addEventListener('DOMContentLoaded', function() {
@@ -59,18 +60,20 @@ function setupAuthStateListener() {
     });
 }
 
-// =================== FUNCIÓN CLAVE: RENDERIZAR DASHBOARD ===================
-// Esta función arregla el problema de "Cargando..."
-function renderStatsBoard(plan) {
-    // 1. Buscamos el contenedor padre que SÍ existe en el HTML
-    const topSection = document.querySelector('.stats-section-top');
-    if (!topSection) return;
+// =================== RENDERIZADO (LA PARTE QUE FALLABA) ===================
 
-    // 2. Calculamos estadísticas
+function renderStatsBoard(plan) {
+    // 1. Buscamos el contenedor padre. Si no existe, no hacemos nada.
+    const topSection = document.querySelector('.stats-section-top');
+    if (!topSection) {
+        console.warn("No se encontró '.stats-section-top'");
+        return;
+    }
+
+    // 2. Calculamos las estadísticas
     const stats = calculateStats(plan);
 
-    // 3. ¡IMPORTANTE! Reemplazamos todo el contenido del contenedor
-    // Esto borra el mensaje de "Cargando..." e inserta el Dashboard nuevo
+    // 3. INYECCIÓN DIRECTA: Esto borra el "Cargando..." y pone el dashboard nuevo
     topSection.innerHTML = `
         <div class="section-header">
             <h3><i class="fas fa-chart-pie" style="color: #3b82f6;"></i> Tu Progreso</h3>
@@ -147,30 +150,28 @@ function renderStatsBoard(plan) {
     `;
 }
 
-// =================== CÁLCULOS ===================
 function calculateStats(plan) {
     const subjects = plan.subjects || [];
     const completed = subjects.filter(s => s.completed);
     
-    // Requisitos Diseño Industrial
+    // Configuración Diseño Industrial
     const DI_REQUIREMENTS = { total: 140, AB: 49, AP: 57, EP: 17, EC: 17 };
     
     const normalizeCode = (v) => String(v || '').trim().toUpperCase();
     const getCode = (s) => normalizeCode(s?.id);
 
-    // Códigos Excluidos de suma normal
+    // Códigos que NO suman al total académico estándar
     const englishCodes = new Set(['204025C', '204026C', '204027C', '204028C']);
     const sportsCodes = new Set(['404032C', '404002C', '404010C']);
     
     const categoryStats = {};
     
-    // Calcular categorías
     Object.keys(DI_REQUIREMENTS).forEach(cat => {
         if (cat === 'total') return;
         let sub = subjects.filter(s => s.type === cat);
         let comp = sub.filter(s => s.completed);
         
-        // Filtros especiales
+        // Exclusiones
         if (cat === 'AB') {
             sub = sub.filter(s => !englishCodes.has(getCode(s)));
             comp = comp.filter(s => !englishCodes.has(getCode(s)));
@@ -186,7 +187,7 @@ function calculateStats(plan) {
         };
     });
     
-    // Totales
+    // Cálculo total limpio
     const totalComp = completed.filter(s => !englishCodes.has(getCode(s)) && !sportsCodes.has(getCode(s)))
                               .reduce((sum, s) => sum + (s.credits || 0), 0);
     
@@ -228,7 +229,7 @@ function loadPlannerData(userId, careerId) {
 }
 
 function getInitialState() {
-    // Carga segura del pensum
+    // Carga segura de pensum + electivas
     let allSubjects = (typeof PENSUM_DI !== 'undefined' ? PENSUM_DI : []).map(s => ({...s, completed: false, location: 'bank'}));
     if (typeof ELECTIVAS_FG !== 'undefined') {
         allSubjects = [...allSubjects, ...ELECTIVAS_FG.map(s => ({...s, completed: false, location: 'bank'}))];
@@ -254,7 +255,8 @@ function initializeAppUI() {
 
 function render() {
     const plan = plannerState.plans[plannerState.activePlanId];
-    renderStatsBoard(plan); // Aquí se llama a la función corregida
+    if (!plan) return;
+    renderStatsBoard(plan);
     renderSubjectBank(plan);
     renderSemesters(plan);
 }
@@ -267,7 +269,7 @@ function renderSubjectBank(plan) {
     const search = document.getElementById('subject-search')?.value.toLowerCase() || '';
     const bankSubjects = plan.subjects.filter(s => s.location === 'bank' && s.name.toLowerCase().includes(search));
     
-    // Agrupar por tipo para el ejemplo
+    // Renderizado simple
     container.innerHTML = bankSubjects.map(s => `
         <div class="subject-card type-${s.type} ${s.completed ? 'completed' : ''}" 
              draggable="true" ondragstart="dragStart(event)" 
@@ -301,7 +303,7 @@ function renderSemesters(plan) {
     }).join('') + `<button class="btn-secondary" onclick="addSemester()">+ Semestre</button>`;
 }
 
-// =================== ACCIONES ===================
+// =================== ACCIONES (Drag & Drop, Guardado) ===================
 function dragStart(e) { draggedElementId = e.target.dataset.subjectId; }
 function allowDrop(e) { e.preventDefault(); }
 function dropSubject(e, semId) {
