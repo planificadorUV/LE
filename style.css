@@ -3058,9 +3058,9 @@ body.zen-mode .right-panel {
 
 .schedule-block-name {
     font-size: 0.62rem;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
     overflow: hidden;
-    text-overflow: ellipsis;
     opacity: 0.9;
 }
 

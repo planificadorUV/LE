@@ -2651,8 +2651,8 @@ function parseScheduleString(str) {
         const dayKey = m[1].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
         const raw = m[4].trim();
         // Extract location: "Edf. D6 (D6) -> 1006 -- CS -- MELENDEZ"
-        const locM = raw.match(/Edf\.\s*(\S+)\s*\([^)]*\)\s*->\s*([^\s-]+)/i);
-        const location = locM ? `${locM[1]}-${locM[2]}` : raw.replace(/\s*--.*$/,'').trim();
+        const locM = raw.match(/Edf\.\s*\S+\s*\([^)]*\)\s*->\s*(.+?)\s*--/i);
+        const location = locM ? locM[1].trim().replace(/-/g, ' · ') : raw.replace(/\s*--.*$/,'').trim();
         sessions.push({ day: SCHEDULE_DAY_MAP[dayKey] || m[1], startTime: m[2], endTime: m[3], location });
     }
     return sessions;
@@ -2674,7 +2674,16 @@ function parseScheduleData(text) {
             const rowM = lines[i].match(/^(\d+)\t[^\t]+\t(\d+)\t\d+\t(.+)/);
             if (!rowM) continue;
             const groupNum = rowM[2].trim();
-            const schedStr = rowM[3].trim();
+            let schedStr = rowM[3].trim();
+            // Collect continuation lines (multi-day schedules on separate lines, no tab prefix)
+            let nextIdx = i + 1;
+            while (nextIdx < lines.length) {
+                const nxt = lines[nextIdx].trim();
+                if (/^(LUN|MAR|MI[EÉ]|JUE|VIE|S[AÁ]B):/i.test(nxt)) {
+                    schedStr += ' ' + nxt;
+                    nextIdx++;
+                } else { break; }
+            }
             const sessions = parseScheduleString(schedStr);
             if (!sessions.length) continue;
             // Teacher: next non-empty line that looks like a name (no tabs, not email)
@@ -2796,8 +2805,9 @@ function renderScheduleGrid() {
     const empty = document.getElementById('schedule-empty-state');
     const courses = Object.entries(schedule);
 
-    if (!courses.length) { grid.classList.add('hidden'); empty.style.display = ''; return; }
-    empty.style.display = 'none'; grid.classList.remove('hidden');
+    const exportBar = document.getElementById('schedule-export-bar');
+    if (!courses.length) { grid.classList.add('hidden'); empty.style.display = ''; if (exportBar) exportBar.classList.add('hidden'); return; }
+    empty.style.display = 'none'; grid.classList.remove('hidden'); if (exportBar) exportBar.classList.remove('hidden');
 
     // Determine hour range from actual sessions
     let minHour = SCHEDULE_HOUR_END, maxHour = SCHEDULE_HOUR_START;
@@ -2878,8 +2888,94 @@ function getContrastColor(hex) {
     return (r*299+g*587+b*114)/1000 > 128 ? '#111' : '#fff';
 }
 
+async function exportScheduleAsImage() {
+    const el = document.getElementById('schedule-grid-wrapper');
+    if (!el || document.getElementById('schedule-empty-state').style.display === '') {
+        showNotification('No hay horario para exportar', 'error'); return;
+    }
+    if (typeof html2canvas === 'undefined') { showNotification('Librería no cargada, recarga la página', 'error'); return; }
+    showNotification('Generando imagen...', 'info');
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim() || '#ffffff' });
+    const a = document.createElement('a');
+    a.download = 'horario.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+}
+
+async function exportScheduleAsPDF() {
+    const el = document.getElementById('schedule-grid-wrapper');
+    if (!el || document.getElementById('schedule-empty-state').style.display === '') {
+        showNotification('No hay horario para exportar', 'error'); return;
+    }
+    if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+        showNotification('Librerías no cargadas, recarga la página', 'error'); return;
+    }
+    showNotification('Generando PDF...', 'info');
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const w = canvas.width / 2, h = canvas.height / 2;
+    const pdf = new jsPDF({ orientation: w > h ? 'landscape' : 'portrait', unit: 'px', format: [w, h] });
+    pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+    pdf.save('horario.pdf');
+}
+
+function exportScheduleAsICS() {
+    const schedule = getScheduleState();
+    const courses = Object.entries(schedule);
+    if (!courses.length) { showNotification('No hay horario para exportar', 'error'); return; }
+
+    const DAY_BYDAY = { 'Lunes':'MO','Martes':'TU','Miércoles':'WE','Jueves':'TH','Viernes':'FR','Sábado':'SA' };
+    const DAY_NUM  = { 'Lunes':1,'Martes':2,'Miércoles':3,'Jueves':4,'Viernes':5,'Sábado':6 };
+    const pad = n => String(n).padStart(2,'0');
+
+    const today = new Date();
+    const dow = today.getDay(); // 0=Sun
+    const toMon = dow === 0 ? 1 : dow === 1 ? 0 : 8 - dow;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + toMon);
+    monday.setHours(0,0,0,0);
+
+    function dtStr(dayName, timeStr) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + (DAY_NUM[dayName] - 1));
+        const [h,m] = timeStr.split(':').map(Number);
+        return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(h)}${pad(m||0)}00`;
+    }
+
+    const now = new Date().toISOString().replace(/[-:.]/g,'').slice(0,15)+'Z';
+    const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//PlanificadorUV//ES','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+
+    for (const [code, c] of courses) {
+        for (const s of c.sessions || []) {
+            const byday = DAY_BYDAY[s.day];
+            if (!byday) continue;
+            lines.push('BEGIN:VEVENT',
+                `UID:${code}-${byday}-${dtStr(s.day, s.startTime)}@planificadoruv`,
+                `DTSTAMP:${now}`,
+                `DTSTART:${dtStr(s.day, s.startTime)}`,
+                `DTEND:${dtStr(s.day, s.endTime)}`,
+                `RRULE:FREQ=WEEKLY;BYDAY=${byday};COUNT=20`,
+                `SUMMARY:${code} - ${c.name}`,
+                ...(s.location ? [`LOCATION:${s.location}`] : []),
+                'END:VEVENT');
+        }
+    }
+    lines.push('END:VCALENDAR');
+
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'horario.ics'; a.click();
+    URL.revokeObjectURL(url);
+    showNotification('Horario exportado como ICS', 'success');
+}
+
 window.showScheduleModal = showScheduleModal;
 window.processScheduleImport = processScheduleImport;
 window.confirmGroupSelection = confirmGroupSelection;
 window.clearSchedule = clearSchedule;
 window.changeScheduleCourseColor = changeScheduleCourseColor;
+window.exportScheduleAsImage = exportScheduleAsImage;
+window.exportScheduleAsPDF = exportScheduleAsPDF;
+window.exportScheduleAsICS = exportScheduleAsICS;

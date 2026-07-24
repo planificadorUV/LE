@@ -17,6 +17,7 @@
     
     <!-- jsPDF para exportar PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body data-theme="dark">
     
@@ -500,7 +501,7 @@
             </div>
 
             <!-- Weekly grid -->
-            <div style="flex:1;overflow:auto;padding:0 1.5rem 1.5rem;">
+            <div style="flex:1;overflow:auto;padding:0 1.5rem 1rem;">
                 <div id="schedule-grid-wrapper">
                     <div id="schedule-empty-state" style="text-align:center;padding:3rem;color:var(--text-secondary);">
                         <i class="fas fa-calendar-week" style="font-size:3rem;opacity:0.3;"></i>
@@ -508,6 +509,18 @@
                     </div>
                     <div id="schedule-grid" class="hidden"></div>
                 </div>
+            </div>
+            <!-- Export bar (shown when grid has content) -->
+            <div id="schedule-export-bar" class="hidden" style="flex-shrink:0;padding:0.6rem 1.5rem 1rem;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn-secondary" onclick="exportScheduleAsImage()" style="font-size:0.8rem;">
+                    <i class="fas fa-image"></i> PNG
+                </button>
+                <button class="btn-secondary" onclick="exportScheduleAsPDF()" style="font-size:0.8rem;">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+                <button class="btn-secondary" onclick="exportScheduleAsICS()" style="font-size:0.8rem;">
+                    <i class="fas fa-calendar-plus"></i> ICS (Google Cal / Outlook)
+                </button>
             </div>
         </div>
     </div>
