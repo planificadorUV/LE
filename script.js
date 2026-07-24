@@ -54,29 +54,6 @@ function showNotification(message, type = 'info', duration = 3000) {
     }, duration);
 }
 
-// =================== INICIALIZACIÓN FIREBASE ===================
-function initializeFirebase() {
-    try {
-        if (typeof firebase === 'undefined') {
-            console.error('Firebase no está disponible');
-            showNotification('Error: Firebase no se pudo cargar', 'error');
-            return false;
-        }
-
-        app = firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        db = firebase.firestore();
-        googleProvider = new firebase.auth.GoogleAuthProvider();
-        
-        console.log('Firebase inicializado correctamente');
-        return true;
-    } catch (error) {
-        console.error('Error inicializando Firebase:', error);
-        showNotification('Error inicializando Firebase', 'error');
-        return false;
-    }
-}
-
 // =================== FUNCIONES DE AUTENTICACIÓN ===================
 function setupLoginEventListeners() {
     console.log('Configurando event listeners de login...');
@@ -612,7 +589,7 @@ function loadPlannerData(userId, careerId) {
 }
 
 function savePlannerData() {
-    if (!auth.currentUser || !currentCareerId || isSaving) return;
+    if (!auth.currentUser || !currentCareerId) return;
 
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
@@ -688,21 +665,7 @@ function initializeAppUI(user) {
 function setupEventListeners() {
     console.log('Configurando event listeners...');
 
-    // Auth listeners
-    const googleBtn = document.getElementById('google-login-btn');
-    if (googleBtn) {
-        googleBtn.addEventListener('click', loginWithGoogle);
-    }
-
-    const emailForm = document.getElementById('email-login-form');
-    if (emailForm) {
-        emailForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            loginWithEmail(email, password);
-        });
-    }
+    // Auth listeners are set up once in setupLoginEventListeners() at DOMContentLoaded
 
     const toggleRegisterBtn = document.getElementById('toggle-register');
     if (toggleRegisterBtn) {
@@ -1047,7 +1010,7 @@ function calculateStats(plan) {
         totalCredits: DI_REQUIREMENTS.total,
         completedCredits: totalCompletedCredits,
         completionPercentage: Math.round((totalCompletedCredits / DI_REQUIREMENTS.total) * 100),
-        englishTotal: englishSubjects.length,
+        englishTotal: 4,
         englishCompleted,
         sportsTotal: 1,
         sportsCompleted,
@@ -1136,6 +1099,10 @@ function renderSubjectBank(plan) {
     }
 }
 
+function escapeHTML(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function createSubjectCardHTML(subject, plan) {
     const canTake = canTakeSubject(subject, plan);
     
@@ -1162,7 +1129,7 @@ function createSubjectCardHTML(subject, plan) {
                 <span class="subject-credits">${subject.credits || 0} cr</span>
             </div>
             
-            <div class="subject-name">${subject.name}</div>
+            <div class="subject-name">${escapeHTML(subject.name)}</div>
             
             <div class="subject-type">${getTypeLabel(subject.type)}</div>
             
@@ -1207,8 +1174,9 @@ function renderSemesters(plan) {
             
             <div class="semester-content">
                 <div class="drop-zone ${subjects.length ? 'has-subjects' : ''}" 
-                     ondrop="dropSubject(event, ${semester.id})" 
+                     ondrop="dropSubject(event, ${semester.id})"
                      ondragover="allowDrop(event)"
+                     ondragleave="event.currentTarget.classList.remove('drag-over')"
                      data-semester-id="${semester.id}">
                     ${subjects.length ? 
                         subjects.map(s => createSemesterSubjectHTML(s)).join('') : 
@@ -1235,7 +1203,7 @@ function createSemesterSubjectHTML(subject) {
                 <span class="subject-credits">${subject.credits || 0} cr</span>
             </div>
             
-            <div class="subject-name">${subject.name}</div>
+            <div class="subject-name">${escapeHTML(subject.name)}</div>
             
             <div class="subject-type">${getTypeLabel(subject.type)}</div>
             
