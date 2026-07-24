@@ -325,6 +325,11 @@
                 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
+                    <button id="schedule-btn" class="btn-secondary" onclick="showScheduleModal()">
+                        <i class="fas fa-calendar-week"></i>
+                        Horario Semanal
+                    </button>
+
                     <button id="export-plan-btn" class="btn-secondary" onclick="exportPlan()">
                         <i class="fas fa-download"></i>
                         Exportar Plan
@@ -460,6 +465,49 @@
                     <i class="fas fa-check"></i>
                     Confirmar Importación
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="modal-overlay hidden" style="z-index:1100;">
+        <div class="modal-content" style="max-width:1100px;width:95vw;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;">
+            <button class="modal-close-btn" onclick="hideModal('schedule-modal')">&times;</button>
+            <div class="modal-header" style="flex-shrink:0;">
+                <h2><i class="fas fa-calendar-week"></i> Horario Semanal</h2>
+                <p>Importa la programación académica para generar tu horario visual.</p>
+            </div>
+
+            <!-- Import area (collapsible) -->
+            <div id="schedule-import-area" style="flex-shrink:0;padding:0 1.5rem 0.75rem;">
+                <textarea id="schedule-data" rows="4" placeholder="Pega aquí el texto de la Programación Académica (univalle.edu.co/programacion-academica)..." style="width:100%;font-family:monospace;font-size:0.8rem;resize:vertical;box-sizing:border-box;background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:6px;padding:0.6rem;"></textarea>
+                <div style="display:flex;gap:8px;margin-top:6px;">
+                    <button class="btn-primary" onclick="processScheduleImport()" style="flex:1;">
+                        <i class="fas fa-magic"></i> Procesar Horario
+                    </button>
+                    <button class="btn-secondary" onclick="clearSchedule()" style="font-size:0.8rem;">
+                        <i class="fas fa-trash"></i> Limpiar
+                    </button>
+                </div>
+                <!-- Group selection (shown when needed) -->
+                <div id="schedule-group-selection" class="hidden" style="margin-top:0.75rem;background:var(--bg-secondary);border-radius:6px;padding:0.75rem;border:1px solid var(--border-color);">
+                    <p style="margin:0 0 0.5rem;font-size:0.85rem;font-weight:600;"><i class="fas fa-users"></i> Selecciona tu grupo para las siguientes materias:</p>
+                    <div id="schedule-group-list"></div>
+                    <button class="btn-primary" style="margin-top:0.75rem;width:100%;" onclick="confirmGroupSelection()">
+                        <i class="fas fa-check"></i> Confirmar selección
+                    </button>
+                </div>
+            </div>
+
+            <!-- Weekly grid -->
+            <div style="flex:1;overflow:auto;padding:0 1.5rem 1.5rem;">
+                <div id="schedule-grid-wrapper">
+                    <div id="schedule-empty-state" style="text-align:center;padding:3rem;color:var(--text-secondary);">
+                        <i class="fas fa-calendar-week" style="font-size:3rem;opacity:0.3;"></i>
+                        <p style="margin-top:1rem;">Importa la programación académica para ver tu horario</p>
+                    </div>
+                    <div id="schedule-grid" class="hidden"></div>
+                </div>
             </div>
         </div>
     </div>

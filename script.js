@@ -2613,3 +2613,273 @@ document.addEventListener('DOMContentLoaded', function() {
         showNotification('Error inicializando la aplicación', 'error');
     }
 });
+
+// =================== HORARIO SEMANAL ===================
+
+const SCHEDULE_DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const SCHEDULE_DAY_MAP = { LUN:'Lunes', MAR:'Martes', MIE:'Miércoles', 'MIÉ':'Miércoles', JUE:'Jueves', VIE:'Viernes', SAB:'Sábado', 'SÁB':'Sábado' };
+const SCHEDULE_HOUR_START = 7;
+const SCHEDULE_HOUR_END = 20;
+
+// Default colors para los tipos de materias
+const TYPE_COLORS = { AB:'#3b82f6', AP:'#8b5cf6', EP:'#f59e0b', EC:'#10b981' };
+
+let pendingScheduleGroups = []; // courses with multiple groups awaiting user selection
+
+function showScheduleModal() {
+    showModal('schedule-modal');
+    renderScheduleGrid();
+}
+
+function getScheduleState() {
+    const plan = getCurrentPlan();
+    if (!plan) return {};
+    if (!plan.schedule) plan.schedule = {};
+    return plan.schedule;
+}
+
+function getCurrentPlan() {
+    if (!plannerState || !plannerState.activePlanId) return null;
+    return plannerState.plans[plannerState.activePlanId] || null;
+}
+
+function parseScheduleString(str) {
+    const sessions = [];
+    const pattern = /(LUN|MAR|MI[EÉ]|JUE|VIE|S[AÁ]B):\s*(\d{1,2}:\d{2})-(\d{1,2}:\d{2})\s*,\s*([^,]+?)(?=\s*(?:LUN|MAR|MI[EÉ]|JUE|VIE|S[AÁ]B):|$)/gi;
+    let m;
+    while ((m = pattern.exec(str)) !== null) {
+        const dayKey = m[1].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+        const raw = m[4].trim();
+        // Extract location: "Edf. D6 (D6) -> 1006 -- CS -- MELENDEZ"
+        const locM = raw.match(/Edf\.\s*(\S+)\s*\([^)]*\)\s*->\s*([^\s-]+)/i);
+        const location = locM ? `${locM[1]}-${locM[2]}` : raw.replace(/\s*--.*$/,'').trim();
+        sessions.push({ day: SCHEDULE_DAY_MAP[dayKey] || m[1], startTime: m[2], endTime: m[3], location });
+    }
+    return sessions;
+}
+
+function parseScheduleData(text) {
+    const courses = [];
+    // Split by course header
+    const sections = text.split(/(?=\n?\d{6}[A-Z]\s*->)/);
+    for (const section of sections) {
+        const headerM = section.match(/(\d{6}[A-Z])\s*->\s*(.+)/);
+        if (!headerM) continue;
+        const code = headerM[1].trim();
+        const name = headerM[2].trim();
+        // Find group rows: lines starting with digit + tab
+        const groupRows = [];
+        const lines = section.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            const rowM = lines[i].match(/^(\d+)\t[^\t]+\t(\d+)\t\d+\t(.+)/);
+            if (!rowM) continue;
+            const groupNum = rowM[2].trim();
+            const schedStr = rowM[3].trim();
+            const sessions = parseScheduleString(schedStr);
+            if (!sessions.length) continue;
+            // Teacher: next non-empty line that looks like a name (no tabs, not email)
+            let teacher = '';
+            for (let j = i+1; j < Math.min(i+4, lines.length); j++) {
+                const tl = lines[j].trim();
+                if (tl && !tl.includes('@') && !tl.includes('\t') && /^[A-ZÁÉÍÓÚÑ\s]+$/.test(tl)) {
+                    teacher = tl; break;
+                }
+            }
+            const existing = groupRows.find(g => g.group === groupNum);
+            if (existing) { existing.sessions.push(...sessions); }
+            else { groupRows.push({ group: groupNum, teacher, sessions }); }
+        }
+        if (groupRows.length) courses.push({ code, name, groups: groupRows });
+    }
+    return courses;
+}
+
+function processScheduleImport() {
+    const text = document.getElementById('schedule-data').value.trim();
+    if (!text) { showNotification('Pega el texto de la programación académica', 'error'); return; }
+
+    const parsed = parseScheduleData(text);
+    if (!parsed.length) { showNotification('No se encontraron materias. Verifica el formato.', 'error'); return; }
+
+    const schedule = getScheduleState();
+    const needsGroupSelection = [];
+
+    for (const course of parsed) {
+        const existing = schedule[course.code] || {};
+        const color = existing.color || TYPE_COLORS[getPlanSubjectType(course.code)] || '#6b7280';
+        if (course.groups.length === 1) {
+            schedule[course.code] = { name: course.name, color, selectedGroup: course.groups[0].group, groups: course.groups, sessions: course.groups[0].sessions };
+        } else {
+            needsGroupSelection.push({ ...course, color });
+        }
+    }
+
+    if (needsGroupSelection.length) {
+        pendingScheduleGroups = needsGroupSelection;
+        // Already applied single-group courses — save them
+        getCurrentPlan().schedule = schedule;
+        savePlannerData();
+        renderGroupSelection(needsGroupSelection);
+    } else {
+        getCurrentPlan().schedule = schedule;
+        savePlannerData();
+        renderScheduleGrid();
+        showNotification(`${parsed.length} materia(s) importadas al horario`, 'success');
+    }
+}
+
+function getPlanSubjectType(code) {
+    const plan = getCurrentPlan();
+    if (!plan) return null;
+    const s = (plan.subjects || []).find(s => s.id === code);
+    return s ? s.type : null;
+}
+
+function renderGroupSelection(courses) {
+    const container = document.getElementById('schedule-group-list');
+    container.innerHTML = courses.map(c => `
+        <div style="margin-bottom:8px;">
+            <span style="font-size:0.8rem;font-weight:600;">${c.code} — ${escapeHTML(c.name)}</span>
+            <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+                ${c.groups.map(g => `
+                    <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;cursor:pointer;background:var(--bg-primary);padding:4px 8px;border-radius:4px;border:1px solid var(--border-color);">
+                        <input type="radio" name="group_${c.code}" value="${g.group}" ${g.group==='01'?'checked':''}>
+                        Grupo ${g.group} — ${g.sessions.map(s=>`${s.day.substring(0,3)} ${s.startTime}-${s.endTime}`).join(', ')}
+                        ${g.teacher ? `<span style="opacity:0.6;">(${g.teacher.split(' ')[0]})</span>` : ''}
+                    </label>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+    document.getElementById('schedule-group-selection').classList.remove('hidden');
+}
+
+function confirmGroupSelection() {
+    const schedule = getScheduleState();
+    for (const course of pendingScheduleGroups) {
+        const sel = document.querySelector(`input[name="group_${course.code}"]:checked`);
+        const groupNum = sel ? sel.value : course.groups[0].group;
+        const group = course.groups.find(g => g.group === groupNum) || course.groups[0];
+        schedule[course.code] = { name: course.name, color: course.color, selectedGroup: group.group, groups: course.groups, sessions: group.sessions };
+    }
+    getCurrentPlan().schedule = schedule;
+    savePlannerData();
+    pendingScheduleGroups = [];
+    document.getElementById('schedule-group-selection').classList.add('hidden');
+    renderScheduleGrid();
+    showNotification('Horario guardado', 'success');
+}
+
+function clearSchedule() {
+    const plan = getCurrentPlan();
+    if (!plan) return;
+    plan.schedule = {};
+    savePlannerData();
+    document.getElementById('schedule-data').value = '';
+    document.getElementById('schedule-group-selection').classList.add('hidden');
+    renderScheduleGrid();
+}
+
+function changeScheduleCourseColor(code, color) {
+    const schedule = getScheduleState();
+    if (schedule[code]) { schedule[code].color = color; getCurrentPlan().schedule = schedule; savePlannerData(); renderScheduleGrid(); }
+}
+
+function timeToMinutes(t) {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + (m || 0);
+}
+
+function renderScheduleGrid() {
+    const schedule = getScheduleState();
+    const grid = document.getElementById('schedule-grid');
+    const empty = document.getElementById('schedule-empty-state');
+    const courses = Object.entries(schedule);
+
+    if (!courses.length) { grid.classList.add('hidden'); empty.style.display = ''; return; }
+    empty.style.display = 'none'; grid.classList.remove('hidden');
+
+    // Determine hour range from actual sessions
+    let minHour = SCHEDULE_HOUR_END, maxHour = SCHEDULE_HOUR_START;
+    for (const [, c] of courses) {
+        for (const s of c.sessions || []) {
+            minHour = Math.min(minHour, Math.floor(timeToMinutes(s.startTime)/60));
+            maxHour = Math.max(maxHour, Math.ceil(timeToMinutes(s.endTime)/60));
+        }
+    }
+    minHour = Math.max(SCHEDULE_HOUR_START, minHour - 1);
+    maxHour = Math.min(SCHEDULE_HOUR_END, maxHour + 1);
+    const totalHours = maxHour - minHour;
+    const PX_PER_HOUR = 48;
+
+    // Build grid HTML
+    let html = `<div class="schedule-course-legend">`;
+    for (const [code, c] of courses) {
+        const textColor = getContrastColor(c.color);
+        html += `<div class="schedule-legend-item">
+            <input type="color" value="${c.color}" title="Cambiar color" class="schedule-color-btn"
+                onchange="changeScheduleCourseColor('${code}', this.value)" style="background:${c.color};border-color:${c.color};">
+            <span style="font-weight:600;">${code}</span>
+            <span style="opacity:0.7;">${escapeHTML(c.name).substring(0,25)}${c.name.length>25?'…':''}</span>
+        </div>`;
+    }
+    html += `</div><div class="schedule-grid" style="grid-template-rows:28px repeat(${totalHours},${PX_PER_HOUR}px);">`;
+
+    // Header row
+    html += `<div class="schedule-day-header schedule-time-col"></div>`;
+    for (const day of SCHEDULE_DAYS) {
+        html += `<div class="schedule-day-header">${day.substring(0,3).toUpperCase()}</div>`;
+    }
+
+    // Hour rows
+    for (let h = minHour; h < maxHour; h++) {
+        html += `<div class="schedule-hour-label">${h}:00</div>`;
+        for (const day of SCHEDULE_DAYS) {
+            html += `<div class="schedule-cell" data-day="${day}" data-hour="${h}"></div>`;
+        }
+    }
+    html += `</div>`;
+    grid.innerHTML = html;
+
+    // Place course blocks
+    const gridEl = grid.querySelector('.schedule-grid');
+    for (const [code, c] of courses) {
+        for (const session of c.sessions || []) {
+            const dayIdx = SCHEDULE_DAYS.indexOf(session.day);
+            if (dayIdx < 0) continue;
+            const startMin = timeToMinutes(session.startTime);
+            const endMin = timeToMinutes(session.endTime);
+            const topPx = ((startMin/60) - minHour) * PX_PER_HOUR;
+            const heightPx = ((endMin - startMin) / 60) * PX_PER_HOUR - 2;
+            const textColor = getContrastColor(c.color);
+
+            // Find the cell for this day/hour to attach the block
+            const colEl = gridEl.querySelector(`.schedule-cell[data-day="${session.day}"][data-hour="${Math.floor(startMin/60)}"]`);
+            if (!colEl) continue;
+
+            // Calculate position relative to the column group
+            const colIndex = dayIdx + 1; // 1-based (skip time col)
+            const block = document.createElement('div');
+            block.className = 'schedule-block';
+            block.style.cssText = `background:${c.color};color:${textColor};top:${topPx - (Math.floor(startMin/60)-minHour)*PX_PER_HOUR}px;height:${heightPx}px;`;
+            block.innerHTML = `
+                <div class="schedule-block-code">${code}</div>
+                <div class="schedule-block-name">${escapeHTML(c.name)}</div>
+                ${session.location ? `<div class="schedule-block-loc"><i class="fas fa-map-marker-alt" style="font-size:0.55rem;"></i> ${escapeHTML(session.location)}</div>` : ''}
+            `;
+            block.title = `${c.name}\n${session.startTime}–${session.endTime}\n${session.location||''}`;
+            colEl.appendChild(block);
+        }
+    }
+}
+
+function getContrastColor(hex) {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return (r*299+g*587+b*114)/1000 > 128 ? '#111' : '#fff';
+}
+
+window.showScheduleModal = showScheduleModal;
+window.processScheduleImport = processScheduleImport;
+window.confirmGroupSelection = confirmGroupSelection;
+window.clearSchedule = clearSchedule;
+window.changeScheduleCourseColor = changeScheduleCourseColor;

@@ -2975,3 +2975,135 @@ body.zen-mode .right-panel {
         page-break-inside: avoid;
     }
 }
+
+/* =================== HORARIO SEMANAL =================== */
+.schedule-grid {
+    display: grid;
+    grid-template-columns: 52px repeat(6, 1fr);
+    gap: 0;
+    min-width: 600px;
+    font-size: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.schedule-day-header {
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    padding: 6px 4px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.schedule-time-col {
+    grid-column: 1;
+}
+
+.schedule-hour-label {
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color-subtle, rgba(255,255,255,0.05));
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    padding: 0 4px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    height: 48px;
+    padding-top: 4px;
+}
+
+.schedule-cell {
+    position: relative;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color-subtle, rgba(255,255,255,0.05));
+    height: 48px;
+    background: var(--bg-primary);
+}
+
+.schedule-cell:last-child {
+    border-right: none;
+}
+
+.schedule-block {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    border-radius: 4px;
+    padding: 3px 5px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.schedule-block:hover { opacity: 0.85; }
+
+.schedule-block-code {
+    font-weight: 700;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.schedule-block-name {
+    font-size: 0.62rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.9;
+}
+
+.schedule-block-loc {
+    font-size: 0.6rem;
+    opacity: 0.75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.schedule-course-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.schedule-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    padding: 3px 8px;
+    border: 1px solid var(--border-color);
+}
+
+.schedule-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.schedule-color-btn {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    display: inline-block;
+}
