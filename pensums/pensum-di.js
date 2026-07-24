@@ -42,7 +42,7 @@ const PENSUM_DI = [
     { id: '507060C', name: 'HERRAMIENTAS DIGITALES - CREACIÓN VISUALIZACIÓN', credits: 2, type: 'AP', prerequisites: [] },
     { id: '507019C', name: 'PROYECTO - BIOSFERA', credits: 7, type: 'AP', prerequisites: [] },
     { id: '507058C', name: 'HERRAMIENTAS DIGITALES - SIMULACIÓN', credits: 2, type: 'AP', prerequisites: [] },
-    { id: '507096C', name: 'PROYECTO FINAL FORMULACIÓN', credits: 3, type: 'AP', prerequisites: ['507012C'] },
+    { id: '507096C', name: 'PROYECTO FINAL FORMULACIÓN', credits: 3, type: 'AP', prerequisites: ['507026C', '507012C', '507017C', '507025C', '507024C', '507021C', '507023C', '507020C', '507019C', '507115C'] },
     { id: '507095C', name: 'PROYECTO FINAL DESARROLLO', credits: 4, type: 'AP', prerequisites: ['507096C'] },
 
   

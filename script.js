@@ -907,14 +907,18 @@ function renderStatsBoard(plan) {
         
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">
-                    Electivas Formación General (EC)
-                    <i class="fas fa-info-circle fg-info-icon" title="Solo cuentan materias con componente COM en SIRA (AHU, EVS, etc.). Las marcadas como SIN son electivas complementarias de la carrera y NO cuentan como FG."></i>
-                </span>
-                <span class="stat-value">${stats.categories.EC?.completed || 0}/${stats.categories.EC?.required || 17}</span>
+                <span class="stat-title">Electivas Formación General (EC)</span>
+                <span class="stat-value">${stats.categories.EC?.completed || 0}/${stats.categories.EC?.required || 17} cr</span>
             </div>
             <div class="progress-bar">
                 <div class="progress-bar-fill ${stats.categories.EC && stats.categories.EC.completed >= stats.categories.EC.required ? 'completed' : ''}" style="width: ${stats.categories.EC ? Math.round((stats.categories.EC.completed / stats.categories.EC.required) * 100) : 0}%"></div>
+            </div>
+            <div class="ec-components" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+                ${['Artístico Humanístico','Lenguaje y Comunicación','Formación Social y Ciudadana','Científico Tecnológico','Estilos de Vida Saludable'].map(comp => {
+                    const covered = stats.ecComponentsCovered.some(c => c === comp);
+                    const short = {'Artístico Humanístico':'Art.','Lenguaje y Comunicación':'Leng.','Formación Social y Ciudadana':'Soc.','Científico Tecnológico':'Cient.','Estilos de Vida Saludable':'EVS'}[comp];
+                    return `<span title="${comp}" style="font-size:10px;padding:2px 5px;border-radius:3px;background:${covered ? 'var(--color-success,#4caf50)' : 'var(--color-muted,#555)'};color:#fff;opacity:${covered?'1':'0.5'}">${covered ? '✓' : '○'} ${short}</span>`;
+                }).join('')}
             </div>
         </div>
 
@@ -1003,7 +1007,20 @@ function calculateStats(plan) {
     const sportsSubjects = subjects.filter(s => sportsCodeSet.has(getSubjectCode(s)));
     const sportsCompletedCount = sportsSubjects.filter(s => s.completed).length;
     const sportsCompleted = sportsCompletedCount > 0 ? 1 : 0;
-    
+
+    // Cobertura de componentes EC (todos y cada uno de los 5 según Res. 188)
+    const EC_COMPONENTS = [
+        'Artístico Humanístico',
+        'Lenguaje y Comunicación',
+        'Formación Social y Ciudadana',
+        'Científico Tecnológico',
+        'Estilos de Vida Saludable'
+    ];
+    const completedEcSubjects = subjects.filter(s => s.type === 'EC' && s.completed);
+    const ecComponentsCovered = EC_COMPONENTS.filter(comp =>
+        completedEcSubjects.some(s => String(s.category || '').toLowerCase().includes(comp.toLowerCase()))
+    );
+
     return {
         totalSubjects: subjects.length,
         completedSubjects: completed.length,
@@ -1014,6 +1031,8 @@ function calculateStats(plan) {
         englishCompleted,
         sportsTotal: 1,
         sportsCompleted,
+        ecComponentsCovered,
+        ecComponentsTotal: EC_COMPONENTS.length,
         categories: categoryStats
     };
 }
