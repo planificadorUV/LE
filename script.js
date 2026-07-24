@@ -2888,6 +2888,265 @@ function getContrastColor(hex) {
     return (r*299+g*587+b*114)/1000 > 128 ? '#111' : '#fff';
 }
 
+// ============================================================
+// ENROLLMENT PLANNER
+// ============================================================
+
+let enrollmentSel = new Set();
+
+function showEnrollmentModal() {
+    enrollmentSel.clear();
+    renderEnrollmentModal();
+    showModal('enrollment-modal');
+}
+
+function getEnrollmentPlan() {
+    const plan = getCurrentPlan();
+    if (!plan) return { courses: [], groups: [] };
+    if (!plan.enrollmentPlan) plan.enrollmentPlan = { courses: [], groups: [] };
+    return plan.enrollmentPlan;
+}
+
+function enrollmentSubjectInfo(code) {
+    const plan = getCurrentPlan();
+    return plan ? (plan.subjects || []).find(s => s.id === code) : null;
+}
+
+function toggleEnrollmentCourse(code) {
+    const ep = getEnrollmentPlan();
+    const idx = ep.courses.indexOf(code);
+    if (idx >= 0) {
+        ep.courses.splice(idx, 1);
+        ep.groups = ep.groups
+            .map(g => ({ ...g, courses: g.courses.filter(c => c !== code) }))
+            .filter(g => g.courses.length >= 2);
+        enrollmentSel.delete(code);
+    } else {
+        ep.courses.push(code);
+    }
+    savePlannerData();
+    renderEnrollmentModal();
+}
+
+function toggleEnrollmentSel(code) {
+    if (enrollmentSel.has(code)) enrollmentSel.delete(code);
+    else enrollmentSel.add(code);
+    renderEnrollmentPlanArea();
+}
+
+function createEnrollmentGroup() {
+    const ep = getEnrollmentPlan();
+    const selected = [...enrollmentSel];
+    if (selected.length < 2) return;
+    ep.groups = ep.groups
+        .map(g => ({ ...g, courses: g.courses.filter(c => !selected.includes(c)) }))
+        .filter(g => g.courses.length >= 2);
+    ep.groups.push({ id: 'g_' + Date.now(), courses: selected });
+    enrollmentSel.clear();
+    savePlannerData();
+    renderEnrollmentModal();
+}
+
+function dissolveEnrollmentGroup(groupId) {
+    const ep = getEnrollmentPlan();
+    ep.groups = ep.groups.filter(g => g.id !== groupId);
+    savePlannerData();
+    renderEnrollmentModal();
+}
+
+function moveEnrollmentPriority(groupId, idx, dir) {
+    const ep = getEnrollmentPlan();
+    const g = ep.groups.find(g => g.id === groupId);
+    if (!g) return;
+    const to = idx + dir;
+    if (to < 0 || to >= g.courses.length) return;
+    [g.courses[idx], g.courses[to]] = [g.courses[to], g.courses[idx]];
+    savePlannerData();
+    renderEnrollmentPlanArea();
+    renderEnrollmentScenarios();
+}
+
+function removeEnrollmentGroup(groupId) {
+    const ep = getEnrollmentPlan();
+    const g = ep.groups.find(g => g.id === groupId);
+    if (g) g.courses.forEach(code => {
+        const i = ep.courses.indexOf(code);
+        if (i >= 0) ep.courses.splice(i, 1);
+    });
+    ep.groups = ep.groups.filter(g => g.id !== groupId);
+    savePlannerData();
+    renderEnrollmentModal();
+}
+
+function renderEnrollmentModal() {
+    renderEnrollmentCourseList();
+    renderEnrollmentPlanArea();
+    renderEnrollmentScenarios();
+}
+
+function renderEnrollmentCourseList() {
+    const plan = getCurrentPlan();
+    const container = document.getElementById('enroll-course-list');
+    if (!container || !plan) return;
+    const ep = getEnrollmentPlan();
+    const search = (document.getElementById('enroll-search')?.value || '').toLowerCase();
+    const TYPE_COLOR = { AB: '#3b82f6', AP: '#8b5cf6', EP: '#f59e0b', EC: '#10b981' };
+    const subjects = (plan.subjects || []).filter(s => !s.completed);
+    const list = search ? subjects.filter(s =>
+        s.name.toLowerCase().includes(search) || s.id.toLowerCase().includes(search)
+    ) : subjects;
+
+    container.innerHTML = list.map(s => {
+        const inPlan = ep.courses.includes(s.id);
+        return `<div class="enroll-course-item ${inPlan ? 'in-plan' : ''}" onclick="toggleEnrollmentCourse('${s.id}')">
+            <div style="display:flex;align-items:center;gap:5px;">
+                <span style="background:${TYPE_COLOR[s.type]||'#6b7280'};color:#fff;font-size:0.62rem;padding:1px 4px;border-radius:3px;flex-shrink:0;">${s.type}</span>
+                <span style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);">${s.id}</span>
+                <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:auto;flex-shrink:0;">${s.credits}cr</span>
+            </div>
+            <div style="font-size:0.76rem;margin-top:3px;line-height:1.3;padding-right:4px;">${escapeHTML(s.name)}</div>
+            <div style="position:absolute;top:7px;right:7px;font-size:1rem;font-weight:700;color:${inPlan ? 'var(--accent-color)' : 'var(--border-color)'};">${inPlan ? '✓' : '+'}</div>
+        </div>`;
+    }).join('') || '<div style="color:var(--text-secondary);font-size:0.8rem;text-align:center;padding:2rem 0.5rem;">Sin materias pendientes</div>';
+}
+
+function renderEnrollmentPlanArea() {
+    const ep = getEnrollmentPlan();
+    const container = document.getElementById('enroll-plan-area');
+    const groupBtn = document.getElementById('enroll-group-btn');
+    if (!container) return;
+
+    if (groupBtn) groupBtn.classList.toggle('hidden', enrollmentSel.size < 2);
+
+    const groupedCodes = new Set(ep.groups.flatMap(g => g.courses));
+    const ungrouped = ep.courses.filter(code => !groupedCodes.has(code));
+
+    if (!ep.courses.length) {
+        container.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:var(--text-secondary);">
+            <div style="font-size:2.5rem;opacity:0.25;">📋</div>
+            <div style="font-size:0.82rem;margin-top:0.75rem;">Haz clic en materias del panel izquierdo para agregarlas</div>
+        </div>`;
+        return;
+    }
+
+    let html = '';
+
+    if (ungrouped.length) {
+        const selHint = enrollmentSel.size === 1 ? 'Selecciona otra para agrupar' : enrollmentSel.size >= 2 ? '' : 'Marca varias para hacer alternativas';
+        html += `<div style="font-size:0.7rem;font-weight:700;color:var(--text-secondary);letter-spacing:.05em;margin-bottom:4px;">DEFINITIVAS ${selHint ? `<span style="font-weight:400;font-style:italic;"> — ${selHint}</span>` : ''}</div>`;
+        html += ungrouped.map(code => {
+            const s = enrollmentSubjectInfo(code);
+            if (!s) return '';
+            const sel = enrollmentSel.has(code);
+            return `<div class="enroll-plan-item ${sel ? 'selected' : ''}">
+                <input type="checkbox" class="enroll-sel-check" ${sel ? 'checked' : ''} onchange="toggleEnrollmentSel('${code}')" onclick="event.stopPropagation()">
+                <div style="flex:1;min-width:0;cursor:pointer;" onclick="toggleEnrollmentSel('${code}')">
+                    <div style="font-size:0.76rem;font-weight:700;">${code}</div>
+                    <div style="font-size:0.72rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(s.name)}</div>
+                </div>
+                <span style="font-size:0.72rem;color:var(--text-secondary);flex-shrink:0;">${s.credits}cr</span>
+                <button onclick="toggleEnrollmentCourse('${code}')" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1rem;padding:0 3px;line-height:1;" title="Quitar">×</button>
+            </div>`;
+        }).join('');
+    }
+
+    ep.groups.forEach((g, gi) => {
+        html += `<div class="enroll-group-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:0.7rem;font-weight:700;color:var(--text-secondary);letter-spacing:.05em;">GRUPO ${gi + 1} — ALTERNATIVAS</span>
+                <button onclick="dissolveEnrollmentGroup('${g.id}')" style="background:none;border:none;cursor:pointer;font-size:0.72rem;color:var(--text-secondary);padding:1px 5px;border-radius:3px;border:1px solid var(--border-color);">Desagrupar</button>
+            </div>
+            ${g.courses.map((code, idx) => {
+                const s = enrollmentSubjectInfo(code);
+                if (!s) return '';
+                const labels = ['1° Prioridad', '2° Fallback', '3° Fallback', '4° Fallback'];
+                const colors = ['#10b981', '#f59e0b', '#ef4444', '#6b7280'];
+                return `<div class="enroll-alt-item">
+                    <span style="font-size:0.64rem;font-weight:700;color:${colors[idx]||'#6b7280'};flex-shrink:0;width:76px;">${labels[idx]||`${idx+1}°`}</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:0.76rem;font-weight:700;">${code}</div>
+                        <div style="font-size:0.7rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(s.name)}</div>
+                    </div>
+                    <span style="font-size:0.7rem;color:var(--text-secondary);flex-shrink:0;">${s.credits}cr</span>
+                    <div style="display:flex;flex-direction:column;gap:0;flex-shrink:0;">
+                        <button onclick="moveEnrollmentPriority('${g.id}',${idx},-1)" ${idx === 0 ? 'disabled' : ''} style="background:none;border:none;cursor:pointer;font-size:0.65rem;line-height:1.2;color:var(--text-secondary);padding:1px 2px;opacity:${idx === 0 ? 0.3 : 1};">▲</button>
+                        <button onclick="moveEnrollmentPriority('${g.id}',${idx},1)" ${idx === g.courses.length - 1 ? 'disabled' : ''} style="background:none;border:none;cursor:pointer;font-size:0.65rem;line-height:1.2;color:var(--text-secondary);padding:1px 2px;opacity:${idx === g.courses.length - 1 ? 0.3 : 1};">▼</button>
+                    </div>
+                </div>`;
+            }).join('')}
+            <button onclick="removeEnrollmentGroup('${g.id}')" style="margin-top:8px;width:100%;background:none;border:1px dashed var(--border-color);border-radius:4px;color:var(--text-secondary);font-size:0.7rem;cursor:pointer;padding:3px 6px;">Quitar grupo del plan</button>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+function renderEnrollmentScenarios() {
+    const ep = getEnrollmentPlan();
+    const container = document.getElementById('enroll-scenarios');
+    if (!container) return;
+
+    if (!ep.courses.length) {
+        container.innerHTML = '<div style="color:var(--text-secondary);font-size:0.78rem;text-align:center;padding:2rem 0.5rem;line-height:1.5;">Agrega materias al plan para ver los escenarios posibles</div>';
+        return;
+    }
+
+    const groupedCodes = new Set(ep.groups.flatMap(g => g.courses));
+    const ungrouped = ep.courses.filter(code => !groupedCodes.has(code));
+
+    const totalCredits = (codes) => codes.reduce((sum, code) => {
+        const s = enrollmentSubjectInfo(code);
+        return sum + (s ? s.credits : 0);
+    }, 0);
+
+    const codeChips = (codes) => codes.map(code => {
+        const s = enrollmentSubjectInfo(code);
+        return `<span style="font-size:0.68rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:3px;padding:1px 5px;display:inline-block;margin:1px 1px 0 0;">${code}</span>`;
+    }).join('');
+
+    let html = '';
+
+    // Best case: all first priorities
+    const bestCodes = [...ungrouped, ...ep.groups.map(g => g.courses[0])];
+    html += `<div class="enroll-scenario best">
+        <div class="enroll-scenario-title">✅ Escenario ideal</div>
+        <div class="enroll-scenario-credits">${totalCredits(bestCodes)} créditos</div>
+        <div style="margin-top:6px;">${codeChips(bestCodes)}</div>
+    </div>`;
+
+    // One fallback scenario per group
+    ep.groups.forEach((g) => {
+        if (g.courses.length < 2) return;
+        const fallbackFirst = enrollmentSubjectInfo(g.courses[0]);
+        const fallbackCodes = [
+            ...ungrouped,
+            ...ep.groups.map(gr => gr.id === g.id ? gr.courses[1] : gr.courses[0])
+        ];
+        html += `<div class="enroll-scenario fallback">
+            <div class="enroll-scenario-title">⚡ Sin cupo: ${g.courses[0]}</div>
+            ${fallbackFirst ? `<div style="font-size:0.68rem;color:var(--text-secondary);margin-bottom:4px;line-height:1.3;">${escapeHTML(fallbackFirst.name.substring(0, 35))}${fallbackFirst.name.length > 35 ? '…' : ''}</div>` : ''}
+            <div class="enroll-scenario-credits">${totalCredits(fallbackCodes)} créditos</div>
+            <div style="margin-top:6px;">${codeChips(fallbackCodes)}</div>
+        </div>`;
+    });
+
+    // Total ungrouped credits note if no groups
+    if (!ep.groups.length && ungrouped.length) {
+        html += `<div style="font-size:0.75rem;color:var(--text-secondary);padding:8px;text-align:center;line-height:1.4;">Sin grupos de alternativas.<br>Todas las materias son definitivas.</div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+window.showEnrollmentModal = showEnrollmentModal;
+window.toggleEnrollmentCourse = toggleEnrollmentCourse;
+window.toggleEnrollmentSel = toggleEnrollmentSel;
+window.createEnrollmentGroup = createEnrollmentGroup;
+window.dissolveEnrollmentGroup = dissolveEnrollmentGroup;
+window.moveEnrollmentPriority = moveEnrollmentPriority;
+window.removeEnrollmentGroup = removeEnrollmentGroup;
+window.renderEnrollmentCourseList = renderEnrollmentCourseList;
+
 async function exportScheduleAsImage() {
     const el = document.getElementById('schedule-grid-wrapper');
     if (!el || document.getElementById('schedule-empty-state').style.display === '') {

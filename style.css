@@ -3107,3 +3107,77 @@ body.zen-mode .right-panel {
     padding: 0;
     display: inline-block;
 }
+
+/* =================== ENROLLMENT PLANNER =================== */
+.enroll-course-item {
+    position: relative;
+    padding: 7px 28px 7px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+}
+.enroll-course-item:hover { background: var(--bg-secondary); }
+.enroll-course-item.in-plan {
+    border-color: var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 8%, var(--bg-primary));
+}
+.enroll-plan-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-primary);
+    cursor: default;
+    flex-shrink: 0;
+}
+.enroll-plan-item.selected {
+    border-color: var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 10%, var(--bg-primary));
+}
+.enroll-group-card {
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+.enroll-alt-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 4px;
+    border-radius: 4px;
+}
+.enroll-alt-item + .enroll-alt-item {
+    border-top: 1px dashed var(--border-color);
+}
+.enroll-scenario {
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+.enroll-scenario.best {
+    border: 1.5px solid #10b981;
+    background: color-mix(in srgb, #10b981 8%, var(--bg-primary));
+}
+.enroll-scenario.fallback {
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+.enroll-scenario-title {
+    font-weight: 700;
+    font-size: 0.78rem;
+    margin-bottom: 3px;
+}
+.enroll-scenario-credits {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+.enroll-sel-check { cursor: pointer; flex-shrink: 0; }

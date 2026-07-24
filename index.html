@@ -331,6 +331,11 @@
                         Horario Semanal
                     </button>
 
+                    <button id="enrollment-btn" class="btn-secondary" onclick="showEnrollmentModal()">
+                        <i class="fas fa-clipboard-list"></i>
+                        Planificar Matrícula
+                    </button>
+
                     <button id="export-plan-btn" class="btn-secondary" onclick="exportPlan()">
                         <i class="fas fa-download"></i>
                         Exportar Plan
@@ -471,6 +476,45 @@
     </div>
 
     <!-- Schedule Modal -->
+    <!-- Enrollment Planner Modal -->
+    <div id="enrollment-modal" class="modal-overlay hidden" style="z-index:1100;">
+        <div class="modal-content" style="max-width:1060px;width:96vw;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;">
+            <button class="modal-close-btn" onclick="hideModal('enrollment-modal')">&times;</button>
+            <div class="modal-header" style="flex-shrink:0;">
+                <h2><i class="fas fa-clipboard-list"></i> Planificación de Matrícula</h2>
+                <p>Organiza qué materias vas a matricular y define alternativas por si no hay cupo.</p>
+            </div>
+            <div style="flex:1;overflow:hidden;display:flex;gap:0;min-height:0;">
+
+                <!-- LEFT: available courses -->
+                <div style="width:240px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border-color);padding:0 0.75rem 0.75rem;">
+                    <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);letter-spacing:.06em;margin-bottom:6px;padding-top:0.75rem;">MATERIAS DISPONIBLES</div>
+                    <input type="text" id="enroll-search" placeholder="Buscar materia..." oninput="renderEnrollmentCourseList()"
+                        style="font-size:0.8rem;padding:5px 8px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-secondary);color:var(--text-primary);margin-bottom:8px;width:100%;box-sizing:border-box;">
+                    <div id="enroll-course-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
+                </div>
+
+                <!-- CENTER: enrollment plan -->
+                <div style="flex:1;display:flex;flex-direction:column;min-width:0;padding:0 0.75rem 0.75rem;border-right:1px solid var(--border-color);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding-top:0.75rem;margin-bottom:8px;flex-shrink:0;">
+                        <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);letter-spacing:.06em;">PLAN DE MATRÍCULA</div>
+                        <button id="enroll-group-btn" class="btn-primary hidden" onclick="createEnrollmentGroup()" style="font-size:0.72rem;padding:3px 10px;">
+                            <i class="fas fa-link"></i> Hacer alternativas
+                        </button>
+                    </div>
+                    <div id="enroll-plan-area" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+                </div>
+
+                <!-- RIGHT: scenarios -->
+                <div style="width:230px;flex-shrink:0;display:flex;flex-direction:column;padding:0 0.75rem 0.75rem;">
+                    <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);letter-spacing:.06em;padding-top:0.75rem;margin-bottom:8px;">ESCENARIOS</div>
+                    <div id="enroll-scenarios" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <div id="schedule-modal" class="modal-overlay hidden" style="z-index:1100;">
         <div class="modal-content" style="max-width:1100px;width:95vw;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;">
             <button class="modal-close-btn" onclick="hideModal('schedule-modal')">&times;</button>
