@@ -2660,46 +2660,76 @@ function parseScheduleString(str) {
 
 function parseScheduleData(text) {
     const courses = [];
-    // Split by course header
-    const sections = text.split(/(?=\n?\d{6}[A-Z]\s*->)/);
-    for (const section of sections) {
-        const headerM = section.match(/(\d{6}[A-Z])\s*->\s*(.+)/);
-        if (!headerM) continue;
-        const code = headerM[1].trim();
-        const name = headerM[2].trim();
-        // Find group rows: lines starting with digit + tab
+    if (!text) return courses;
+
+    const lines = text.replace(/\r\n?/g, '\n').split('\n');
+    let curCode = null, curName = null, curLines = [];
+
+    const flushCourse = () => {
+        if (!curCode) return;
         const groupRows = [];
-        const lines = section.split('\n');
-        for (let i = 0; i < lines.length; i++) {
-            const rowM = lines[i].match(/^(\d+)\t[^\t]+\t(\d+)\t\d+\t(.+)/);
-            if (!rowM) continue;
-            const groupNum = rowM[2].trim();
-            let schedStr = rowM[3].trim();
-            // Collect continuation lines (multi-day schedules on separate lines, no tab prefix)
-            let nextIdx = i + 1;
-            while (nextIdx < lines.length) {
-                const nxt = lines[nextIdx].trim();
-                if (/^(LUN|MAR|MI[EÉ]|JUE|VIE|S[AÁ]B):/i.test(nxt)) {
-                    schedStr += ' ' + nxt;
-                    nextIdx++;
-                } else { break; }
+
+        for (let i = 0; i < curLines.length; i++) {
+            const line = curLines[i];
+            // Detect any line that contains a day-time schedule pattern
+            const dayIdx = line.search(/(?:LUN|MAR|MI[EÉ]|JUE|VIE|S[AÁ]B):/i);
+            if (dayIdx < 0) continue;
+
+            let schedStr = line.slice(dayIdx).trim();
+            // Collect multi-day continuation lines (no prefix, start with day abbrev)
+            let j = i + 1;
+            while (j < curLines.length) {
+                const nxt = curLines[j].trim();
+                if (/^(?:LUN|MAR|MI[EÉ]|JUE|VIE|S[AÁ]B):/i.test(nxt)) {
+                    schedStr += ' ' + nxt; j++;
+                } else break;
             }
+
             const sessions = parseScheduleString(schedStr);
             if (!sessions.length) continue;
-            // Teacher: next non-empty line that looks like a name (no tabs, not email)
+
+            // Extract group number from the text before the day pattern.
+            // Format (tabs OR spaces): ROW  PERIOD  GROUP  CUPO  <day pattern>
+            // Second-to-last whitespace token before the day = group number.
+            const beforeDay = line.slice(0, dayIdx).trim();
+            const parts = beforeDay.split(/\s+/).filter(Boolean);
+            let groupNum = '01';
+            if (parts.length >= 2) {
+                const candidate = parts[parts.length - 2];
+                if (/^\d{1,3}$/.test(candidate)) groupNum = candidate.padStart(2, '0');
+            }
+
+            // Teacher: first all-caps name-like line after the schedule block
             let teacher = '';
-            for (let j = i+1; j < Math.min(i+4, lines.length); j++) {
-                const tl = lines[j].trim();
-                if (tl && !tl.includes('@') && !tl.includes('\t') && /^[A-ZÁÉÍÓÚÑ\s]+$/.test(tl)) {
+            for (let k = j; k < Math.min(j + 4, curLines.length); k++) {
+                const tl = curLines[k].trim();
+                if (tl && !tl.includes('@') && /^[A-ZÁÉÍÓÚÑ\s]+$/.test(tl)) {
                     teacher = tl; break;
                 }
             }
+
             const existing = groupRows.find(g => g.group === groupNum);
-            if (existing) { existing.sessions.push(...sessions); }
-            else { groupRows.push({ group: groupNum, teacher, sessions }); }
+            if (existing) existing.sessions.push(...sessions);
+            else groupRows.push({ group: groupNum, teacher, sessions });
         }
-        if (groupRows.length) courses.push({ code, name, groups: groupRows });
+
+        if (groupRows.length) courses.push({ code: curCode, name: curName, groups: groupRows });
+        curCode = null; curName = null; curLines = [];
+    };
+
+    for (const line of lines) {
+        // Course header: CODE -> NAME  (code = 4-8 digits + uppercase letter)
+        const hdr = line.trim().match(/^(\d{4,8}[A-Z])\s*->\s*(.+)/);
+        if (hdr) {
+            flushCourse();
+            curCode = hdr[1];
+            curName = hdr[2].trim();
+            curLines = [];
+        } else if (curCode !== null) {
+            curLines.push(line);
+        }
     }
+    flushCourse();
     return courses;
 }
 
