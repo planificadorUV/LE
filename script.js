@@ -2868,8 +2868,33 @@ function renderScheduleGrid() {
     const courses = Object.entries(schedule);
 
     const exportBar = document.getElementById('schedule-export-bar');
-    if (!courses.length) { grid.classList.add('hidden'); empty.style.display = ''; if (exportBar) exportBar.classList.add('hidden'); return; }
-    empty.style.display = 'none'; grid.classList.remove('hidden'); if (exportBar) exportBar.classList.remove('hidden');
+    const legendWrapper = document.getElementById('schedule-legend-wrapper');
+    if (!courses.length) {
+        grid.classList.add('hidden'); empty.style.display = '';
+        if (exportBar) exportBar.classList.add('hidden');
+        if (legendWrapper) legendWrapper.classList.add('hidden');
+        return;
+    }
+    empty.style.display = 'none'; grid.classList.remove('hidden');
+    if (exportBar) exportBar.classList.remove('hidden');
+
+    // Render legend separately (always visible, outside scroll area)
+    if (legendWrapper) {
+        legendWrapper.classList.remove('hidden');
+        let legendHtml = `<div style="font-size:0.7rem;font-weight:700;color:var(--text-secondary);letter-spacing:.05em;padding-top:6px;margin-bottom:4px;">EN EL HORARIO — clic en × para quitar, 🎨 para cambiar color</div><div class="schedule-course-legend">`;
+        for (const [code, c] of courses) {
+            legendHtml += `<div class="schedule-legend-item">
+                <input type="color" value="${c.color}" title="Cambiar color" class="schedule-color-btn"
+                    onchange="changeScheduleCourseColor('${code}', this.value)" style="background:${c.color};border-color:${c.color};">
+                <span style="font-weight:600;">${code}</span>
+                <span style="opacity:0.7;">${escapeHTML(c.name).substring(0,28)}${c.name.length>28?'…':''}</span>
+                <button onclick="removeFromSchedule('${code}')" title="Quitar del horario"
+                    style="background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:1rem;line-height:1;padding:0 3px;opacity:0.5;" onmouseover="this.style.opacity=1;this.style.color='#ef4444'" onmouseout="this.style.opacity=0.5;this.style.color=''">×</button>
+            </div>`;
+        }
+        legendHtml += `</div>`;
+        legendWrapper.innerHTML = legendHtml;
+    }
 
     // Determine hour range from actual sessions
     let minHour = SCHEDULE_HOUR_END, maxHour = SCHEDULE_HOUR_START;
@@ -2884,20 +2909,8 @@ function renderScheduleGrid() {
     const totalHours = maxHour - minHour;
     const PX_PER_HOUR = 48;
 
-    // Build grid HTML
-    let html = `<div class="schedule-course-legend">`;
-    for (const [code, c] of courses) {
-        const textColor = getContrastColor(c.color);
-        html += `<div class="schedule-legend-item">
-            <input type="color" value="${c.color}" title="Cambiar color" class="schedule-color-btn"
-                onchange="changeScheduleCourseColor('${code}', this.value)" style="background:${c.color};border-color:${c.color};">
-            <span style="font-weight:600;">${code}</span>
-            <span style="opacity:0.7;">${escapeHTML(c.name).substring(0,25)}${c.name.length>25?'…':''}</span>
-            <button onclick="removeFromSchedule('${code}')" title="Eliminar del horario"
-                style="background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:0.9rem;line-height:1;padding:0 2px;margin-left:2px;opacity:0.6;" onmouseover="this.style.opacity=1;this.style.color='#ef4444'" onmouseout="this.style.opacity=0.6;this.style.color='var(--text-secondary)'">×</button>
-        </div>`;
-    }
-    html += `</div><div class="schedule-grid" style="grid-template-rows:28px repeat(${totalHours},${PX_PER_HOUR}px);">`;
+    // Build grid HTML (no legend here anymore)
+    let html = `<div class="schedule-grid" style="grid-template-rows:28px repeat(${totalHours},${PX_PER_HOUR}px);">`;
 
     // Header row
     html += `<div class="schedule-day-header schedule-time-col"></div>`;
