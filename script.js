@@ -17,6 +17,7 @@ let draggedElementId = null;
 let selectedSubjectId = null;
 let isSaving = false;
 let saveTimeout = null;
+let localWriteTimer = null; // guards onSnapshot from overwriting pending local changes
 let touchMoveMode = false;
 let selectedTouchElement = null;
 let processedSiraData = null;
@@ -547,7 +548,13 @@ function loadPlannerData(userId, careerId) {
     unsubscribePlanner = docRef.onSnapshot(doc => {
         console.log('=== SNAPSHOT FIRESTORE ===');
         console.log('Documento existe:', doc.exists);
-        
+
+        // Skip snapshot if local changes are pending — local data is authoritative
+        if (localWriteTimer) {
+            console.log('Snapshot ignorado: hay cambios locales pendientes');
+            return;
+        }
+
         if (doc.exists) {
             const data = doc.data();
             console.log('Datos cargados desde Firebase:', data);
@@ -591,6 +598,10 @@ function loadPlannerData(userId, careerId) {
 function savePlannerData() {
     if (!auth.currentUser || !currentCareerId) return;
 
+    // Block onSnapshot from overwriting local state until save completes (+ buffer)
+    clearTimeout(localWriteTimer);
+    localWriteTimer = setTimeout(() => { localWriteTimer = null; }, 6000);
+
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
         isSaving = true;
@@ -604,10 +615,13 @@ function savePlannerData() {
         docRef.set(plannerState)
             .then(() => {
                 console.log('Datos guardados en Firebase');
+                clearTimeout(localWriteTimer);
+                localWriteTimer = null;
             })
             .catch(error => {
                 console.error("Error guardando:", error);
                 showNotification("Error guardando cambios", 'error');
+                localWriteTimer = null;
             })
             .finally(() => {
                 isSaving = false;
@@ -2651,8 +2665,17 @@ function parseScheduleString(str) {
         const dayKey = m[1].toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
         const raw = m[4].trim();
         // Extract location: "Edf. D6 (D6) -> 1006 -- CS -- MELENDEZ"
-        const locM = raw.match(/Edf\.\s*\S+\s*\([^)]*\)\s*->\s*(.+?)\s*--/i);
-        const location = locM ? locM[1].trim().replace(/-/g, ' · ') : raw.replace(/\s*--.*$/,'').trim();
+        const locM = raw.match(/Edf\.\s*(\S+)\s*\([^)]*\)\s*->\s*(.+?)\s*--/i);
+        let location;
+        if (locM) {
+            const building = locM[1];
+            const parts = locM[2].trim().split('-').filter(Boolean);
+            // Prepend building if room code doesn't already start with it
+            if (parts[0] !== building) parts.unshift(building);
+            location = parts.join(' · ');
+        } else {
+            location = raw.replace(/\s*--.*$/, '').trim();
+        }
         sessions.push({ day: SCHEDULE_DAY_MAP[dayKey] || m[1], startTime: m[2], endTime: m[3], location });
     }
     return sessions;
@@ -2824,6 +2847,15 @@ function changeScheduleCourseColor(code, color) {
     if (schedule[code]) { schedule[code].color = color; getCurrentPlan().schedule = schedule; savePlannerData(); renderScheduleGrid(); }
 }
 
+function removeFromSchedule(code) {
+    const plan = getCurrentPlan();
+    if (!plan || !plan.schedule) return;
+    delete plan.schedule[code];
+    savePlannerData();
+    renderScheduleGrid();
+    showNotification(`${code} eliminado del horario`, 'info');
+}
+
 function timeToMinutes(t) {
     const [h, m] = t.split(':').map(Number);
     return h * 60 + (m || 0);
@@ -2861,6 +2893,8 @@ function renderScheduleGrid() {
                 onchange="changeScheduleCourseColor('${code}', this.value)" style="background:${c.color};border-color:${c.color};">
             <span style="font-weight:600;">${code}</span>
             <span style="opacity:0.7;">${escapeHTML(c.name).substring(0,25)}${c.name.length>25?'…':''}</span>
+            <button onclick="removeFromSchedule('${code}')" title="Eliminar del horario"
+                style="background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:0.9rem;line-height:1;padding:0 2px;margin-left:2px;opacity:0.6;" onmouseover="this.style.opacity=1;this.style.color='#ef4444'" onmouseout="this.style.opacity=0.6;this.style.color='var(--text-secondary)'">×</button>
         </div>`;
     }
     html += `</div><div class="schedule-grid" style="grid-template-rows:28px repeat(${totalHours},${PX_PER_HOUR}px);">`;
@@ -3265,6 +3299,7 @@ window.processScheduleImport = processScheduleImport;
 window.confirmGroupSelection = confirmGroupSelection;
 window.clearSchedule = clearSchedule;
 window.changeScheduleCourseColor = changeScheduleCourseColor;
+window.removeFromSchedule = removeFromSchedule;
 window.exportScheduleAsImage = exportScheduleAsImage;
 window.exportScheduleAsPDF = exportScheduleAsPDF;
 window.exportScheduleAsICS = exportScheduleAsICS;
