@@ -980,27 +980,25 @@ function calculateStats(plan) {
 
     const sportsCodes = ['404032C', '404002C', '404010C'];
     const sportsCodeSet = new Set(sportsCodes.map(normalizeCode));
-    
+
+    // Inglés: exonerada cuenta pra el componente pero NO suma créditos; equivalencia sí suma créditos
+    const isEquivalence = (s) => (s.equivalencies || []).some(e => e.type === 'equivalence');
+    const englishCreditExcluded = (s) => englishCodeSet.has(getSubjectCode(s)) && !isEquivalence(s);
+
     // Calcular créditos por categoría
     const categoryStats = {};
     Object.keys(DI_REQUIREMENTS).forEach(category => {
         if (category === 'total') return;
-        
+
         let categorySubjects = subjects.filter(s => s.type === category);
         let categoryCompleted = categorySubjects.filter(s => s.completed);
-        
-        // Para el área básica (AB), excluir los créditos de inglés
+
+        // Para el área básica (AB), excluir los créditos de inglés (salvo equivalencia)
         if (category === 'AB') {
-            categorySubjects = categorySubjects.filter(s => !englishCodeSet.has(getSubjectCode(s)));
-            categoryCompleted = categoryCompleted.filter(s => !englishCodeSet.has(getSubjectCode(s)));
+            categorySubjects = categorySubjects.filter(s => !englishCreditExcluded(s));
+            categoryCompleted = categoryCompleted.filter(s => !englishCreditExcluded(s));
         }
 
-        // Para formación general (EC), excluir deporte formativo (es requisito aparte)
-        if (category === 'EC') {
-            categorySubjects = categorySubjects.filter(s => !sportsCodeSet.has(getSubjectCode(s)));
-            categoryCompleted = categoryCompleted.filter(s => !sportsCodeSet.has(getSubjectCode(s)));
-        }
-        
         categoryStats[category] = {
             completed: categoryCompleted.reduce((sum, s) => sum + (s.credits || 0), 0),
             required: DI_REQUIREMENTS[category],
@@ -1008,9 +1006,9 @@ function calculateStats(plan) {
             completedSubjects: categoryCompleted.length
         };
     });
-    
-    // Calcular créditos totales completados (excluyendo inglés)
-    const completedWithoutEnglish = completed.filter(s => !englishCodeSet.has(getSubjectCode(s)) && !sportsCodeSet.has(getSubjectCode(s)));
+
+    // Calcular créditos totales completados (deporte formativo ya cuenta como EC normal; inglés solo si es equivalencia)
+    const completedWithoutEnglish = completed.filter(s => !englishCreditExcluded(s));
     const totalCompletedCredits = completedWithoutEnglish.reduce((sum, s) => sum + (s.credits || 0), 0);
     
     // Inglés (solo los 4 niveles obligatorios del pensum de DI)
